@@ -1,9 +1,15 @@
 # snotra
 Python Cloud (AWS) Auditing Tool
 
+pronounced "snow-trah” 
+
+creates a CSV file in --output-dir containing results from CIS Audit
 
 # usage
+`python3 snotra.py --output-dir ./snotra/`
 
+# CIS
+v1.4.0
 
 # requriements
 boto3
