@@ -21,12 +21,15 @@ class cis:
             self.CIS1_8,
             self.CIS1_9,
             self.CIS1_10,
-            self.CIS1_11
+            self.CIS1_11,
+            self.CIS1_12,
+            self.CIS1_13,
+            self.CIS1_14
         ]
         checks2 = [
-            self.CIS1_12
+            self.CIS1_14
         ]
-        return checks2
+        return checks
 
     def CIS1_1():
         # Maintain current contact details (Manual)
@@ -255,6 +258,7 @@ class cis:
             "result" : "",
             "pass_fail" : "PASS"
         }
+
         users = []
 
         report_content = credential_report()["Content"].decode('ascii')
@@ -290,6 +294,80 @@ class cis:
 
         if users:
             cis_dict["result"] = "The following users have credentials (password or keys) not used in the last 45 days: {}".format(" ".join(set(users)))
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+
+
+    def CIS1_13():
+        # Ensure there is only one active access key available for any single IAM user (Automated)
+
+        cis_dict = {
+            "check" : 1.13,
+            "level" : 1,
+            "benchmark" : "Ensure there is only one active access key available for any single IAM user",
+            "result" : "",
+            "pass_fail" : "PASS"
+        }
+
+        users = []
+
+        report_content = credential_report()["Content"].decode('ascii')
+
+        for user in report_content.split("\n"):
+            access_key_1_active = user.split(",")[8]
+            access_key_2_active = user.split(",")[13]
+
+            if access_key_1_active == "true":
+                if access_key_2_active == "true":
+                        users += [user.split(",")[0]]
+
+        if users:
+            cis_dict["result"] = "The following users have more than one access key: {}".format(" ".join(users))
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+    
+    
+    def CIS1_14():
+        # Ensure access keys are rotated every 90 days or less (Automated)
+
+        cis_dict = {
+            "check" : 1.14,
+            "level" : 1,
+            "benchmark" : "Ensure access keys are rotated every 90 days or less",
+            "result" : "",
+            "pass_fail" : "PASS"
+        }
+
+        users = []
+
+        report_content = credential_report()["Content"].decode('ascii')
+
+        for user in report_content.split("\n"):
+            access_key_1_active = user.split(",")[8]
+            access_key_1_last_rotated = user.split(",")[9]
+            access_key_2_active = user.split(",")[13]
+            access_key_2_last_rotated = user.split(",")[14]
+
+            if access_key_1_active == "true":
+                if access_key_1_last_rotated != "N/A":
+                    year, month, day = access_key_1_last_rotated.split("T")[0].split("-")
+                    access_key_1_last_rotated_date = date(int(year), int(month), int(day))
+                    if access_key_1_last_rotated_date < (date.today() - timedelta(days=90)):
+                        users += [user.split(",")[0]]
+            
+            if access_key_2_active == "true":
+                if access_key_2_last_rotated != "N/A":
+                    year, month, day = access_key_2_last_rotated.split("T")[0].split("-")
+                    access_key_2_last_rotated_date = date(int(year), int(month), int(day))
+                    if access_key_2_last_rotated_date < (date.today() - timedelta(days=90)):
+                        users += [user.split(",")[0]]
+
+        if users:
+            cis_dict["result"] = "The following users have access keys that have not been rotated in the last 90 days: {}".format(" ".join(set(users)))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
