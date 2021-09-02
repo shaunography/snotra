@@ -1,5 +1,8 @@
 import boto3
 
+from datetime import date
+from datetime import timedelta
+
 from utils.utils import credential_report
 from utils.utils import password_policy
 
@@ -21,7 +24,7 @@ class cis:
             self.CIS1_11
         ]
         checks2 = [
-            self.CIS1_11
+            self.CIS1_12
         ]
         return checks2
 
@@ -225,7 +228,6 @@ class cis:
 
         for user in report_content.split("\n"):
             password_enabled = user.split(",")[3]
-            #mfa_active = user.split(",")[7]
             access_key_1_active = user.split(",")[8]
             access_key_1_last_used = user.split(",")[10]
             access_key_2_active = user.split(",")[13]
@@ -238,7 +240,56 @@ class cis:
                         users += [user.split(",")[0]]            
         
         if users:
-            cis_dict["result"] = "The following have unused Access Keys: {}".format(" ".join(users))
+            cis_dict["result"] = "The following users have unused Access Keys: {}".format(" ".join(users))
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+    
+    def CIS1_12():
+        # Ensure credentials unused for 45 days or greater are disabled (Automated)
+
+        cis_dict = {
+            "check" : 1.12,
+            "level" : 1,
+            "benchmark" : "Ensure credentials unused for 45 days or greater are disabled",
+            "result" : "",
+            "pass_fail" : "PASS"
+        }
+        users = []
+
+        report_content = credential_report()["Content"].decode('ascii')
+
+        for user in report_content.split("\n"):
+            password_enabled = user.split(",")[3]
+            password_last_used = user.split(",")[4]
+            access_key_1_active = user.split(",")[8]
+            access_key_1_last_used = user.split(",")[10]
+            access_key_2_active = user.split(",")[13]
+            access_key_2_last_used = user.split(",")[15]
+
+            if password_enabled == "true":
+                if password_last_used != "N/A":
+                    year, month, day = password_last_used.split("T")[0].split("-")
+                    password_last_used_date = date(int(year), int(month), int(day))
+                    if password_last_used_date < (date.today() - timedelta(days=45)):
+                        users += [user.split(",")[0]]
+
+            if access_key_1_active == "true":
+                if access_key_1_last_used != "N/A":
+                    year, month, day = access_key_1_last_used.split("T")[0].split("-")
+                    access_key_1_last_used_date = date(int(year), int(month), int(day))
+                    if access_key_1_last_used_date < (date.today() - timedelta(days=45)):
+                        users += [user.split(",")[0]]
+            
+            if access_key_2_active == "true":
+                if access_key_2_last_used != "N/A":
+                    year, month, day = access_key_2_last_used.split("T")[0].split("-")
+                    access_key_2_last_used_date = date(int(year), int(month), int(day))
+                    if access_key_2_last_used_date < (date.today() - timedelta(days=45)):
+                        users += [user.split(",")[0]]
+
+        if users:
+            cis_dict["result"] = "The following users have credentials (password or keys) not used in the last 45 days: {}".format(" ".join(set(users)))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
