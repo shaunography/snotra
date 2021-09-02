@@ -11,7 +11,7 @@ creates a CSV file in --output-dir containing results from CIS Audit, currently 
 # CIS
 v1.4.0
 
-# requriements
+# requirements
 boto3
 
 # todo
