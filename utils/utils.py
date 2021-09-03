@@ -37,4 +37,4 @@ def get_available_regions_ec2():
     # returns list of available ec2 regions
     session = boto3.session.Session()
     return session.get_available_regions(service_name="ec2")
-
+    

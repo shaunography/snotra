@@ -31,6 +31,7 @@ boto3
 
 ## improvements
 - [ ] error handling
+- [ ] actually test CIS1_19
 
 ## bugs
 

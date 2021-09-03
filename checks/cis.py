@@ -16,6 +16,7 @@ from utils.utils import describe_regions
 #        "ref" : "",
 #        "compliance" : "cis",
 #        "level" : ,
+#        "service" : ""
 #        "name" : "",
 #        "analysis" : "",
 #        "description" : "",
@@ -665,7 +666,7 @@ class cis():
             "probability" : "",
             "cvss_vector" : "",
             "cvss_score" : "",
-            "pass_fail" : ""
+            "pass_fail" : "PASS"
         }
 
         failing_instances = []
@@ -690,10 +691,52 @@ class cis():
             cis_dict["analysis"] = "the following running instances do not have an instance profile attached: {}".format(" ".join(failing_instances))
             cis_dict["pass_fail"] = "FAIL"
 
-
-                    
-
+        return cis_dict
 
 
+    def CIS1_19():
+        # Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed (Automated)
+
+
+        cis_dict = {
+            "id" : "cis19",
+            "ref" : "1.19",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "iam",
+            "name" : "Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed",
+            "affected": "",
+            "analysis" : "No expired server certificates found",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        client = boto3.client('iam')
+        server_certificates = client.list_server_certificates()["ServerCertificateMetadataList"]
+        expired_certs = []
+
+        if not server_certificates:
+            cis_dict["analysis"] = "No server certificates found"
+            cis_dict["pass_fail"] = "PASS"
+        
+        #############################################
+        # NEEDS TESTING WITH ACTUAL EXPIRED CERTS!!!#
+        #############################################
+        for cert in server_certificates:
+            expiration = cert["Expiration"]
+            server_certificate_name = cert["ServerCertificateName"]
+            year, month, day = expiration.split("T")[0].split("-")
+            expiration_date = date(int(year), int(month), int(day))
+            if expiration_date < date.today():
+                expired_certs =+ [server_certificate_name]
+
+        if expired_certs:
+            cis_dict["analysis"] = "the following server certificates have expired: {}".format(" ".join(expired_certs))
+            cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
