@@ -5,39 +5,52 @@ from datetime import timedelta
 
 from utils.utils import credential_report
 from utils.utils import password_policy
+from utils.utils import account_summary
+from utils.utils import describe_regions
 
-class cis:
+
+###
+#
+#    cis_dict = {
+#        "id" : "cis",
+#        "ref" : "",
+#        "compliance" : "cis",
+#        "level" : ,
+#        "name" : "",
+#        "analysis" : "",
+#        "description" : "",
+#        "remediation" : "",
+#        "impact" : "",
+#        "probability" : "",
+#        "cvss_vector" : "",
+#        "cvss_score" : "",
+#        "pass_fail" : ""
+#    }
+#
+###
+
+
+
+class cis():
     #def __init__(self):
-
-    def checks(self):
-        checks = [
-            self.CIS1_1,
-            self.CIS1_2,
-            self.CIS1_3,
-            self.CIS1_4,
-            self.CIS1_5,
-            self.CIS1_6,
-            self.CIS1_7,
-            self.CIS1_8,
-            self.CIS1_9,
-            self.CIS1_10,
-            self.CIS1_11,
-            self.CIS1_12,
-            self.CIS1_13,
-            self.CIS1_14
-        ]
-        checks2 = [
-            self.CIS1_14
-        ]
-        return checks
 
     def CIS1_1():
         # Maintain current contact details (Manual)
         cis_dict = {
-            "check" : 1.1,
+            "id" : "cis1",
+            "ref" : "1.1",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Maintain current contact details",
-            "result" : "Manual Check",
+            "service" : "iam",
+            "name" : "Maintain current contact details",
+            "affected": "",
+            "analysis" : "Manual Check",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : ""
         }
         return cis_dict
@@ -46,59 +59,99 @@ class cis:
     def CIS1_2():
         # Ensure security contact information is registered (Manual)
         cis_dict = {
-            "check" : 1.2,
+            "id" : "cis2",
+            "ref" : "1.2",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure security contact information is registered",
-            "result" : "Manual Check",
+            "service" : "iam",
+            "name" : "Ensure security contact information is registered",
+            "affected": "",
+            "analysis" : "Manual Check",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : ""
         }
         return cis_dict
 
     def CIS1_3():
-        # Ensure security questions are registered in the AWS account
+        # Ensure security questions are registered in the AWS account (Manual)
         cis_dict = {
-            "check" : 1.3,
+            "id" : "cis3",
+            "ref" : "1.3",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure security questions are registered in the AWS account",
-            "result" : "Manual Check",
+            "service" : "iam",
+            "name" : "Ensure security questions are registered in the AWS account",
+            "affected": "",
+            "analysis" : "Manual Check",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : ""
         }
         return cis_dict
 
     def CIS1_4():
         # Ensure no 'root' user account access key exists (Automated)
+        
         cis_dict = {
-            "check" : 1.4,
+            "id" : "cis4",
+            "ref" : "1.4",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure no 'root' user account access key exists",
-            "result" : "No root access keys exist",
+            "service" : "iam",
+            "name" : "Ensure no 'root' user account access key exists",
+            "affected": "",
+            "analysis" : "No root access keys exist",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
-        client = boto3.client('iam')    
-        summary = client.get_account_summary()
+        summary = account_summary()
 
-        if summary["SummaryMap"]["AccountAccessKeysPresent"] != 0:
-            cis_dict["result"] = "Root Access Keys Found"
+        if summary["AccountAccessKeysPresent"] != 0:
+            cis_dict["analysis"] = "Root Access Keys Found"
             cis_dict["pass_fail"] = "FAIL"
         
         return cis_dict
 
     def CIS1_5():
         # Ensure MFA is enabled for the 'root' user account (Automated)
+        
         cis_dict = {
-            "check" : 1.5,
+            "id" : "cis5",
+            "ref" : "1.5",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure MFA is enabled for the 'root' user account",
-            "result" : "Root MFA is enabled",
+            "service" : "iam",
+            "name" : "Ensure MFA is enabled for the 'root' user account",
+            "affected": "",
+            "analysis" : "Root MFA is enabled",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
-        client = boto3.client('iam')    
-        summary = client.get_account_summary()
+        summary = account_summary()
 
-        if summary["SummaryMap"]["AccountMFAEnabled"] == 0:
-            cis_dict["result"] = "Root MFA Not Enabled"
+        if summary["AccountMFAEnabled"] == 0:
+            cis_dict["analysis"] = "Root MFA Not Enabled"
             cis_dict["pass_fail"] = "FAIL"
         
         return cis_dict
@@ -107,18 +160,27 @@ class cis:
         # Ensure hardware MFA is enabled for the 'root' user account (Automated)
 
         cis_dict = {
-            "check" : 1.6,
+            "id" : "cis6",
+            "ref" : "1.6",
+            "compliance" : "cis",
             "level" : 2,
-            "benchmark" : "Ensure hardware MFA is enabled for the 'root' user account",
-            "result" : "Root MFA is enabled (Virtual or Hardware)",
+            "service" : "iam",
+            "name" : "Ensure hardware MFA is enabled for the 'root' user account",
+            "affected": "",
+            "analysis" : "Root MFA is enabled (Virtual or Hardware)",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
-        client = boto3.client('iam')    
-        summary = client.get_account_summary()
+        summary = account_summary()
 
-        if summary["SummaryMap"]["AccountMFAEnabled"] == 0:
-            cis_dict["result"] = "Root MFA Disabled"
+        if summary["AccountMFAEnabled"] == 0:
+            cis_dict["analysis"] = "Root MFA Disabled"
             cis_dict["pass_fail"] = "FAIL"
         
         return cis_dict
@@ -128,10 +190,20 @@ class cis:
         # Eliminate use of the 'root' user for administrative and daily tasks (Automated)
 
         cis_dict = {
-            "check" : 1.7,
+            "id" : "cis7",
+            "ref" : "1.7",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Eliminate use of the 'root' user for administrative and daily tasks",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Eliminate use of the 'root' user for administrative and daily tasks",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "INFO"
         }
 
@@ -140,7 +212,7 @@ class cis:
         password_last_used = root.split(",")[4]
         accesskey1_last_used = root.split(",")[10]
         accesskey2_last_used = root.split(",")[15]
-        cis_dict["result"] = "password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
+        cis_dict["analysis"] = "password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
 
         return cis_dict
 
@@ -148,16 +220,26 @@ class cis:
         # Ensure IAM password policy requires minimum length of 14 or greater (Automated)
 
         cis_dict = {
-            "check" : 1.8,
+            "id" : "cis8",
+            "ref" : "1.8",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure IAM password policy requires minimum length of 14 or greater",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Ensure IAM password policy requires minimum length of 14 or greater",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
         password_length = password_policy()["MinimumPasswordLength"]
         if password_length < 14:
-            cis_dict["result"] = "Minimum Password Length = {}".format(password_length)
+            cis_dict["analysis"] = "Minimum Password Length = {}".format(password_length)
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -166,20 +248,31 @@ class cis:
         # Ensure IAM password policy prevents password reuse (Automated)
 
         cis_dict = {
-            "check" : 1.9,
+            "id" : "cis9",
+            "ref" : "1.9",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure IAM password policy prevents password reuse",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Ensure IAM password policy prevents password reuse",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
+
         try:
             password_reuse = password_policy()["PasswordReusePrevention"]
         except KeyError:
-            cis_dict["result"] = "Password Reuse Prevention Not Set"
+            cis_dict["analysis"] = "Password Reuse Prevention Not Set"
             cis_dict["pass_fail"] = "FAIL"
         else:
             if password_reuse < 24:
-                cis_dict["result"] = "Password Reuse Prevention = {}".format(password_reuse)
+                cis_dict["analysis"] = "Password Reuse Prevention = {}".format(password_reuse)
                 cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -187,12 +280,21 @@ class cis:
     def CIS1_10():
         # Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password (Automated)
 
-
         cis_dict = {
-            "check" : 1.10,
+            "id" : "cis10",
+            "ref" : "1.10",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
@@ -209,7 +311,7 @@ class cis:
                     users += [user.split(",")[0]]
         
         if users:
-            cis_dict["result"] = "The following users do not have MFA enabled: {}".format(" ".join(users))
+            cis_dict["analysis"] = "The following users do not have MFA enabled: {}".format(" ".join(users))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -219,12 +321,23 @@ class cis:
         # Do not setup access keys during initial user setup for all IAM users that have a console password (Manual)
         
         cis_dict = {
-            "check" : 1.11,
+            "id" : "cis11",
+            "ref" : "1.11",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Do not setup access keys during initial user setup for all IAM users that have a console password",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Do not setup access keys during initial user setup for all IAM users that have a console password",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
+
         users = []
 
         report_content = credential_report()["Content"].decode('ascii')
@@ -243,7 +356,7 @@ class cis:
                         users += [user.split(",")[0]]            
         
         if users:
-            cis_dict["result"] = "The following users have unused Access Keys: {}".format(" ".join(users))
+            cis_dict["analysis"] = "The following users have unused Access Keys: {}".format(" ".join(users))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -252,10 +365,20 @@ class cis:
         # Ensure credentials unused for 45 days or greater are disabled (Automated)
 
         cis_dict = {
-            "check" : 1.12,
+            "id" : "cis12",
+            "ref" : "1.12",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure credentials unused for 45 days or greater are disabled",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Ensure credentials unused for 45 days or greater are disabled",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
@@ -293,7 +416,7 @@ class cis:
                         users += [user.split(",")[0]]
 
         if users:
-            cis_dict["result"] = "The following users have credentials (password or keys) not used in the last 45 days: {}".format(" ".join(set(users)))
+            cis_dict["analysis"] = "The following users have credentials (password or keys) not used in the last 45 days: {}".format(" ".join(set(users)))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -304,10 +427,20 @@ class cis:
         # Ensure there is only one active access key available for any single IAM user (Automated)
 
         cis_dict = {
-            "check" : 1.13,
+            "id" : "cis13",
+            "ref" : "1.13",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure there is only one active access key available for any single IAM user",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Ensure there is only one active access key available for any single IAM user",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
@@ -324,7 +457,7 @@ class cis:
                         users += [user.split(",")[0]]
 
         if users:
-            cis_dict["result"] = "The following users have more than one access key: {}".format(" ".join(users))
+            cis_dict["analysis"] = "The following users have more than one access key: {}".format(" ".join(users))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -335,10 +468,20 @@ class cis:
         # Ensure access keys are rotated every 90 days or less (Automated)
 
         cis_dict = {
-            "check" : 1.14,
+            "id" : "cis14",
+            "ref" : "1.14",
+            "compliance" : "cis",
             "level" : 1,
-            "benchmark" : "Ensure access keys are rotated every 90 days or less",
-            "result" : "",
+            "service" : "iam",
+            "name" : "Ensure access keys are rotated every 90 days or less",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
             "pass_fail" : "PASS"
         }
 
@@ -367,7 +510,190 @@ class cis:
                         users += [user.split(",")[0]]
 
         if users:
-            cis_dict["result"] = "The following users have access keys that have not been rotated in the last 90 days: {}".format(" ".join(set(users)))
+            cis_dict["analysis"] = "The following users have access keys that have not been rotated in the last 90 days: {}".format(" ".join(set(users)))
             cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+    def CIS1_15():
+        # Ensure IAM Users Receive Permissions Only Through Groups (Automated)
+
+
+        cis_dict = {
+            "id" : "cis15",
+            "ref" : "1.15",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "iam",
+            "name" : "Ensure IAM Users Receive Permissions Only Through Groups",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        client = boto3.client('iam')
+
+        all_users = client.list_users()["Users"]
+        users = []
+
+        for user in all_users:
+            inline_policies = client.list_user_policies(UserName=user["UserName"])
+            attached_policies = client.list_attached_user_policies(UserName=user["UserName"])
+
+            if inline_policies["PolicyNames"]:
+                    users += [user["UserName"]]
+            
+            if attached_policies["AttachedPolicies"]:
+                    users += [user["UserName"]]
+
+        if users:
+            cis_dict["analysis"] = "The following users have managed or inline policies directly attached: {}".format(" ".join(set(users)))
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+    
+    def CIS1_16():
+        # Ensure IAM policies that allow full "*:*" administrative privileges are not attached (Automated)
+
+        cis_dict = {
+            "id" : "cis16",
+            "ref" : "1.16",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "iam",
+            "name" : "Ensure IAM policies that allow full *:* administrative privileges are not attached",
+            "affected": "",
+            "analysis" : "No customer policies that allow full *:* privileges found",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        client = boto3.client('iam')
+
+        all_policies = client.list_policies(OnlyAttached=True)["Policies"]
+        policies = []
+
+        for policy in all_policies:
+
+            arn = policy["Arn"]
+            policy_name = policy["PolicyName"]
+            #policy_id = policy["PolicyId"]
+            version_id = policy["DefaultVersionId"]
+
+            statements = client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            for statement in statements:
+                if statement["Effect"] == "Allow":
+                    if statement["Action"] == "*":
+                        if statement["Resource"] == "*":
+                            policies += []
+
+        if policies:
+            cis_dict["analysis"] = "The following customer policies grant full *:* privileges: {}".format(" ".join(set(policies)))
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+    def CIS1_17():
+        # Ensure a support role has been created to manage incidents with AWS Support (Automated)
+
+
+        cis_dict = {
+            "id" : "cis17",
+            "ref" : "1.17",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "iam",
+            "name" : "Ensure a support role has been created to manage incidents with AWS Support",
+            "affected": "",
+            "analysis" : "AWSSupportAccess Policy is not attached to any entities",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "FAIL"
+        }
+
+        client = boto3.client('iam')
+
+        #all_policies = client.list_policies(Scope="All")["Policies"]
+        attached_policies = client.list_policies(OnlyAttached=True)["Policies"]
+
+        for policy in attached_policies:
+            
+            if policy["PolicyName"] == "AWSSupportAccess":                
+                cis_dict["analysis"] = "AWSSupportAccess Policy is attached - but not to a custom support role"
+                cis_dict["pass_fail"] = "FAIL"
+                
+                arn = policy["Arn"]
+                
+                policy_roles = client.list_entities_for_policy(PolicyArn=arn)["PolicyRoles"]
+                
+                if policy_roles:
+                    cis_dict["analysis"] = "AWSSupportAccess Policy is attached to role: {}".format(" ".join(policy_roles))
+                    cis_dict["pass_fail"] = "PASS"
+
+        return cis_dict
+
+    def CIS1_18():
+        # Ensure IAM instance roles are used for AWS resource access from instances (Manual)
+
+        cis_dict = {
+            "id" : "cis18",
+            "ref" : "1.18",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "ec2",
+            "name" : "Ensure IAM instance roles are used for AWS resource access from instances",
+            "affected": "",
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : ""
+        }
+
+        failing_instances = []
+        regions = describe_regions()
+
+        for region in regions:
+            client = boto3.client('ec2', region_name=region)
+            instance_description = client.describe_instances()
+            reservations = instance_description["Reservations"]
+            for reservation in reservations:
+                instances = reservation["Instances"]
+                for instance in instances:
+                    state = instance["State"]["Name"]
+                    if state == "running":
+                        instance_id = instance["InstanceId"]
+                        ec2 = boto3.resource('ec2', region_name=region)
+                        ec2_instance = ec2.Instance(id=instance_id)
+                        if not ec2_instance.iam_instance_profile:
+                            failing_instances += ["{}({})".format(instance_id, region)]
+
+        if failing_instances:
+            cis_dict["analysis"] = "the following running instances do not have an instance profile attached: {}".format(" ".join(failing_instances))
+            cis_dict["pass_fail"] = "FAIL"
+
+
+                    
+
+
+
 
         return cis_dict

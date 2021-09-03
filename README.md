@@ -30,6 +30,7 @@ boto3
 - [ ] git gud
 
 ## improvements
+- [ ] error handling
 
 ## bugs
 
