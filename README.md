@@ -1,9 +1,5 @@
 # snotra
-Python Cloud (AWS) Auditing Tool
-
-pronounced "snow-trah” 
-
-creates a CSV file in --output-dir containing results from CIS Audit, currently uses the default AWS Profile.
+Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it currently creates a CSV file in --output-dir containing results from a CIS Audit. It will use the default AWS Profile as configure in your ~/.aws/credentials file.
 
 # usage
 `python3 snotra.py --output-dir ./snotra/`
@@ -15,7 +11,7 @@ v1.4.0
 boto3
 
 # todo
-## features
+### features
 - [ ] CIS benchmark
     - [ ] pass/fail percentage
 - [ ] non-CIS checks
@@ -23,15 +19,17 @@ boto3
 - [ ] JSON results file for consumption by other tools
 - [ ] CSV results file for consumption by other tools
 - [ ] AWS profiles
+- [ ] specifiy regions
+- [ ] specify checks by groups (i.e. CIS, IAM, EC2, CIS_level_1 etc)
 - [ ] additional compliance standards
 - [ ] dockerfile
 - [ ] dockerhub
 - [ ] Azure
 - [ ] git gud
 
-## improvements
+### improvements
 - [ ] error handling
 - [ ] actually test CIS1_19
 
-## bugs
+### bugs
 

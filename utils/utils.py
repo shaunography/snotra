@@ -38,3 +38,7 @@ def get_available_regions_ec2():
     session = boto3.session.Session()
     return session.get_available_regions(service_name="ec2")
     
+def list_buckets():
+    # returns list of s3 buckets names
+    client = boto3.client('s3')
+    return [ bucket["Name"] for bucket in client.list_buckets()["Buckets"] ]

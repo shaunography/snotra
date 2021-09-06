@@ -7,6 +7,7 @@ from utils.utils import credential_report
 from utils.utils import password_policy
 from utils.utils import account_summary
 from utils.utils import describe_regions
+from utils.utils import list_buckets
 
 
 ###
@@ -689,6 +690,7 @@ class cis():
 
         if failing_instances:
             cis_dict["analysis"] = "the following running instances do not have an instance profile attached: {}".format(" ".join(failing_instances))
+            cis_dict["affected"] = ", ".join(failing_instances)
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -733,10 +735,149 @@ class cis():
             year, month, day = expiration.split("T")[0].split("-")
             expiration_date = date(int(year), int(month), int(day))
             if expiration_date < date.today():
-                expired_certs =+ [server_certificate_name]
+                expired_certs += [server_certificate_name]
 
         if expired_certs:
             cis_dict["analysis"] = "the following server certificates have expired: {}".format(" ".join(expired_certs))
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+    def CIS1_20():
+        # Ensure that IAM Access analyzer is enabled for all regions (Automated)
+
+
+        cis_dict = {
+            "id" : "cis20",
+            "ref" : "1.20",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "access_analyzer",
+            "name" : "Ensure that IAM Access analyzer is enabled for all regions",
+            "affected": "",
+            "analysis" : "Access Analyzer is enabled in all regions",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+
+        failing_regions = []
+        regions = describe_regions()
+
+        for region in regions:
+            client = boto3.client('accessanalyzer', region_name=region)
+            if not client.list_analyzers()["analyzers"]:
+                failing_regions += [region]
+
+        if failing_regions:
+            cis_dict["analysis"] = "the following regions do not have Access Analyzer enabled: {}".format(" ".join(failing_regions))
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+    def CIS1_21():
+        # Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments (Manual)
+
+        # could list identity providers and local iam users for comparison
+
+        cis_dict = {
+            "id" : "cis21",
+            "ref" : "1.21",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "iam",
+            "name" : "Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments",
+            "affected": "",
+            "analysis" : "Manual Check",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : ""
+        }
+
+        return cis_dict
+
+    def CIS2_1_1():
+        # Ensure all S3 buckets employ encryption-at-rest (Manual)
+
+        cis_dict = {
+            "id" : "cis22",
+            "ref" : "2.1.1",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "S3",
+            "name" : "Ensure all S3 buckets employ encryption-at-rest",
+            "affected": "",
+            "analysis" : "All buckets have server side encryption enabled",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        client = boto3.client('s3')
+        failing_buckets = []
+
+        for bucket in list_buckets():
+            try:
+                encryption = client.get_bucket_encryption(Bucket=bucket)
+            # ServerSideEncryptionConfigurationNotFoundError
+            # botocore.exceptions.ClientError: An error occurred (ServerSideEncryptionConfigurationNotFoundError) when calling the GetBucketEncryption operation: The server side encryption configuration was not found
+            except:
+                failing_buckets += [bucket]
+
+        if failing_buckets:
+            cis_dict["analysis"] = "the following buckets do not have server side encryption enabled: {}".format(" ".join(failing_buckets))
+            cis_dict["affected"] = ", ".join(failing_buckets)
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+    
+    def CIS2_1_1():
+        # Ensure S3 Bucket Policy is set to deny HTTP requests (Manual)
+
+        cis_dict = {
+            "id" : "cis23",
+            "ref" : "2.1.2",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "S3",
+            "name" : "Ensure S3 Bucket Policy is set to deny HTTP requests",
+            "affected": "",
+            "analysis" : "All buckets enforce HTTPS requests",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+        
+        # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/checks/check_extra764
+
+        client = boto3.client('s3')
+        failing_buckets = []
+
+        for bucket in list_buckets():
+            policy = client.get_bucket_policy(Bucket=bucket)
+            failing_buckets += [bucket]
+
+        if failing_buckets:
+            cis_dict["analysis"] = "the following buckets do enfore HTTPS requests: {}".format(" ".join(failing_buckets))
+            cis_dict["affected"] = ", ".join(failing_buckets)
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
