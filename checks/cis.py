@@ -9,6 +9,7 @@ from utils.utils import credential_report
 from utils.utils import password_policy
 from utils.utils import account_summary
 from utils.utils import describe_regions
+from utils.utils import get_available_regions_ec2
 from utils.utils import list_buckets
 
 
@@ -21,6 +22,7 @@ from utils.utils import list_buckets
 #        "level" : ,
 #        "service" : ""
 #        "name" : "",
+#        "affected" : ""
 #        "analysis" : "",
 #        "description" : "",
 #        "remediation" : "",
@@ -944,6 +946,116 @@ class cis():
         if failing_buckets:
             cis_dict["analysis"] = "the following buckets do have MFA Delete enabled: {}".format(" ".join(failing_buckets))
             cis_dict["affected"] = ", ".join(failing_buckets)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+
+
+    def CIS2_1_4():
+        # Ensure all data in Amazon S3 has been discovered, classified and secured when required. (Manual)
+
+        cis_dict = {
+            "id" : "cis25",
+            "ref" : "2.1.4",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "S3",
+            "name" : "Ensure all data in Amazon S3 has been discovered, classified and secured when required",
+            "affected": "",
+            "analysis" : "Manual Check",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : ""
+        }
+
+        #client = boto3.client('macie2', region_name="eu-west-2")
+
+        return cis_dict
+
+    def CIS2_1_5():
+        # Ensure that S3 Buckets are configured with 'Block public access (bucket settings)' (Automated)
+
+        cis_dict = {
+            "id" : "cis26",
+            "ref" : "2.1.5",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "S3",
+            "name" : "Ensure that S3 Buckets are configured with Block public access (bucket settings)",
+            "affected": "",
+            "analysis" : "All Buckets block public access ",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        client = boto3.client('s3')
+        passing_buckets = []      
+        buckets = list_buckets()
+
+        for bucket in buckets:
+            try:
+                public_access_block_configuration = client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
+                if public_access_block_configuration["BlockPublicAcls"] == True:
+                    if public_access_block_configuration["IgnorePublicAcls"] == True:
+                        if public_access_block_configuration["BlockPublicPolicy"] == True:
+                            if public_access_block_configuration["RestrictPublicBuckets"] == True:
+                                passing_buckets += [bucket]
+            #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+            except:
+                pass
+
+        failing_buckets = [i for i in buckets if i not in passing_buckets]
+        
+        if failing_buckets:
+            cis_dict["analysis"] = "the following buckets do not block public access: {}".format(" ".join(failing_buckets))
+            cis_dict["affected"] = ", ".join(failing_buckets)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+
+
+    def CIS2_2_1():
+        # Ensure EBS volume encryption is enabled (Manual)
+
+        cis_dict = {
+            "id" : "cis27",
+            "ref" : "2.2.1",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "EC2",
+            "name" : "Ensure EBS volume encryption is enabled",
+            "affected": "",
+            "analysis" : "All EBS Volumes are encrypted",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        #regions = get_available_regions_ec2()
+        regions = describe_regions()
+        failing_regions = []
+        
+        for region in regions:
+            client = boto3.client('ec2', region_name=region)
+            if client.get_ebs_encryption_by_default()["EbsEncryptionByDefault"] == False:
+                failing_regions += [region]
+        
+        if failing_regions:
+            cis_dict["analysis"] = "the following EC2 regions do not encrypt EBS volumes by default: {}".format(" ".join(failing_regions))
+            cis_dict["affected"] = ", ".join(failing_regions)
             cis_dict["pass_fail"] = "FAIL"
         
         return cis_dict
