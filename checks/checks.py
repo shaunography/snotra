@@ -34,10 +34,13 @@ class checks:
             cis.CIS2_1_4,
             cis.CIS2_1_5,
             cis.CIS2_2_1,
-            cis.CIS2_3_1
+            cis.CIS2_3_1,
+            cis.CIS3_1,
+            cis.CIS3_2,
+            cis.CIS3_3
         ]
         checks_test = [
-            cis.CIS2_3_1
+            cis.CIS3_3
         ]
         return checks
 

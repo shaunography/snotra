@@ -879,6 +879,7 @@ class cis():
                 policy = json.loads(client.get_bucket_policy(Bucket=bucket)["Policy"])
             # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
             except:
+                # no bucket policy exists
                 pass
             else:
                 statements = policy["Statement"]
@@ -1009,6 +1010,7 @@ class cis():
                                 passing_buckets += [bucket]
             #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
             except:
+                # no public access block configuration exists
                 pass
 
         failing_buckets = [i for i in buckets if i not in passing_buckets]
@@ -1095,6 +1097,159 @@ class cis():
         if failing_instances:
             cis_dict["analysis"] = "the following EC2 regions do not encrypt EBS volumes by default: {}".format(" ".join(failing_instances))
             cis_dict["affected"] = ", ".join(failing_instances)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+
+
+    def CIS3_1():
+        # Ensure CloudTrail is enabled in all regions (Automated)
+
+        cis_dict = {
+            "id" : "cis29",
+            "ref" : "3.1",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "cloudtrail",
+            "name" : "Ensure CloudTrail is enabled in all regions",
+            "affected": "",
+            "analysis" : "No multi region enabled trails were found",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "FAIL"
+        }
+
+        regions = describe_regions()
+        multi_region_trails = []
+        
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                trail_name = trail["Name"]
+                if trail["IsMultiRegionTrail"] == True:
+                    if trail["HomeRegion"] == region:
+                        if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                            multi_region_trails += [trail_name]
+
+        if multi_region_trails:
+            cis_dict["analysis"] = "the following trails are multi region enabled: {}".format(" ".join(multi_region_trails))
+            #cis_dict["affected"] = ", ".join(multi_region_trails)
+            cis_dict["pass_fail"] = "PASS"
+        
+        return cis_dict
+
+    def CIS3_2():
+        # Ensure CloudTrail log file validation is enabled (Automated)
+
+        cis_dict = {
+            "id" : "cis30",
+            "ref" : "3.2",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "cloudtrail",
+            "name" : "Ensure CloudTrail log file validation is enabled",
+            "affected": "",
+            "analysis" : "log file validation is enabled on all trails",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_trails = []
+        
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["LogFileValidationEnabled"] == False:
+                        failing_trails += [trail["name"]]
+
+        if failing_trails:
+            cis_dict["analysis"] = "the following trails are multi region enabled: {}".format(" ".join(failing_trails))
+            cis_dict["affected"] = ", ".join(failing_trails)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+
+    def CIS3_3():
+        # Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible (Automated)
+
+        cis_dict = {
+            "id" : "cis31",
+            "ref" : "3.3",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "cloudtrail",
+            "name" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible",
+            "affected": "",
+            "analysis" : "no public cloud trail buckets found",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_trails = []
+
+        s3_client = boto3.client('s3')
+        
+        for region in regions:
+            cloudtrail_client = boto3.client('cloudtrail', region_name=region)
+            trail_list = cloudtrail_client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    bucket_name = trail["S3BucketName"]
+                    trail_name = trail["Name"]
+                    grants = s3_client.get_bucket_acl(Bucket=bucket_name)["Grants"]
+                    for grant in grants:
+                        try:
+                            if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AllUsers":
+                                failing_trails += [trail_name]
+                            if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AuthenticatedUsers":
+                                failing_trails += [trail_name]
+                        except KeyError:
+                            pass
+                                     
+                        try:
+                            policy = json.loads(s3_client.get_bucket_policy(Bucket=bucket_name)["Policy"])
+                        # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
+                        except:
+                            # no bucket policy exists
+                            pass
+                        else:
+                            statements = policy["Statement"]
+                            for statement in statements:
+                                effect = statement["Effect"]
+                                if effect == "Allow":
+                                    try:
+                                        if statement["Principal"]["AWS"] == "*":
+                                            failing_trails += [trail_name]
+                                    except KeyError:
+                                        pass
+
+                                    try:
+                                        if statement["Principal"]["Service"] == "*":
+                                            failing_trails += [trail_name]
+                                    except KeyError:
+                                        pass
+
+        if failing_trails:
+            cis_dict["analysis"] = "the following trails are using a potentially public S3 bucket: {}".format(" ".join(set(failing_trails)))
+            cis_dict["affected"] = ", ".join(set(failing_trails))
             cis_dict["pass_fail"] = "FAIL"
         
         return cis_dict
