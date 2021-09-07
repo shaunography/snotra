@@ -27,10 +27,12 @@ class checks:
             cis.CIS1_18,
             cis.CIS1_19,
             cis.CIS1_20,
-            cis.CIS1_21
+            cis.CIS1_21,
+            cis.CIS2_1_1,
+            cis.CIS2_1_2
         ]
         checks_test = [
-            cis.CIS2_1_1
+            cis.CIS2_1_2
         ]
         return checks_test
 

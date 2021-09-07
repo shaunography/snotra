@@ -1,4 +1,6 @@
 import boto3
+import json
+import re
 
 from datetime import date
 from datetime import timedelta
@@ -845,7 +847,7 @@ class cis():
         return cis_dict
 
     
-    def CIS2_1_1():
+    def CIS2_1_2():
         # Ensure S3 Bucket Policy is set to deny HTTP requests (Manual)
 
         cis_dict = {
@@ -869,12 +871,34 @@ class cis():
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/checks/check_extra764
 
         client = boto3.client('s3')
-        failing_buckets = []
+        passing_buckets = []      
+        buckets = list_buckets()
 
-        for bucket in list_buckets():
-            policy = client.get_bucket_policy(Bucket=bucket)
-            failing_buckets += [bucket]
+        for bucket in buckets:
+            try:
+                policy = json.loads(client.get_bucket_policy(Bucket=bucket)["Policy"])
+            # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
+            except:
+                pass
+            else:
+                statements = policy["Statement"]
+                for statement in statements:
+                    try:
+                        bool_secure_transport = statement["Condition"]["Bool"]["aws:SecureTransport"]
+                    except KeyError:
+                        pass
+                    else:
+                        effect = statement["Effect"]
+                        action = statement["Action"]
+                        resource = statement["Resource"]
+                        if bool_secure_transport == "false":
+                            if effect == "Deny":
+                                if action == "s3:GetObject" or action == "s3:*":
+                                    if re.match("arn:aws:s3*|\*", resource):
+                                        passing_buckets += [bucket]
 
+        failing_buckets = [i for i in buckets if i not in passing_buckets]
+        
         if failing_buckets:
             cis_dict["analysis"] = "the following buckets do enfore HTTPS requests: {}".format(" ".join(failing_buckets))
             cis_dict["affected"] = ", ".join(failing_buckets)
