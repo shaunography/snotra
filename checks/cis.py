@@ -186,7 +186,7 @@ class cis():
         summary = account_summary()
 
         if summary["AccountMFAEnabled"] == 0:
-            cis_dict["analysis"] = "Root MFA Disabled"
+            cis_dict["analysis"] = "Root MFA Not Enabled"
             cis_dict["pass_fail"] = "FAIL"
         
         return cis_dict
@@ -575,7 +575,7 @@ class cis():
             "service" : "iam",
             "name" : "Ensure IAM policies that allow full *:* administrative privileges are not attached",
             "affected": "",
-            "analysis" : "No customer policies that allow full *:* privileges found",
+            "analysis" : "No custom policies that allow full *:* privileges found",
             "description" : "",
             "remediation" : "",
             "impact" : "",
@@ -703,7 +703,6 @@ class cis():
     def CIS1_19():
         # Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed (Automated)
 
-
         cis_dict = {
             "id" : "cis19",
             "ref" : "1.19",
@@ -749,7 +748,6 @@ class cis():
 
     def CIS1_20():
         # Ensure that IAM Access analyzer is enabled for all regions (Automated)
-
 
         cis_dict = {
             "id" : "cis20",
@@ -817,7 +815,7 @@ class cis():
             "ref" : "2.1.1",
             "compliance" : "cis",
             "level" : 2,
-            "service" : "S3",
+            "service" : "s3",
             "name" : "Ensure all S3 buckets employ encryption-at-rest",
             "affected": "",
             "analysis" : "All buckets have server side encryption enabled",
@@ -857,7 +855,7 @@ class cis():
             "ref" : "2.1.2",
             "compliance" : "cis",
             "level" : 2,
-            "service" : "S3",
+            "service" : "s3",
             "name" : "Ensure S3 Bucket Policy is set to deny HTTP requests",
             "affected": "",
             "analysis" : "All buckets enforce HTTPS requests",
@@ -916,7 +914,7 @@ class cis():
             "ref" : "2.1.3",
             "compliance" : "cis",
             "level" : 1,
-            "service" : "S3",
+            "service" : "s3",
             "name" : "Ensure MFA Delete is enable on S3 buckets",
             "affected": "",
             "analysis" : "All buckets have MFA Delete Enabled",
@@ -959,7 +957,7 @@ class cis():
             "ref" : "2.1.4",
             "compliance" : "cis",
             "level" : 1,
-            "service" : "S3",
+            "service" : "s3",
             "name" : "Ensure all data in Amazon S3 has been discovered, classified and secured when required",
             "affected": "",
             "analysis" : "Manual Check",
@@ -984,7 +982,7 @@ class cis():
             "ref" : "2.1.5",
             "compliance" : "cis",
             "level" : 1,
-            "service" : "S3",
+            "service" : "s3",
             "name" : "Ensure that S3 Buckets are configured with Block public access (bucket settings)",
             "affected": "",
             "analysis" : "All Buckets block public access ",
@@ -1031,7 +1029,7 @@ class cis():
             "ref" : "2.2.1",
             "compliance" : "cis",
             "level" : 1,
-            "service" : "EC2",
+            "service" : "ec2",
             "name" : "Ensure EBS volume encryption is enabled",
             "affected": "",
             "analysis" : "All EBS Volumes are encrypted",
@@ -1056,6 +1054,47 @@ class cis():
         if failing_regions:
             cis_dict["analysis"] = "the following EC2 regions do not encrypt EBS volumes by default: {}".format(" ".join(failing_regions))
             cis_dict["affected"] = ", ".join(failing_regions)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+
+
+    def CIS2_3_1():
+        # Ensure that encryption is enabled for RDS Instances (Automated)
+
+        cis_dict = {
+            "id" : "cis28",
+            "ref" : "2.3.1",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "rds",
+            "name" : "Ensure that encryption is enabled for RDS Instances",
+            "affected": "",
+            "analysis" : "All RDS instances have encryption enabled",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_instances = []
+        
+        for region in regions:
+            client = boto3.client('rds', region_name=region)
+            instances = client.describe_db_instances()["DBInstances"]
+            for instance in instances:
+                db_instance_identifier = instance["DBInstanceIdentifier"]
+                instance_description = client.describe_db_instances(DBInstanceIdentifier=db_instance_identifier)["DBInstances"][0]
+                if instance_description["StorageEncrypted"] != True:
+                    failing_instances += [db_instance_identifier]
+
+        if failing_instances:
+            cis_dict["analysis"] = "the following EC2 regions do not encrypt EBS volumes by default: {}".format(" ".join(failing_instances))
+            cis_dict["affected"] = ", ".join(failing_instances)
             cis_dict["pass_fail"] = "FAIL"
         
         return cis_dict
