@@ -905,3 +905,45 @@ class cis():
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
+
+    def CIS2_1_3():
+        # Ensure MFA Delete is enable on S3 buckets (Automated)
+
+        cis_dict = {
+            "id" : "cis24",
+            "ref" : "2.1.3",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "S3",
+            "name" : "Ensure MFA Delete is enable on S3 buckets",
+            "affected": "",
+            "analysis" : "All buckets have MFA Delete Enabled",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        client = boto3.client('s3')
+        passing_buckets = []      
+        buckets = list_buckets()
+
+        for bucket in buckets:
+            try:
+                if client.get_bucket_versioning(Bucket=bucket)["Status"] == "Enabled":
+                    if client.get_bucket_versioning(Bucket=bucket)["MfaDelete"] == "Enabled": # need testing with mfadelete enabled bucket
+                        passing_buckets += [bucket]
+            except KeyError:
+                pass
+            
+        failing_buckets = [i for i in buckets if i not in passing_buckets]
+        
+        if failing_buckets:
+            cis_dict["analysis"] = "the following buckets do have MFA Delete enabled: {}".format(" ".join(failing_buckets))
+            cis_dict["affected"] = ", ".join(failing_buckets)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
