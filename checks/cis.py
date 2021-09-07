@@ -605,7 +605,7 @@ class cis():
                             policies += []
 
         if policies:
-            cis_dict["analysis"] = "The following customer policies grant full *:* privileges: {}".format(" ".join(set(policies)))
+            cis_dict["analysis"] = "The following custom policies grant full *:* privileges: {}".format(" ".join(set(policies)))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
@@ -1003,15 +1003,16 @@ class cis():
         for bucket in buckets:
             try:
                 public_access_block_configuration = client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
+            #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+            except:
+                # no public access block configuration exists
+                pass
+            else:
                 if public_access_block_configuration["BlockPublicAcls"] == True:
                     if public_access_block_configuration["IgnorePublicAcls"] == True:
                         if public_access_block_configuration["BlockPublicPolicy"] == True:
                             if public_access_block_configuration["RestrictPublicBuckets"] == True:
                                 passing_buckets += [bucket]
-            #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
-            except:
-                # no public access block configuration exists
-                pass
 
         failing_buckets = [i for i in buckets if i not in passing_buckets]
         
@@ -1252,4 +1253,47 @@ class cis():
             cis_dict["affected"] = ", ".join(set(failing_trails))
             cis_dict["pass_fail"] = "FAIL"
         
+        return cis_dict
+
+
+
+    def CIS3_4():
+        # Ensure CloudTrail trails are integrated with CloudWatch Logs (Automated)
+
+        cis_dict = {
+            "id" : "cis32",
+            "ref" : "3.4",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "cloudtrail",
+            "name" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
+            "affected": "",
+            "analysis" : "all trails are integrated with CloudWatch Logs",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_trails = []
+        
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    try:
+                        cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
+                    except KeyError:
+                        failing_trails += [trail["Name"]]
+
+        if failing_trails:
+            cis_dict["analysis"] = "the following trails are not integrated with CloudWatch Logs: {}".format(" ".join(failing_trails))
+            cis_dict["affected"] = ", ".join(failing_trails)
+            cis_dict["pass_fail"] = "FAIL"
+
         return cis_dict
