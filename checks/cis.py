@@ -836,7 +836,7 @@ class cis():
                 encryption = client.get_bucket_encryption(Bucket=bucket)
             # ServerSideEncryptionConfigurationNotFoundError
             # botocore.exceptions.ClientError: An error occurred (ServerSideEncryptionConfigurationNotFoundError) when calling the GetBucketEncryption operation: The server side encryption configuration was not found
-            except:
+            except boto3.exceptions.botocore.exceptions.ClientError:
                 failing_buckets += [bucket]
 
         if failing_buckets:
@@ -878,7 +878,7 @@ class cis():
             try:
                 policy = json.loads(client.get_bucket_policy(Bucket=bucket)["Policy"])
             # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
-            except:
+            except boto3.exceptions.botocore.exceptions.ClientError:
                 # no bucket policy exists
                 pass
             else:
@@ -1004,7 +1004,7 @@ class cis():
             try:
                 public_access_block_configuration = client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
             #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
-            except:
+            except boto3.exceptions.botocore.exceptions.ClientError:
                 # no public access block configuration exists
                 pass
             else:
@@ -1173,7 +1173,7 @@ class cis():
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["LogFileValidationEnabled"] == False:
-                        failing_trails += [trail["name"]]
+                        failing_trails += [trail["Name"]]
 
         if failing_trails:
             cis_dict["analysis"] = "the following trails are multi region enabled: {}".format(" ".join(failing_trails))
@@ -1228,7 +1228,7 @@ class cis():
                         try:
                             policy = json.loads(s3_client.get_bucket_policy(Bucket=bucket_name)["Policy"])
                         # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
-                        except:
+                        except boto3.exceptions.botocore.exceptions.ClientError:
                             # no bucket policy exists
                             pass
                         else:
@@ -1297,3 +1297,262 @@ class cis():
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
+
+
+    def CIS3_5():
+        # Ensure AWS Config is enabled in all regions (Automated)
+
+        cis_dict = {
+            "id" : "cis33",
+            "ref" : "3.5",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "config",
+            "name" : "Ensure AWS Config is enabled in all regions",
+            "affected": "",
+            "analysis" : "AWS Config is enabled in all regions",
+            "description" : "AWS Config is a web service that performs configuration management of supported AWS resources within your account and delivers log files to you. The recorded information includes the configuration item (AWS resource), relationships between configuration items (AWS resources), any configuration changes between resources. It is recommended AWS Config be enabled in all regions. The AWS configuration item history captured by AWS Config enables security analysis, resource change tracking, and compliance auditing.",
+            "remediation" : "It is recommended AWS Config be enabled in all regions.",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_regions = []
+        
+        for region in regions:
+            client = boto3.client('config', region_name=region)
+            recorder_list = client.describe_configuration_recorders()["ConfigurationRecorders"]
+            if not recorder_list:
+                failing_regions += [region]
+            else:
+                for recorder in recorder_list:
+                    if recorder["recordingGroup"]["allSupported"] != True:
+                        if recorder["recordingGroup"]["includeGlobalResourceTypes"] != True:
+                            failing_regions += [region]
+
+        if failing_regions:
+            cis_dict["analysis"] = "the following regions do not have AWS config enabled: {}".format(" ".join(failing_regions))
+            cis_dict["affected"] = ", ".join(failing_regions)
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+
+    def CIS3_6():
+        # Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket (Automated)
+
+        cis_dict = {
+            "id" : "cis34",
+            "ref" : "3.6",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "cloudtrail",
+            "name" : "Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket",
+            "affected": "",
+            "analysis" : "S3 bucket acces logging is enabled",
+            "description" : "S3 Bucket Access Logging generates a log that contains access records for each request made to your S3 bucket. An access log record contains details about the request, such as the request type, the resources specified in the request worked, and the time and date the request was processed. It is recommended that bucket access logging be enabled on the CloudTrail S3 bucket. By enabling S3 bucket logging on target S3 buckets, it is possible to capture all events which may affect objects within any target buckets. Configuring logs to be placed in a separate bucket allows access to log information which can be useful in security and incident response workflows.",
+            "remediation" : "Ensure the CloudTrail S3 bucket has access logging is enabled",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_trails = []
+
+        s3_client = boto3.client('s3')
+        
+        for region in regions:
+            cloudtrail_client = boto3.client('cloudtrail', region_name=region)
+            trail_list = cloudtrail_client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    try:
+                        logging = s3_client.get_bucket_logging(Bucket=trail["S3BucketName"])["LoggingEnabled"]
+                    except KeyError:
+                        failing_trails += [trail["Name"]]
+
+        if failing_trails:
+            cis_dict["analysis"] = "the following trails do not have S3 bucket access logging enabled: {}".format(" ".join(failing_trails))
+            cis_dict["affected"] = ", ".join(failing_trails)
+            cis_dict["pass_fail"] = "FAIL"
+
+        return cis_dict
+    
+    
+    def CIS3_7():
+        # Ensure CloudTrail logs are encrypted at rest using KMS CMKs (Automated)
+
+        cis_dict = {
+            "id" : "cis35",
+            "ref" : "3.7",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "cloudtrail",
+            "name" : "Ensure CloudTrail logs are encrypted at rest using KMS CMKs",
+            "affected": "",
+            "analysis" : "CloudTrail logs are encrypted at rest with KMS CMKs",
+            "description" : "AWS CloudTrail is a web service that records AWS API calls for an account and makes those logs available to users and resources in accordance with IAM policies. AWS Key Management Service (KMS) is a managed service that helps create and control the encryption keys used to encrypt account data, and uses Hardware Security Modules (HSMs) to protect the security of encryption keys. CloudTrail logs can be configured to leverage server side encryption (SSE) and KMS customer created master keys (CMK) to further protect CloudTrail logs. It is recommended that CloudTrail be configured to use SSE-KMS. Configuring CloudTrail to use SSE-KMS provides additional confidentiality controls on log data as a given user must have S3 read permission on the corresponding log bucket and must be granted decrypt permission by the CMK policy.",
+            "remediation" : "Configure CloudTrail to use SSE-KMS for encryption at rest.",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_trails = []
+        
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    try:
+                        kms_key_id = trail["KmsKeyId"]
+                    except KeyError:
+                        failing_trails += [trail["Name"]]
+
+        if failing_trails:
+            cis_dict["analysis"] = "the following trails are multi region enabled: {}".format(" ".join(failing_trails))
+            cis_dict["affected"] = ", ".join(failing_trails)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+
+    def CIS3_8():
+        # Ensure rotation for customer created CMKs is enabled (Automated)
+
+        cis_dict = {
+            "id" : "cis36",
+            "ref" : "3.8",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "kms",
+            "name" : "Ensure rotation for customer created CMKs is enabled",
+            "affected": "",
+            "analysis" : "rotation is enabled on all CMKs",
+            "description" : "AWS Key Management Service (KMS) allows customers to rotate the backing key which is key material stored within the KMS which is tied to the key ID of the Customer Created customer master key (CMK). It is the backing key that is used to perform cryptographic operations such as encryption and decryption. Automated key rotation currently retains all prior backing keys so that decryption of encrypted data can take place transparently. It is recommended that CMK key rotation be enabled. Rotating encryption keys helps reduce the potential impact of a compromised key as data encrypted with a new key cannot be accessed with a previous key that may have been exposed.",
+            "remediation" : "Enable key rotation on all customer created CMKs",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_keys = []
+        
+        for region in regions:
+            client = boto3.client('kms', region_name=region)
+            keys_list = client.list_keys()["Keys"]
+            for key in keys_list:
+                key_id = key["KeyId"]
+                try:
+                    key_rotation_Status = client.get_key_rotation_status(KeyId=key_id)["KeyRotationEnabled"]
+                #botocore.exceptions.ClientError: An error occurred (AccessDeniedException) when calling the GetKeyRotationStatus operation
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    print("access denied - KMS KeyID:{}({})".format(key_id, region))
+                    pass
+                else:
+                    if key_rotation_Status == False:
+                        failing_keys += ["{}({})".format(key_id, region)]
+
+        if failing_keys:
+            cis_dict["analysis"] = "the following KMS keys do not have rotation enabled: {}".format(" ".join(failing_keys))
+            cis_dict["affected"] = ", ".join(failing_keys)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+    
+    
+    def CIS3_9():
+        # Ensure VPC flow logging is enabled in all VPCs (Automated)
+
+        cis_dict = {
+            "id" : "cis37",
+            "ref" : "3.9",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "vpc",
+            "name" : "Ensure VPC flow logging is enabled in all VPCs",
+            "affected": "",
+            "analysis" : "Flow Logs are enabled on all VPCs",
+            "description" : "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs. It is recommended that VPC Flow Logs be enabled for packet Rejects for VPCs. VPC Flow Logs provide visibility into network traffic that traverses the VPC and can be used to detect anomalous traffic or insight during security workflows.",
+            "remediation" : "Enable VPC Flow Logs on all VPCs",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "PASS"
+        }
+
+        regions = describe_regions()
+        failing_regions = []
+        
+        for region in regions:
+            client = boto3.client('ec2', region_name=region)
+            flow_logs = client.describe_flow_logs()["FlowLogs"]
+            if not flow_logs:
+                failing_regions += [region]
+            
+
+        if failing_regions:
+            cis_dict["analysis"] = "the following regions do not have any VPC FLow Logs enabled: {}".format(" ".join(failing_regions))
+            cis_dict["affected"] = ", ".join(failing_regions)
+            cis_dict["pass_fail"] = "FAIL"
+        
+        return cis_dict
+    
+    
+    def CIS3_10():
+        # Ensure that Object-level logging for write events is enabled for S3 bucket (Automated)
+
+
+        cis_dict = {
+            "id" : "cis38",
+            "ref" : "3.10",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "cloudtrail",
+            "name" : "Ensure that Object-level logging for write events is enabled for S3 bucket",
+            "affected": "",
+            "analysis" : "No trails were found with S3 Object-Level Logging enabled",
+            "description" : "S3 object-level API operations such as GetObject, DeleteObject, and PutObject are called data events. By default, CloudTrail trails don't log data events and so it is recommended to enable Object-level logging for S3 buckets. Enabling object-level logging will help you meet data compliance requirements within your organization, perform comprehensive security analysis, monitor specific patterns of user behavior in your AWS account or take immediate actions on any object-level API activity within your S3 Buckets using Amazon CloudWatch Events.",
+            "remediation" : "Enable S3 bucket Object-level logging for write events in CloudTrail",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "FAIL"
+        }
+        
+        regions = describe_regions()
+        passing_trails = []
+     
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    trail_name = trail["Name"]
+                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
+                    for selector in event_selectors:
+                        for resources in selector["DataResources"]:
+                            if resources["Type"] == "AWS::S3::Object":
+                                passing_trails += [trail_name]
+        
+        if passing_trails:
+            cis_dict["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
+            cis_dict["affected"] = ", ".join(passing_trails)
+            cis_dict["pass_fail"] = "PASS"
+
+        return cis_dict
+        

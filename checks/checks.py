@@ -38,12 +38,18 @@ class checks:
             cis.CIS3_1,
             cis.CIS3_2,
             cis.CIS3_3,
-            cis.CIS3_4
+            cis.CIS3_4,
+            cis.CIS3_5,
+            cis.CIS3_6,
+            cis.CIS3_7,
+            cis.CIS3_8,
+            cis.CIS3_9,
+            cis.CIS3_10
         ]
         checks_test = [
-            cis.CIS3_4
+            cis.CIS3_10
         ]
-        return checks_test
+        return checks
 
     def cis_level1(self):
         pass
