@@ -1515,7 +1515,6 @@ class cis():
     def CIS3_10():
         # Ensure that Object-level logging for write events is enabled for S3 bucket (Automated)
 
-
         cis_dict = {
             "id" : "cis38",
             "ref" : "3.10",
@@ -1542,12 +1541,14 @@ class cis():
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
-                    trail_name = trail["Name"]
-                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
-                    for selector in event_selectors:
-                        for resources in selector["DataResources"]:
-                            if resources["Type"] == "AWS::S3::Object":
-                                passing_trails += [trail_name]
+                    if trail["HasCustomEventSelectors"] == True:
+                        trail_name = trail["Name"]
+                        event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
+                        for selector in event_selectors:
+                            if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "WriteOnly":
+                                for resources in selector["DataResources"]:
+                                    if resources["Type"] == "AWS::S3::Object":
+                                        passing_trails += [trail_name]
         
         if passing_trails:
             cis_dict["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
@@ -1555,4 +1556,332 @@ class cis():
             cis_dict["pass_fail"] = "PASS"
 
         return cis_dict
+    
+    def CIS3_11():
+        # Ensure that Object-level logging for read events is enabled for S3 bucket (Automated)
+
+        cis_dict = {
+            "id" : "cis39",
+            "ref" : "3.11",
+            "compliance" : "cis",
+            "level" : 2,
+            "service" : "cloudtrail",
+            "name" : "Ensure that Object-level logging for write read is enabled for S3 bucket",
+            "affected": "",
+            "analysis" : "No trails were found with S3 Object-Level Logging enabled",
+            "description" : "S3 object-level API operations such as GetObject, DeleteObject, and PutObject are called data events. By default, CloudTrail trails don't log data events and so it is recommended to enable Object-level logging for S3 buckets. Enabling object-level logging will help you meet data compliance requirements within your organization, perform comprehensive security analysis, monitor specific patterns of user behavior in your AWS account or take immediate actions on any object-level API activity using Amazon CloudWatch Events.",
+            "remediation" : "Enable S3 bucket Object-level logging for read events in CloudTrail",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "FAIL"
+        }
         
+        regions = describe_regions()
+        passing_trails = []
+     
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    if trail["HasCustomEventSelectors"] == True:
+                        trail_name = trail["Name"]
+                        event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
+                        for selector in event_selectors:
+                            if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "ReadOnly":
+                                for resources in selector["DataResources"]:
+                                    if resources["Type"] == "AWS::S3::Object":
+                                        passing_trails += [trail_name]
+        
+        if passing_trails:
+            cis_dict["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
+            cis_dict["affected"] = ", ".join(passing_trails)
+            cis_dict["pass_fail"] = "PASS"
+
+        return cis_dict
+    
+    
+    def CIS4_1():
+        # Ensure a log metric filter and alarm exist for unauthorized API calls (Automated)
+
+        cis_dict = {
+            "id" : "cis40",
+            "ref" : "4.1",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "cloudwatch",
+            "name" : "Ensure a log metric filter and alarm exist for unauthorized API calls",
+            "affected": "",
+            "analysis" : "No log metric filter and alarm for unauthorized API calls could be found",
+            "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for unauthorized API calls. Monitoring unauthorized API calls will help reveal application errors and may reduce time to detect malicious activity.",
+            "remediation" : "Create a log metric filter and alarm for unauthorized API calls in CloudWatch Logs",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "FAIL"
+        }
+
+        # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
+        
+        regions = describe_regions()
+        passing_metrics = []
+
+        ## What a mess, could probably be moved into a seperate function to be shared with the other metric/alarm checks
+     
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    try:
+                        cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
+                        cloudtrail_log_group_name = cloudwatch_logs_log_group_arn.split(":")[6]
+                        #cloudtrail_log_group_region = cloudwatch_logs_log_group_arn.split(":")[3]
+                        #cloudtrail_log_group_account = cloudwatch_logs_log_group_arn.split(":")[4]
+                    except KeyError:
+                        # trail not integrated with cloudwatch logs
+                        pass
+                    else:
+
+                        # check if trail is multi region
+                        if trail["IsMultiRegionTrail"] == True:
+                            trail_name = trail["Name"]
+
+                            # check trail is enabled
+                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                
+                                # check logging of all events
+                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                                if event_selectors["ReadWriteType"] == "All":
+
+                                    # check management event logging
+                                    if event_selectors["IncludeManagementEvents"] == True:
+                                        
+                                        # get cloud watch metrics
+                                        logs_client = boto3.client('logs', region_name=region)
+                                        try:
+                                            metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
+                                        except boto3.exceptions.botocore.exceptions.ClientError:
+                                            cis_dict["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
+                                            cis_dict["pass_fail"] = "INFO"
+
+                                        else:
+                                            for filter in metric_filters:
+
+                                                # check desired filter exists
+                                                metric_filter_name = filter["filterName"]
+                                                # { ($.errorCode = "*UnauthorizedOperation") || ($.errorCode = "AccessDenied*") || ($.sourceIPAddress!="delivery.logs.amazonaws.com") || ($.eventName!="HeadBucket") }
+                                                metric_filter_pattern = filter["filterPattern"]
+                                                if re.match('.*\$\.errorCode\s=\s\"AccessDenied\*\".*', metric_filter_pattern):
+                                                    if re.match('.*\$\.errorCode\s=\s\"\*UnauthorizedOperation\".*', metric_filter_pattern):
+
+                                                        # check alarm exists for filter
+                                                        cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                        metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
+                                                        for alarm in metric_alarms:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                
+                                                                # check SNS topic has a subcriber
+                                                                sns_client = boto3.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    passing_metrics += [metric_filter_name]
+
+        if passing_metrics:
+            cis_dict["analysis"] = "the following metric filters were found for unauthorized API calls: {}".format(" ".join(passing_metrics))
+            cis_dict["pass_fail"] = "PASS"
+
+        return cis_dict
+
+
+    def CIS4_2():
+        # Ensure a log metric filter and alarm exist for Management Console sign-in without MFA (Automated)
+
+        cis_dict = {
+            "id" : "cis41",
+            "ref" : "4.2",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "cloudwatch",
+            "name" : "Ensure a log metric filter and alarm exist for Management Console sign-in without MFA",
+            "affected": "",
+            "analysis" : "No log metric filter and alarm for Management Console sign-in without MFA could be found",
+            "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for console logins that are not protected by multi-factor authentication (MFA). Monitoring for single-factor console logins will increase visibility into accounts that are not protected by MFA.",
+            "remediation" : "Create a log metric filter and alarm for Management Console sign-in without MFA in CloudWatch Logs",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "FAIL"
+        }
+
+        # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
+        
+        regions = describe_regions()
+        passing_metrics = []
+     
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    try:
+                        cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
+                        cloudtrail_log_group_name = cloudwatch_logs_log_group_arn.split(":")[6]
+                        #cloudtrail_log_group_region = cloudwatch_logs_log_group_arn.split(":")[3]
+                        #cloudtrail_log_group_account = cloudwatch_logs_log_group_arn.split(":")[4]
+                    except KeyError:
+                        # trail not integrated with cloudwatch logs
+                        pass
+                    else:
+
+                        # check if trail is multi region
+                        if trail["IsMultiRegionTrail"] == True:
+                            trail_name = trail["Name"]
+
+                            # check trail is enabled
+                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                
+                                # check logging of all events
+                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                                if event_selectors["ReadWriteType"] == "All":
+
+                                    # check management event logging
+                                    if event_selectors["IncludeManagementEvents"] == True:
+                                        
+                                        # get cloud watch metrics
+                                        logs_client = boto3.client('logs', region_name=region)
+                                        try:
+                                            metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
+                                        except boto3.exceptions.botocore.exceptions.ClientError:
+                                            cis_dict["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
+                                            cis_dict["pass_fail"] = "INFO"
+
+                                        else:
+                                            for filter in metric_filters:
+
+                                                # check desired filter exists
+                                                metric_filter_name = filter["filterName"]
+                                                
+                                                # { ($.eventName = "ConsoleLogin") && ($.additionalEventData.MFAUsed != "Yes") && ($.userIdentity.type = "IAMUser") && ($.responseElements.ConsoleLogin = "Success") }
+                                                metric_filter_pattern = filter["filterPattern"]
+                                                if re.match('.*\$\.eventName\s=\s\"ConsoleLogin\".*', metric_filter_pattern):
+                                                    if re.match('.*\$\.additionalEventData\.MFAUsed\s\!=\s\"Yes\".*', metric_filter_pattern):
+                                                        if re.match('.*\$\.userIdentity\.type\s=\s\"IAMUser\".*', metric_filter_pattern):
+
+                                                            # check alarm exists for filter
+                                                            cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                            metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
+                                                            for alarm in metric_alarms:
+                                                                if alarm["MetricName"] == metric_filter_name:
+                                                                    sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                    
+                                                                    # check SNS topic has a subcriber
+                                                                    sns_client = boto3.client('sns', region_name=region)
+                                                                    subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                    if subscriptions:
+                                                                        passing_metrics += [metric_filter_name]
+
+        if passing_metrics:
+            cis_dict["analysis"] = "the following metric filters were found for Management Console sign-in without MFA: {}".format(" ".join(passing_metrics))
+            cis_dict["pass_fail"] = "PASS"
+
+        return cis_dict
+        
+        
+    def CIS4_3():
+        # Ensure a log metric filter and alarm exist for usage of 'root' account (Automated)
+
+        cis_dict = {
+            "id" : "cis42",
+            "ref" : "4.3",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "cloudwatch",
+            "name" : "Ensure a log metric filter and alarm exist for usage of 'root' account",
+            "affected": "",
+            "analysis" : "No log metric filter and alarm for usage of 'root' account could be found",
+            "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for 'root' login attempts. Monitoring for 'root' account logins will provide visibility into the use of a fully privileged account and an opportunity to reduce the use of it.",
+            "remediation" : "Create a log metric filter and alarm for usage of 'root' account in CloudWatch Logs",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : "FAIL"
+        }
+
+        # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
+        
+        regions = describe_regions()
+        passing_metrics = []
+     
+        for region in regions:
+            client = boto3.client('cloudtrail', region_name=region)
+            trail_list = client.describe_trails()["trailList"]
+            for trail in trail_list:
+                if trail["HomeRegion"] == region:
+                    try:
+                        cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
+                        cloudtrail_log_group_name = cloudwatch_logs_log_group_arn.split(":")[6]
+                        #cloudtrail_log_group_region = cloudwatch_logs_log_group_arn.split(":")[3]
+                        #cloudtrail_log_group_account = cloudwatch_logs_log_group_arn.split(":")[4]
+                    except KeyError:
+                        # trail not integrated with cloudwatch logs
+                        pass
+                    else:
+
+                        # check if trail is multi region
+                        if trail["IsMultiRegionTrail"] == True:
+                            trail_name = trail["Name"]
+
+                            # check trail is enabled
+                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                
+                                # check logging of all events
+                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                                if event_selectors["ReadWriteType"] == "All":
+
+                                    # check management event logging
+                                    if event_selectors["IncludeManagementEvents"] == True:
+                                        
+                                        # get cloud watch metrics
+                                        logs_client = boto3.client('logs', region_name=region)
+                                        try:
+                                            metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
+                                        except boto3.exceptions.botocore.exceptions.ClientError:
+                                            cis_dict["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
+                                            cis_dict["pass_fail"] = "INFO"
+
+                                        else:
+                                            for filter in metric_filters:
+
+                                                # check desired filter exists
+                                                metric_filter_name = filter["filterName"]
+                                                
+                                                # { $.userIdentity.type = "Root" && $.userIdentity.invokedBy NOT EXISTS && $.eventType != "AwsServiceEvent" }
+                                                metric_filter_pattern = filter["filterPattern"]
+                                                if re.match('.*\$\.userIdentity\.type\s=\s\"Root\".*', metric_filter_pattern):
+                                                    if re.match('.*\$\.userIdentity\.invokedBy\sNOT\sEXISTS.*', metric_filter_pattern):
+                                                            
+                                                            # check alarm exists for filter
+                                                            cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                            metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
+                                                            for alarm in metric_alarms:
+                                                                if alarm["MetricName"] == metric_filter_name:
+                                                                    sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                    
+                                                                    # check SNS topic has a subcriber
+                                                                    sns_client = boto3.client('sns', region_name=region)
+                                                                    subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                    if subscriptions:
+                                                                        passing_metrics += [metric_filter_name]
+
+        if passing_metrics:
+            cis_dict["analysis"] = "the following metric filters were found for usage of 'root' account: {}".format(" ".join(passing_metrics))
+            cis_dict["pass_fail"] = "PASS"
+
+        return cis_dict
