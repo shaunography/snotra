@@ -17,7 +17,7 @@ boto3
 ## todo
 
 ### features
-- [ ] CIS benchmark
+- [x] CIS benchmark
     - [ ] pass/fail percentage
 - [ ] non-CIS checks
     - [ ] external attack surface
