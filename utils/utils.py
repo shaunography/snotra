@@ -17,7 +17,12 @@ def credential_report():
 
 def password_policy():
     client = boto3.client('iam')
-    return client.get_account_password_policy()["PasswordPolicy"]
+    try:
+        return client.get_account_password_policy()["PasswordPolicy"]
+    # botocore.errorfactory.NoSuchEntityException: An error occurred (NoSuchEntity) when calling the GetAccountPasswordPolicy operation:
+    except:
+        # No password policy created
+        return False
 
 def account_summary():
     client = boto3.client('iam')    

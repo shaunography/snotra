@@ -36,6 +36,7 @@ boto3
 - [ ] better error handling
 - [ ] actually test CIS1_19
 - [ ] test CIS2_1_3 with mfa enabled buckets
+- [ ] cacheing / minimise requests to API
 
 ### bugs
 
