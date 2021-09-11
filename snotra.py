@@ -4,12 +4,13 @@ import argparse
 import boto3
 import json
 import os
-import time
+
+from datetime import datetime
 
 from checks.checks import checks
-#from checks.cis import cis
 
 from utils.utils import get_user
+from utils.utils import get_account_id
 
 def main():
     parser = argparse.ArgumentParser(description="AWS Auditor")
@@ -22,20 +23,22 @@ def main():
     )
     args = parser.parse_args()
     
-    print("Running test with: {}".format(get_user()["Arn"]))
-    
-    
-    # CIS Audit CSV    
-    filename = os.path.join(args.o, "CIS_Benchark.csv")
+    results = {}
 
+    print("Running test with: {}".format(get_user()))
+
+    results["account"] = get_account_id()
+    results["user"] = get_user()
+    results["datetime"] = str(datetime.today())
+    
+    results["findings"] = []
+
+    for check in checks.cis(checks):
+        results["findings"] += [ check() ]
+
+    filename = os.path.join(args.o, "results_{}.json".format(get_account_id()))
     with open(filename, 'w') as f:
-        f.write("Check,Level,Benchmark,Result,Pass/Fail\n")
-
-        for check in checks.cis(checks):
-            results = check()
-            print("CIS check {} complete".format(results["ref"]))
-            f.write("{},{},{},{},{}\n".format(results["ref"],results["level"],results["name"],results["analysis"],results["pass_fail"]))
+        json.dump(results, f)
 
 if __name__ == '__main__':
     main()
-    

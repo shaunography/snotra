@@ -29,8 +29,12 @@ def account_summary():
     return client.get_account_summary()["SummaryMap"]
 
 def get_user():
-    client = boto3.client('iam')    
-    return client.get_user()["User"]
+    client = boto3.client('sts')    
+    return client.get_caller_identity()["Arn"]
+
+def get_account_id():
+    client = boto3.client('sts')    
+    return client.get_caller_identity()["Account"]
 
 def describe_regions():
     # returns list of available ec2 regions
