@@ -1,5 +1,5 @@
 # Snotra
-Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it uses boto3 to audit your AWS account against a list of common issues and compliance standard including the CIS benchmark. Snotra produces a results.json file that can be easily incorporated into existing reporting workflows.
+Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it uses boto3 to audit your AWS account against a list of common issues and compliance standards including the CIS benchmark. Snotra produces a results.json file that can be easily incorporated into existing reporting workflows.
 
 ## usage
 `$ python3 snotra.py --output-dir ./snotra/`
@@ -21,8 +21,8 @@ The results JSON file that Snotra produces is in the following format:
     "user" : user_arn,                          # ARN of user used to run test e.g. arn:aws:iam::123456789123:user/shaun
     "datetime" : datetime.today(),              # datetime of scan e.g. 2021-09-11 13:14:34.562040
     "findings" : [
-        {
-            "id": id,                           # finding ID e.g iam3
+        {                                       # each check function returns a results dictionary in this format
+            "id": id,                           # finding ID e.g iam_3
             "ref": ref,                         # finding reference CIS etc e.g 2.3.1
             "compliance": "cis",                # is the finding from a compliance standard e.g. cis
             "level": level,                     # CIS level e.g 1
@@ -66,7 +66,8 @@ The results JSON file that Snotra produces is in the following format:
 - [ ] better error handling
 - [ ] actually test CIS1_19
 - [ ] test CIS2_1_3 with mfa enabled buckets
-- [ ] cacheing / minimise requests to API
+- [x] cacheing / minimise requests to API
+    - [ ] moar
 
 ### bugs
 

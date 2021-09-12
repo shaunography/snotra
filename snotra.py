@@ -7,7 +7,15 @@ import os
 
 from datetime import datetime
 
-from checks.checks import checks
+from checks.iam import iam
+from checks.s3 import s3
+from checks.ec2 import ec2
+from checks.access_analyzer import access_analyzer
+from checks.rds import rds
+from checks.cloudtrail import cloudtrail
+from checks.config import config
+from checks.kms import kms
+from checks.cloudwatch import cloudwatch
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -32,9 +40,15 @@ def main():
     results["datetime"] = str(datetime.today())
     
     results["findings"] = []
-
-    for check in checks.cis(checks):
-        results["findings"] += [ check() ]
+    results["findings"] += iam().run()
+    results["findings"] += s3().run()
+    results["findings"] += ec2().run()
+    results["findings"] += access_analyzer().run()
+    results["findings"] += rds().run()
+    results["findings"] += cloudtrail().run()
+    results["findings"] += config().run()
+    results["findings"] += kms().run()
+    results["findings"] += cloudwatch().run()
 
     filename = os.path.join(args.o, "results_{}.json".format(get_account_id()))
     with open(filename, 'w') as f:
