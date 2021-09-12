@@ -1,11 +1,13 @@
 import boto3
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class cloudwatch(object):
 
     def __init__(self):
         self.regions = describe_regions()
+        self.account_id = get_account_id()
 
     def run(self):
         findings = []
@@ -40,16 +42,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for unauthorized API calls could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for unauthorized API calls. Monitoring unauthorized API calls will help reveal application errors and may reduce time to detect malicious activity.",
             "remediation" : "Create a log metric filter and alarm for unauthorized API calls in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
         print("running check: cloudwatch_1")
+
+        results["affected"] = self.account_id
         
         passing_metrics = []
 
@@ -137,16 +141,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for Management Console sign-in without MFA could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for console logins that are not protected by multi-factor authentication (MFA). Monitoring for single-factor console logins will increase visibility into accounts that are not protected by MFA.",
             "remediation" : "Create a log metric filter and alarm for Management Console sign-in without MFA in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
         print("running check: cloudwatch_2")
+
+        results["affected"] = self.account_id
         
         passing_metrics = []
      
@@ -233,16 +239,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for usage of 'root' account could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for 'root' login attempts. Monitoring for 'root' account logins will provide visibility into the use of a fully privileged account and an opportunity to reduce the use of it.",
             "remediation" : "Create a log metric filter and alarm for usage of root account in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
         print("running check: cloudwatch_3")
+
+        results["affected"] = self.account_id
         
         passing_metrics = []
      
@@ -328,16 +336,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for IAM policy changes could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established changes made to Identity and Access Management (IAM) policies. Monitoring changes to IAM policies will help ensure authentication and authorization controls remain intact.",
             "remediation" : "Create a log metric filter and alarm for IAM policy changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_4")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -422,16 +432,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for CloudTrail configuration changes could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for detecting changes to CloudTrail's configurations. Monitoring changes to CloudTrail's configuration will help ensure sustained visibility to activities performed in the AWS account.",
             "remediation" : "Create a log metric filter and alarm for CloudTrail configuration changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_5")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -516,16 +528,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for AWS Management Console authentication failures could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for failed console authentication attempts. Monitoring failed console logins may decrease lead time to detect an attempt to brute force a credential, which may provide an indicator, such as source IP, that can be used in other event correlation.",
             "remediation" : "Create a log metric filter and alarm for AWS Management Console authentication failures in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_6")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -610,16 +624,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for disabling or scheduled deletion of customer created CMKs could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for customer created CMKs which have changed state to disabled or scheduled deletion. Data encrypted with disabled or deleted keys will no longer be accessible.",
             "remediation" : "Create a log metric filter and alarm for disabling or scheduled deletion of customer created CMKs in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_7")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -704,16 +720,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for S3 bucket policy changes could be found",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for changes to S3 bucket policies. Monitoring changes to S3 bucket policies may reduce time to detect and correct permissive policies on sensitive S3 buckets.",
             "remediation" : "Create a log metric filter and alarm for S3 bucket policy changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_8")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -799,16 +817,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for AWS Config configuration changes",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for detecting changes to CloudTrail's configurations. Monitoring changes to AWS Config configuration will help ensure sustained visibility of configuration items within the AWS account.",
             "remediation" : "Create a log metric filter and alarm for AWS Config configuration changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_9")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -894,16 +914,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for security group changes",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
             "remediation" : "Create a log metric filter and alarm for security group changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_10")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -989,16 +1011,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for changes to Network Access Control Lists (NACL)",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
             "remediation" : "Create a log metric filter and alarm for changes to Network Access Control Lists (NACL) in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_11")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -1083,16 +1107,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for changes to network gateways",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
             "remediation" : "Create a log metric filter and alarm for changes to network gateways in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_11")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -1177,16 +1203,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for route table changes",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Routing tables are used to route network traffic between subnets and to network gateways. It is recommended that a metric filter and alarm be established for changes to route tables. Monitoring changes to route tables will help ensure that all VPC traffic flows through an expected path. ",
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_13")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -1271,16 +1299,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for VPC changes",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is possible to have more than 1 VPC within an account, in addition it is also possible to create a peer connection between 2 VPCs enabling network traffic to route between VPCs. It is recommended that a metric filter and alarm be established for changes made to VPCs. Monitoring changes to VPC will help ensure VPC traffic flow is not getting impacted.",
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_14")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      
@@ -1365,16 +1395,18 @@ class cloudwatch(object):
             "analysis" : "No log metric filter and alarm for AWS Organizations changes",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for AWS Organizations changes made in the master AWS Account. Monitoring AWS Organizations changes can help you prevent any unwanted, accidental or intentional modifications that may lead to unauthorized access or other security breaches. This monitoring technique helps you to ensure that any unexpected changes performed within your AWS Organizations can be investigated and any unwanted changes can be rolled back.",
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_15")
+
+        results["affected"] = self.account_id
 
         passing_metrics = []
      

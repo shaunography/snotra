@@ -24,12 +24,12 @@ class rds(object):
             "name" : "Ensure that encryption is enabled for RDS Instances",
             "affected": "",
             "analysis" : "All RDS instances have encryption enabled",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "Amazon RDS encrypted DB instances use the industry standard AES-256 encryption algorithm to encrypt your data on the server that hosts your Amazon RDS DB instances. After your data is encrypted, Amazon RDS handles authentication of access and decryption of your data transparently with a minimal impact on performance. Databases are likely to hold sensitive and critical data, it is highly recommended to implement encryption in order to protect your data from unauthorized access or disclosure. With RDS encryption enabled, the data stored on the instance's underlying storage, the automated backups, read replicas, and snapshots, are all encrypted.",
+            "remediation" : "Ensure that encryption is enabled for all RDS Instances",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
             "pass_fail" : "PASS"
         }
 

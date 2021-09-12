@@ -2,11 +2,14 @@ import boto3
 import json
 import re
 
+from utils.utils import get_account_id
+
 class s3(object):
 
     def __init__(self):
         self.client = self.get_client()
         self.buckets = self.list_buckets()
+        self.account_id = get_account_id()
 
     def run(self):
         findings = []
@@ -38,12 +41,12 @@ class s3(object):
             "name" : "Ensure all S3 buckets employ encryption-at-rest",
             "affected": "",
             "analysis" : "All buckets have server side encryption enabled",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "Amazon S3 provides a variety of no, or low, cost encryption options to protect data at rest. Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.",
+            "remediation" : "Ensure all S3 buckets employ encryption-at-rest",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
             "pass_fail" : "PASS"
         }
 
@@ -76,12 +79,12 @@ class s3(object):
             "name" : "Ensure S3 Bucket Policy is set to deny HTTP requests",
             "affected": "",
             "analysis" : "All buckets enforce HTTPS requests",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "At the Amazon S3 bucket level, you can configure permissions through a bucket policy making the objects accessible only through HTTPS. By default, Amazon S3 allows both HTTP and HTTPS requests. To achieve only allowing access to Amazon S3 objects through HTTPS you also have to explicitly deny access to HTTP requests. Bucket policies that allow HTTPS requests without explicitly denying HTTP requests will not comply with this recommendation.",
+            "remediation" : "Enforce HTTPS requests for all buckets within your account",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
             "pass_fail" : "PASS"
         }
         
@@ -136,12 +139,12 @@ class s3(object):
             "name" : "Ensure MFA Delete is enable on S3 buckets",
             "affected": "",
             "analysis" : "All buckets have MFA Delete Enabled",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "Once MFA Delete is enabled on your sensitive and classified S3 bucket it requires the user to have two forms of authentication. Adding MFA delete to an S3 bucket, requires additional authentication when you change the version state of your bucket or you delete and object version adding another layer of security in the event your security credentials are compromised or unauthorized access is granted.",
+            "remediation" : "configure MFA delete on all S3 buckets within your account",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+            "cvss_score" : "3.7",
             "pass_fail" : "PASS"
         }
 
@@ -180,17 +183,19 @@ class s3(object):
             "name" : "Ensure all data in Amazon S3 has been discovered classified and secured when required",
             "affected": "",
             "analysis" : "Manual Check",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
-            "pass_fail" : ""
+            "description" : "Amazon S3 buckets can contain sensitive data, that for security purposes should be discovered, monitored, classified and protected. Macie along with other 3rd party tools can automatically provide an inventory of Amazon S3 buckets. Using a Cloud service or 3rd Party software to continuously monitor and automate the process of data discovery and classification for S3 buckets using machine learning and pattern matching is a strong defense in protecting that information. Amazon Macie is a fully managed data security and data privacy service that uses machine learning and pattern matching to discover and protect your sensitive data in AWS. ",
+            "remediation" : "Enable AWS Macie",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "info"
         }
 
         #client = boto3.client('macie2', region_name="eu-west-2")
         print("running check: s3_4")
+
+        results["affected"] = self.account_id
 
         return results
 
@@ -206,12 +211,12 @@ class s3(object):
             "name" : "Ensure that S3 Buckets are configured with Block public access (bucket settings)",
             "affected": "",
             "analysis" : "All Buckets block public access ",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "Amazon S3 provides Block public access (bucket settings) and Block public access (account settings) to help you manage public access to Amazon S3 resources. By default, S3 buckets and objects are created with public access disabled. However, an IAM principal with sufficient S3 permissions can enable public access at the bucket and/or object level. While enabled, Block public access (bucket settings) prevents an individual bucket, and its contained objects, from becoming publicly accessible. Similarly, Block public access (account settings) prevents all buckets, and contained objects, from becoming publicly accessible across the entire account. Amazon S3 Block public access (bucket settings) prevents the accidental or malicious public exposure of data contained within the respective bucket(s). Amazon S3 Block public access (account settings) prevents the accidental or malicious public exposure of data contained within all buckets of the respective AWS account. Whether blocking public access to all or some buckets is an organizational decision that should be based on data sensitivity, least privilege, and use case.",
+            "remediation" : "Ensure that S3 Buckets are configured with Block public access",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
             "pass_fail" : "PASS"
         }
 

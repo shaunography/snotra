@@ -6,7 +6,7 @@ def get_user():
     return client.get_caller_identity()["Arn"]
 
 def get_account_id():
-    client = boto3.client('sts')    
+    client = boto3.client('sts') 
     return client.get_caller_identity()["Account"]
 
 def describe_regions():

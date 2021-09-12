@@ -2,11 +2,13 @@ import boto3
 import json
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class cloudtrail(object):
 
     def __init__(self):
         self.regions = describe_regions()
+        self.account_id = get_account_id()
 
     def run(self):
         findings = []
@@ -32,16 +34,18 @@ class cloudtrail(object):
             "name" : "Ensure CloudTrail is enabled in all regions",
             "affected": "",
             "analysis" : "No multi region enabled trails were found",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "AWS CloudTrail is a web service that records AWS API calls for your account and delivers log files to you. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, the request parameters, and the response elements returned by the AWS service. CloudTrail provides a history of AWS API calls for an account, including API calls made via the Management Console, SDKs, command line tools, and higher-level AWS services (such as CloudFormation).",
+            "remediation" : "Enable CloudTrail in all regions",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
 
         print("running check: cloudtrail_1")
+
+        results["affected"] = self.account_id
         
         multi_region_trails = []
         
@@ -74,12 +78,12 @@ class cloudtrail(object):
             "name" : "Ensure CloudTrail log file validation is enabled",
             "affected": "",
             "analysis" : "log file validation is enabled on all trails",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "CloudTrail log file validation creates a digitally signed digest file containing a hash of each log that CloudTrail writes to S3. These digest files can be used to determine whether a log file was changed, deleted, or unchanged after CloudTrail delivered the log. It is recommended that file validation be enabled on all CloudTrails. Enabling log file validation will provide additional integrity checking of CloudTrail logs.",
+            "remediation" : "Enabled log file validation on all your trails",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "PASS"
         }
 
@@ -113,12 +117,12 @@ class cloudtrail(object):
             "name" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible",
             "affected": "",
             "analysis" : "no public cloud trail buckets found",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "CloudTrail logs a record of every API call made in your AWS account. These logs file are stored in an S3 bucket. It is recommended that the bucket policy or access control list (ACL) applied to the S3 bucket that CloudTrail logs to prevent public access to the CloudTrail logs. Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected account's use or configuration.",
+            "remediation" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
             "pass_fail" : "PASS"
         }
 
@@ -189,12 +193,12 @@ class cloudtrail(object):
             "name" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
             "affected": "",
             "analysis" : "all trails are integrated with CloudWatch Logs",
-            "description" : "",
-            "remediation" : "",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "description" : "AWS CloudTrail is a web service that records AWS API calls made in a given AWS account. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, the request parameters, and the response elements returned by the AWS service. CloudTrail uses Amazon S3 for log file storage and delivery, so log files are stored durably. In addition to capturing CloudTrail logs within a specified S3 bucket for long term analysis, realtime analysis can be performed by configuring CloudTrail to send logs to CloudWatch Logs. For a trail that is enabled in all regions in an account, CloudTrail sends log files from all those regions to a CloudWatch Logs log group. It is recommended that CloudTrail logs be sent to CloudWatch Logs. Note: The intent of this recommendation is to ensure AWS account activity is being captured, monitored, and appropriately alarmed on. CloudWatch Logs is a native way to accomplish this using AWS services but does not preclude the use of an alternate solution. Sending CloudTrail logs to CloudWatch Logs will facilitate real-time and historic activity logging based on user, API, resource, and IP address, and provides opportunity to establish alarms and notifications for anomalous or sensitivity account activity. ",
+            "remediation" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "PASS"
         }
 
@@ -234,10 +238,10 @@ class cloudtrail(object):
             "analysis" : "S3 bucket acces logging is enabled",
             "description" : "S3 Bucket Access Logging generates a log that contains access records for each request made to your S3 bucket. An access log record contains details about the request, such as the request type, the resources specified in the request worked, and the time and date the request was processed. It is recommended that bucket access logging be enabled on the CloudTrail S3 bucket. By enabling S3 bucket logging on target S3 buckets, it is possible to capture all events which may affect objects within any target buckets. Configuring logs to be placed in a separate bucket allows access to log information which can be useful in security and incident response workflows.",
             "remediation" : "Ensure the CloudTrail S3 bucket has access logging is enabled",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "PASS"
         }
 
@@ -279,10 +283,10 @@ class cloudtrail(object):
             "analysis" : "CloudTrail logs are encrypted at rest with KMS CMKs",
             "description" : "AWS CloudTrail is a web service that records AWS API calls for an account and makes those logs available to users and resources in accordance with IAM policies. AWS Key Management Service (KMS) is a managed service that helps create and control the encryption keys used to encrypt account data, and uses Hardware Security Modules (HSMs) to protect the security of encryption keys. CloudTrail logs can be configured to leverage server side encryption (SSE) and KMS customer created master keys (CMK) to further protect CloudTrail logs. It is recommended that CloudTrail be configured to use SSE-KMS. Configuring CloudTrail to use SSE-KMS provides additional confidentiality controls on log data as a given user must have S3 read permission on the corresponding log bucket and must be granted decrypt permission by the CMK policy.",
             "remediation" : "Configure CloudTrail to use SSE-KMS for encryption at rest.",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
             "pass_fail" : "PASS"
         }
 
@@ -321,14 +325,16 @@ class cloudtrail(object):
             "analysis" : "No trails were found with S3 Object-Level Logging enabled",
             "description" : "S3 object-level API operations such as GetObject, DeleteObject, and PutObject are called data events. By default, CloudTrail trails don't log data events and so it is recommended to enable Object-level logging for S3 buckets. Enabling object-level logging will help you meet data compliance requirements within your organization, perform comprehensive security analysis, monitor specific patterns of user behavior in your AWS account or take immediate actions on any object-level API activity within your S3 Buckets using Amazon CloudWatch Events.",
             "remediation" : "Enable S3 bucket Object-level logging for write events in CloudTrail",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
         
         print("running check: cloudtrail_7")
+
+        results["affected"] = self.account_id
 
         passing_trails = []
      
@@ -348,7 +354,7 @@ class cloudtrail(object):
         
         if passing_trails:
             results["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
-            results["affected"] = ", ".join(passing_trails)
+            #results["affected"] = ", ".join(passing_trails)
             results["pass_fail"] = "PASS"
 
         return results
@@ -367,14 +373,16 @@ class cloudtrail(object):
             "analysis" : "No trails were found with S3 Object-Level Logging enabled",
             "description" : "S3 object-level API operations such as GetObject, DeleteObject, and PutObject are called data events. By default, CloudTrail trails don't log data events and so it is recommended to enable Object-level logging for S3 buckets. Enabling object-level logging will help you meet data compliance requirements within your organization, perform comprehensive security analysis, monitor specific patterns of user behavior in your AWS account or take immediate actions on any object-level API activity using Amazon CloudWatch Events.",
             "remediation" : "Enable S3 bucket Object-level logging for read events in CloudTrail",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
             "pass_fail" : "FAIL"
         }
         
         passing_trails = []
+
+        results["affected"] = self.account_id
      
         for region in self.regions:
             client = boto3.client('cloudtrail', region_name=region)
@@ -392,7 +400,7 @@ class cloudtrail(object):
         
         if passing_trails:
             results["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
-            results["affected"] = ", ".join(passing_trails)
+            #results["affected"] = ", ".join(passing_trails)
             results["pass_fail"] = "PASS"
 
         return results
