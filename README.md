@@ -5,11 +5,17 @@ Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it
 `$ python3 snotra.py --output-dir ./snotra/`
 
 ## Checks
-### CIS
-v1.4.0
-### other
+### CIS Benchmark v1.4.0
+Snotra currently completes all checks included in the latest CIS Benchmark. Although Snotra reports on them, a few of the checks can not be completed programatically - these are marked accordingly.
 
-# requirements
+### other
+* unused security groups (ec2)
+* guardduty enabled in all regions (guardduty)
+* unused elastic IPs (ec2)
+* cloudwatch alarms with no actions configured
+* efs with no access policy, grants access to all clients
+
+## requirements
 * Python3
 * boto3
 
@@ -50,7 +56,7 @@ The results JSON file that Snotra produces is in the following format:
 ### features
 - [x] CIS benchmark
     - [ ] pass/fail percentage
-- [ ] non-CIS checks
+- [x] non-CIS checks
     - [ ] external attack surface
 - [x] JSON results file for consumption by other tools
 - [ ] AWS profiles
@@ -59,7 +65,7 @@ The results JSON file that Snotra produces is in the following format:
 - [ ] additional compliance standards
 - [ ] dockerfile
 - [ ] dockerhub
-- [ ] Azure
+- [ ] Azure?
 - [ ] git gud
 
 ### improvements
@@ -68,7 +74,5 @@ The results JSON file that Snotra produces is in the following format:
 - [ ] test CIS2_1_3 with mfa enabled buckets
 - [ ] hardware MFA check
 - [x] cacheing / minimise requests to API
-    - [ ] moar
-
-### bugs
-
+    - [ ] WTF is S3 doing?
+- [ ] refactor cloudwatch CIS checks

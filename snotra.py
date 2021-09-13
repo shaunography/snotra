@@ -16,6 +16,8 @@ from checks.cloudtrail import cloudtrail
 from checks.config import config
 from checks.kms import kms
 from checks.cloudwatch import cloudwatch
+from checks.guardduty import guardduty
+from checks.efs import efs
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -49,6 +51,8 @@ def main():
     results["findings"] += config().run()
     results["findings"] += kms().run()
     results["findings"] += cloudwatch().run()
+    results["findings"] += guardduty().run()
+    results["findings"] += efs().run()
 
     filename = os.path.join(args.o, "results_{}.json".format(get_account_id()))
     with open(filename, 'w') as f:

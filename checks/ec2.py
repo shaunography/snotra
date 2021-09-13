@@ -16,6 +16,8 @@ class ec2(object):
         findings += [ self.ec2_5() ]
         findings += [ self.ec2_6() ]
         findings += [ self.ec2_7() ]
+        findings += [ self.ec2_8() ]
+        findings += [ self.ec2_9() ]
         return findings
 
     def ec2_1(self):
@@ -156,7 +158,7 @@ class ec2(object):
     def ec2_4(self):
         # Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports (Automated)
 
-        cis_dict = {
+        results = {
             "id" : "ec2_4",
             "ref" : "5.1",
             "compliance" : "cis",
@@ -208,17 +210,17 @@ class ec2(object):
                                         failing_nacls += ["{}({})".format(network_acl_id, region)]
 
         if failing_nacls:
-            cis_dict["analysis"] = "the following Network ACLs allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_nacls)))
-            cis_dict["affected"] = ", ".join(set(failing_nacls))
-            cis_dict["pass_fail"] = "FAIL"
+            results["analysis"] = "the following Network ACLs allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_nacls)))
+            results["affected"] = ", ".join(set(failing_nacls))
+            results["pass_fail"] = "FAIL"
 
-        return cis_dict
+        return results
 
 
     def ec2_5(self):
         # Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports (Automated)
 
-        cis_dict = {
+        results = {
             "id" : "ec2_5",
             "ref" : "5.2",
             "compliance" : "cis",
@@ -285,17 +287,17 @@ class ec2(object):
                                         failing_security_groups += ["{}({})".format(group_id, region)]
 
         if failing_security_groups:
-            cis_dict["analysis"] = "the following security groups allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_security_groups)))
-            cis_dict["affected"] = ", ".join(set(failing_security_groups))
-            cis_dict["pass_fail"] = "FAIL"
+            results["analysis"] = "the following security groups allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_security_groups)))
+            results["affected"] = ", ".join(set(failing_security_groups))
+            results["pass_fail"] = "FAIL"
 
-        return cis_dict
+        return results
     
     
     def ec2_6(self):
         # Ensure the default security group of every VPC restricts all traffic (Automated)
 
-        cis_dict = {
+        results = {
             "id" : "ec2_6",
             "ref" : "5.3",
             "compliance" : "cis",
@@ -327,16 +329,16 @@ class ec2(object):
                         failing_security_groups += ["{}({})".format(group_id, region)]
                     
         if failing_security_groups:
-            cis_dict["analysis"] = "the following default security groups have inbound rules configured: {}".format(" ".join(failing_security_groups))
-            cis_dict["affected"] = ", ".join(failing_security_groups)
-            cis_dict["pass_fail"] = "FAIL"
+            results["analysis"] = "the following default security groups have inbound rules configured: {}".format(" ".join(failing_security_groups))
+            results["affected"] = ", ".join(failing_security_groups)
+            results["pass_fail"] = "FAIL"
 
-        return cis_dict
+        return results
     
     def ec2_7(self):
         # Ensure routing tables for VPC peering are "least access" (Manual)
 
-        cis_dict = {
+        results = {
             "id" : "ec2_7",
             "ref" : "5.4",
             "compliance" : "cis",
@@ -371,7 +373,97 @@ class ec2(object):
                         peering_connections += ["{}({})".format(vpc_peering_connection_id, region)]
                     
         if peering_connections:
-            cis_dict["analysis"] = "VPC peering in use - check routing tables for least access: {}".format(" ".join(set(peering_connections)))
-            cis_dict["pass_fail"] = "INFO"
+            results["analysis"] = "VPC peering in use - check routing tables for least access: {}".format(" ".join(set(peering_connections)))
+            results["pass_fail"] = "INFO"
 
-        return cis_dict
+        return results
+
+
+
+    def ec2_8(self):
+        # Unused Security Groups
+
+        results = {
+            "id" : "ec2_8",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure there are no unused security groups",
+            "affected": "",
+            "analysis" : "No unused security groups found",
+            "description" : "The affected security groups have not been applied to any instances and therefore not in use. To maintain the hygiene of the environment, make maintenance and auditing easier and reduce the risk of security groups erroneously being used and inadvertently granting more access than required, all old unused security groups should be removed.",
+            "remediation" : "Ensure all security groups that are temporary and not being used are deleted when no longer required.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_8")
+
+        failing_security_groups = []
+            
+        for region in self.regions:
+            client = boto3.client('ec2', region_name=region)
+            security_groups = client.describe_security_groups()["SecurityGroups"]
+            for security_group in security_groups:
+                group_name = security_group["GroupName"]
+                if group_name != "default":
+                    group_id = security_group["GroupId"]
+                    network_interfaces = client.describe_network_interfaces(Filters=[{ "Name": "group-id", "Values" : [group_id] }])["NetworkInterfaces"]
+                    if not network_interfaces:
+                        failing_security_groups += ["{}({})".format(group_name, region)]
+
+                
+
+        if failing_security_groups:
+            results["analysis"] = "the following security groups are not being used: {}".format(" ".join(failing_security_groups))
+            results["affected"] = ", ".join(failing_security_groups)
+            results["pass_fail"] = "FAIL"
+        
+        return results
+    
+    def ec2_9(self):
+        # Unused elastic IPs
+
+        results = {
+            "id" : "ec2_9",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure there are no unused elastic IPs",
+            "affected": "",
+            "analysis" : "No unused elastic IPs found",
+            "description" : "Although not a security risk, Amazon Web Services enforce a small hourly charge if an Elastic IP (EIP) address within your account is not associated with a running EC2 instance or an Elastic Network Interface (ENI). To ensure account hygiene and saves costs on your month bill it is recommended to release any elastic IPs that are no longer required.",
+            "remediation" : "To release an Elastic IP address using the console: 1. Open the Amazon EC2 console at https://console.aws.amazon.com/ec2/. 2. In the navigation pane, choose Elastic IPs. 3. Select the Elastic IP address, choose Actions, and then select Release addresses. Choose Release when prompted. More information: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_9")
+
+        failing_addresses = []
+            
+        for region in self.regions:
+            client = boto3.client('ec2', region_name=region)
+            addresses = client.describe_addresses()["Addresses"]
+            for address in addresses:
+                allocation_id = address["AllocationId"]
+                try:
+                    network_interface_id = address["NetworkInterfaceId"]
+                    association_id = address["AssociationId"]
+                except KeyError:
+                    failing_addresses += ["{}({})".format(allocation_id, region)]                
+
+        if failing_addresses:
+            results["analysis"] = "the following elastic IPs are not being used: {}".format(" ".join(failing_addresses))
+            results["affected"] = ", ".join(failing_addresses)
+            results["pass_fail"] = "FAIL"
+        
+        return results

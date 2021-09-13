@@ -26,6 +26,7 @@ class cloudwatch(object):
         findings += [ self.cloudwatch_13() ]
         findings += [ self.cloudwatch_14() ]
         findings += [ self.cloudwatch_15() ]
+        findings += [ self.cloudwatch_16() ]
         return findings
         
     def cloudwatch_1(self):
@@ -1116,7 +1117,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_11")
+        print("running check: cloudwatch_12")
 
         results["affected"] = self.account_id
 
@@ -1473,6 +1474,55 @@ class cloudwatch(object):
 
         if passing_metrics:
             results["analysis"] = "the following metric filters were found for AWS Organizations changes: {}".format(" ".join(passing_metrics))
+            results["pass_fail"] = "PASS"
+
+        return results
+
+    def cloudwatch_16(self):
+        # alarms without any actions
+
+        results = {
+            "id" : "cloudwatch_16",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "cloudwatch",
+            "name" : "CloudWatch Alarms with no actions",
+            "affected": "",
+            "analysis" : "All CloudWatch alarms have actions configured",
+            "description" : "The account under review contains CloudWatch alarms that have not been configured with any actions. To enable effective active monitoring of the account for suspicious activities all alarms should be configured with at least one action, normally raising a notification via the AWS SNS.",
+            "remediation" : "Ensure all CloudWatch alarms are configured with at least one action. More Information: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
+        
+        print("running check: cloudwatch_16")
+
+        failing_alarms = []
+     
+        for region in self.regions:
+            client = boto3.client('cloudwatch', region_name=region)
+            metric_alarms = client.describe_alarms()["MetricAlarms"]
+            composite_alarms = client.describe_alarms()["CompositeAlarms"]
+            
+            for alarm in metric_alarms:
+                alarm_name = alarm["AlarmName"]
+                if not alarm["AlarmActions"] and not alarm["OKActions"]:
+                    failing_alarms += ["{}({})".format(alarm_name, region)]
+                
+            for alarm in composite_alarms:
+                alarm_name = alarm["AlarmName"]
+                if not alarm["AlarmActions"] and not alarm["OKActions"]:
+                    failing_alarms += ["{}({})".format(alarm_name, region)]
+
+        if failing_alarms:
+            results["analysis"] = "the following CloudWatch Alarms have no actions configured: {}".format(" ".join(failing_alarms))
+            results["affected"] = ", ".join(failing_alarms)
             results["pass_fail"] = "PASS"
 
         return results
