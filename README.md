@@ -10,10 +10,10 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 
 ### other
 * unused security groups (ec2)
-* guardduty enabled in all regions (guardduty)
+* guardduty not enabled in all regions (guardduty)
 * unused elastic IPs (ec2)
-* cloudwatch alarms with no actions configured
-* efs with no access policy, grants access to all clients
+* cloudwatch alarms with no actions configured (cloudwatch)
+* efs with no access policy, grants access to all clients (efs)
 
 ## requirements
 * Python3
