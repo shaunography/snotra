@@ -89,17 +89,23 @@ class cloudtrail(object):
 
         print("running check: cloudtrail_2")
 
+        trails = []
         failing_trails = []
         
         for region in self.regions:
             client = boto3.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
+            trails += trail_list
             for trail in trail_list:
                 if trail["LogFileValidationEnabled"] == False:
                         failing_trails += [trail["Name"]]
 
+        if not trails:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+
         if failing_trails:
-            results["analysis"] = "the following trails are multi region enabled: {}".format(" ".join(failing_trails))
+            results["analysis"] = "the following trails do not have log file validation enabled: {}".format(" ".join(failing_trails))
             results["affected"] = ", ".join(failing_trails)
             results["pass_fail"] = "FAIL"
         
@@ -129,12 +135,14 @@ class cloudtrail(object):
         print("running check: cloudtrail_3")
 
         failing_trails = []
+        trails = []
 
         s3_client = boto3.client('s3')
         
         for region in self.regions:
             cloudtrail_client = boto3.client('cloudtrail', region_name=region)
             trail_list = cloudtrail_client.describe_trails()["trailList"]
+            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     bucket_name = trail["S3BucketName"]
@@ -172,6 +180,10 @@ class cloudtrail(object):
                                     except KeyError:
                                         pass
 
+        if not trails:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+        
         if failing_trails:
             results["analysis"] = "the following trails are using a potentially public S3 bucket: {}".format(" ".join(set(failing_trails)))
             results["affected"] = ", ".join(set(failing_trails))
@@ -205,16 +217,22 @@ class cloudtrail(object):
         print("running check: cloudtrail_4")
 
         failing_trails = []
+        trails = []
         
         for region in self.regions:
             client = boto3.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
+            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
                     except KeyError:
                         failing_trails += [trail["Name"]]
+
+        if not trails:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
 
         if failing_trails:
             results["analysis"] = "the following trails are not integrated with CloudWatch Logs: {}".format(" ".join(failing_trails))
@@ -235,7 +253,7 @@ class cloudtrail(object):
             "service" : "cloudtrail",
             "name" : "Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket",
             "affected": "",
-            "analysis" : "S3 bucket acces logging is enabled",
+            "analysis" : "S3 bucket access logging is enabled",
             "description" : "S3 Bucket Access Logging generates a log that contains access records for each request made to your S3 bucket. An access log record contains details about the request, such as the request type, the resources specified in the request worked, and the time and date the request was processed. It is recommended that bucket access logging be enabled on the CloudTrail S3 bucket. By enabling S3 bucket logging on target S3 buckets, it is possible to capture all events which may affect objects within any target buckets. Configuring logs to be placed in a separate bucket allows access to log information which can be useful in security and incident response workflows.",
             "remediation" : "Ensure the CloudTrail S3 bucket has access logging is enabled",
             "impact" : "info",
@@ -248,12 +266,14 @@ class cloudtrail(object):
         print("running check: cloudtrail_5")
         
         failing_trails = []
+        trails = []
 
         s3_client = boto3.client('s3')
         
         for region in self.regions:
             cloudtrail_client = boto3.client('cloudtrail', region_name=region)
             trail_list = cloudtrail_client.describe_trails()["trailList"]
+            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     try:
@@ -261,6 +281,10 @@ class cloudtrail(object):
                     except KeyError:
                         failing_trails += [trail["Name"]]
 
+        if not trails:
+            results["analysis"] = "no CloudTrail trails in use"
+            results["pass_fail"] = "FAIL"
+        
         if failing_trails:
             results["analysis"] = "the following trails do not have S3 bucket access logging enabled: {}".format(" ".join(failing_trails))
             results["affected"] = ", ".join(failing_trails)
@@ -293,10 +317,12 @@ class cloudtrail(object):
         print("running check: cloudtrail_6")
 
         failing_trails = []
+        trails = []
         
         for region in self.regions:
             client = boto3.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
+            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     try:
@@ -304,8 +330,12 @@ class cloudtrail(object):
                     except KeyError:
                         failing_trails += [trail["Name"]]
 
+        if not trails:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+
         if failing_trails:
-            results["analysis"] = "the following trails are multi region enabled: {}".format(" ".join(failing_trails))
+            results["analysis"] = "the following trails do not encrypt logs at rest: {}".format(" ".join(failing_trails))
             results["affected"] = ", ".join(failing_trails)
             results["pass_fail"] = "FAIL"
         
@@ -337,10 +367,12 @@ class cloudtrail(object):
         results["affected"] = self.account_id
 
         passing_trails = []
+        trails = []
      
         for region in self.regions:
             client = boto3.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
+            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if trail["HasCustomEventSelectors"] == True:
@@ -352,6 +384,10 @@ class cloudtrail(object):
                                     if resources["Type"] == "AWS::S3::Object":
                                         passing_trails += [trail_name]
         
+        if not trails:
+            results["analysis"] = "no CloudTrails Trails in use"
+            results["pass_fail"] = "FAIL"
+
         if passing_trails:
             results["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
             #results["affected"] = ", ".join(passing_trails)
@@ -381,12 +417,14 @@ class cloudtrail(object):
         }
         
         passing_trails = []
+        trails = []
 
         results["affected"] = self.account_id
      
         for region in self.regions:
             client = boto3.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
+            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if trail["HasCustomEventSelectors"] == True:
@@ -398,6 +436,10 @@ class cloudtrail(object):
                                     if resources["Type"] == "AWS::S3::Object":
                                         passing_trails += [trail_name]
         
+        if not trails:
+            results["analysis"] = "no CloudTrails Trails in use"
+            results["pass_fail"] = "FAIL"
+
         if passing_trails:
             results["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
             #results["affected"] = ", ".join(passing_trails)

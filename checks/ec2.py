@@ -28,7 +28,7 @@ class ec2(object):
             "level" : 2,
             "service" : "ec2",
             "name" : "Ensure IAM instance roles are used for AWS resource access from instances",
-            "affected": "",
+            "affected": "No failing instances found",
             "analysis" : "",
             "description" : "AWS access from within AWS instances can be done by either encoding AWS keys into AWS API calls or by assigning the instance to a role which has an appropriate permissions policy for the required access. AWS Access means accessing the APIs of AWS in order to access AWS resources or manage AWS account resources. AWS IAM roles reduce the risks associated with sharing and rotating credentials that can be used outside of AWS itself. If credentials are compromised, they can be used from outside of the AWS account they give access to. In contrast, in order to leverage role permissions an attacker would need to gain and maintain access to a specific instance to use the privileges associated with it. Additionally, if credentials are encoded into compiled applications or other hard to change mechanisms, then they are even more unlikely to be properly rotated due to service disruption risks. As time goes on, credentials that cannot be rotated are more likely to be known by an increasing number of individuals who no longer work for the organization owning the credentials",
             "remediation" : "",
@@ -187,12 +187,30 @@ class ec2(object):
                 for entry in entries:
                     if entry["Egress"] == False:
                         if entry["RuleAction"] == "allow":
-                            if entry["CidrBlock"] == "0.0.0.0/0":
-                                failing_nacls += ["{}({})".format(network_acl_id, region)]
+                            try:
+                                cidr_block = entry["CidrBlock"]
+                            except KeyError:
+                                cidr_block = False
+                            try:
+                                ipv6cidr_block = entry["Ipv6CidrBlock"]
+                            except KeyError:
+                                ipv6cidr_block = False
+                            
+                            if cidr_block == "0.0.0.0/0" or ipv6cidr_block == "::/0":
+                                try:
+                                    from_port = entry["PortRange"]["From"]
+                                    to_port = entry["PortRange"]["To"]
+                                except KeyError:
+                                    # NACLs with no port range defined allow all ports
+                                    failing_nacls += ["{}({})".format(network_acl_id, region)]
+                                else:
+                                    if from_port in (22, 3389) or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):
+                                        failing_nacls += ["{}({})".format(network_acl_id, region)]
+
         if failing_nacls:
-            cis_dict["analysis"] = "the following Network ACLs allow allow ingress traffic from 0.0.0.0/0: {}".format(" ".join(failing_nacls))
-            cis_dict["affected"] = ", ".join(failing_nacls)
-            cis_dict["pass_fail"] = "CHECK"
+            cis_dict["analysis"] = "the following Network ACLs allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_nacls)))
+            cis_dict["affected"] = ", ".join(set(failing_nacls))
+            cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict
 
@@ -229,17 +247,46 @@ class ec2(object):
                 group_id = group["GroupId"]
                 ip_permissions = group["IpPermissions"]
                 for ip_permission in ip_permissions:
+
                     try:
-                        if ip_permission["FromPort"] == 22 or ip_permission["FromPort"] == 3389:
-                            for ip_range in ip_permission["IpRanges"]:
-                                if ip_range["CidrIp"] == "0.0.0.0/0":
-                                    failing_security_groups += ["{}({})".format(group_id, region)]
+                        ip_ranges = ip_permission["IpRanges"]
                     except KeyError:
-                        pass
+                        ip_ranges = False
+                    try:
+                        ipv6_ranges = ip_permission["Ipv6Ranges"]
+                    except KeyError:
+                        ipv6_ranges = False
+                    
+                    # ipv4
+                    if ip_ranges:                    
+                        for ip_range in ip_ranges:
+                            if ip_range["CidrIp"] == "0.0.0.0/0":
+                                try:
+                                    from_port = ip_permission["FromPort"]
+                                    to_port = ip_permission["ToPort"]
+                                except KeyError:
+                                    # if no port range is defined, all ports are allowed
+                                    failing_security_groups += ["{}({})".format(group_id, region)]
+                                else:
+                                    if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
+                                        failing_security_groups += ["{}({})".format(group_id, region)]
+                    # ipv6
+                    if ipv6_ranges:
+                        for ip_range in ipv6_ranges:
+                            if ip_range["CidrIpv6"] == "::/0":
+                                try:
+                                    from_port = ip_permission["FromPort"]
+                                    to_port = ip_permission["ToPort"]
+                                except KeyError:
+                                    # if no port range is defined, all ports are allowed
+                                    failing_security_groups += ["{}({})".format(group_id, region)]
+                                else:
+                                    if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
+                                        failing_security_groups += ["{}({})".format(group_id, region)]
 
         if failing_security_groups:
-            cis_dict["analysis"] = "the following security groups allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(failing_security_groups))
-            cis_dict["affected"] = ", ".join(failing_security_groups)
+            cis_dict["analysis"] = "the following security groups allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_security_groups)))
+            cis_dict["affected"] = ", ".join(set(failing_security_groups))
             cis_dict["pass_fail"] = "FAIL"
 
         return cis_dict

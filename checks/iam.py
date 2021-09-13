@@ -93,7 +93,7 @@ class iam(object):
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "info"
+            "pass_fail" : "INFO"
         }
 
         print("running check: iam_1")
@@ -120,7 +120,7 @@ class iam(object):
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "info"
+            "pass_fail" : "INFO"
         }
 
         print("running check: iam_2")
@@ -146,7 +146,7 @@ class iam(object):
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "info"
+            "pass_fail" : "INFO"
         }
 
         print("running check: iam_3")
@@ -814,7 +814,7 @@ class iam(object):
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "info"
+            "pass_fail" : "INFO"
         }
 
         print("running check: iam_19")

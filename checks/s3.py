@@ -111,17 +111,18 @@ class s3(object):
                     else:
                         effect = statement["Effect"]
                         action = statement["Action"]
-                        resource = statement["Resource"]
+                        resources = statement["Resource"]
                         if bool_secure_transport == "false":
                             if effect == "Deny":
                                 if action == "s3:GetObject" or action == "s3:*":
-                                    if re.match("arn:aws:s3*|\*", resource):
-                                        passing_buckets += [bucket]
+                                    for resource in resources:
+                                        if re.match("arn:aws:s3*|\*", resource):
+                                            passing_buckets += [bucket]
 
         failing_buckets = [i for i in self.buckets if i not in passing_buckets]
         
         if failing_buckets:
-            results["analysis"] = "the following buckets do enfore HTTPS requests: {}".format(" ".join(failing_buckets))
+            results["analysis"] = "the following buckets do enforce HTTPS only: {}".format(" ".join(failing_buckets))
             results["affected"] = ", ".join(failing_buckets)
             results["pass_fail"] = "FAIL"
 
@@ -189,7 +190,7 @@ class s3(object):
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "info"
+            "pass_fail" : "INFO"
         }
 
         #client = boto3.client('macie2', region_name="eu-west-2")

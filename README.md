@@ -66,6 +66,7 @@ The results JSON file that Snotra produces is in the following format:
 - [ ] better error handling
 - [ ] actually test CIS1_19
 - [ ] test CIS2_1_3 with mfa enabled buckets
+- [ ] hardware MFA check
 - [x] cacheing / minimise requests to API
     - [ ] moar
 
