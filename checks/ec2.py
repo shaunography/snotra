@@ -21,6 +21,7 @@ class ec2(object):
         findings += [ self.ec2_8() ]
         findings += [ self.ec2_9() ]
         findings += [ self.ec2_10() ]
+        findings += [ self.ec2_11() ]
         return findings
 
     def ec2_1(self):
@@ -517,6 +518,41 @@ class ec2(object):
         if failing_snapshots:
             results["analysis"] = "the following EBS snapshots are public: {}".format(" ".join(failing_snapshots))
             results["affected"] = ", ".join(failing_snapshots)
+            results["pass_fail"] = "FAIL"
+        
+        return results
+
+    def ec2_11(self):
+        # Public AMI images
+
+        results = {
+            "id" : "ec2_11",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure there are no Public EC2 AMIs",
+            "affected": "",
+            "analysis" : "No Public AMIs found",
+            "description" : "The reviewed AWS account contains an AWS AMI that is publicly accessible. When you make your AMIs publicly accessible, these become available in the Community AMIs where everyone with an AWS account can use them to launch EC2 instances. AMIs can contain snapshots of your applications (including their data), therefore exposing your snapshots in this manner is not advised. Ensure that your AWS AMIs are not publicly shared with the other AWS accounts in order to avoid exposing sensitive data. If required, you can share your images with specific AWS accounts without making them public",
+            "remediation" : "Remove public access from your EC2 AMIs and only share them with trusted accounts.",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_11")
+            
+        for region in self.regions:
+            client = boto3.client('ec2', region_name=region)
+            images = client.describe_images(Owners=["self"])["Images"]
+            failing_images = [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
+
+        if failing_images:
+            results["analysis"] = "the following EC2 AMIs are public: {}".format(" ".join(failing_images))
+            results["affected"] = ", ".join(failing_images)
             results["pass_fail"] = "FAIL"
         
         return results
