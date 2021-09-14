@@ -18,6 +18,7 @@ from checks.kms import kms
 from checks.cloudwatch import cloudwatch
 from checks.guardduty import guardduty
 from checks.efs import efs
+from checks.sns import sns
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -53,6 +54,7 @@ def main():
     results["findings"] += cloudwatch().run()
     results["findings"] += guardduty().run()
     results["findings"] += efs().run()
+    results["findings"] += sns().run()
 
     filename = os.path.join(args.o, "results_{}.json".format(get_account_id()))
     with open(filename, 'w') as f:

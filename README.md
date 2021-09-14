@@ -16,8 +16,9 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * unused elastic IPs (ec2)
 * cloudwatch alarms with no actions configured (cloudwatch)
 * efs with no access policy, grants access to all clients (efs)
-* public EBS snapshots
-* public EC2 AMIs
+* public EBS snapshots (ec2)
+* public EC2 AMIs (ec2)
+* public SNS topics (sns)
 
 ## requirements
 * Python3
