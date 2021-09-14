@@ -4,6 +4,8 @@ Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it
 ## usage
 `$ python3 snotra.py --output-dir ./snotra/`
 
+The default AWS profile as defined in ~/.aws/credentials is used.
+
 ## Checks
 ### CIS Benchmark v1.4.0
 Snotra currently completes all checks included in the latest CIS Benchmark. Although Snotra reports on them, a few of the checks can not be completed programatically - these are marked accordingly.
