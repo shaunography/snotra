@@ -1,11 +1,13 @@
 import boto3
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class ec2(object):
 
     def __init__(self):
         self.regions = describe_regions()
+        self.account_id = get_account_id()
 
     def run(self):
         findings = []
@@ -18,6 +20,7 @@ class ec2(object):
         findings += [ self.ec2_7() ]
         findings += [ self.ec2_8() ]
         findings += [ self.ec2_9() ]
+        findings += [ self.ec2_10() ]
         return findings
 
     def ec2_1(self):
@@ -464,6 +467,56 @@ class ec2(object):
         if failing_addresses:
             results["analysis"] = "the following elastic IPs are not being used: {}".format(" ".join(failing_addresses))
             results["affected"] = ", ".join(failing_addresses)
+            results["pass_fail"] = "FAIL"
+        
+        return results
+    
+    
+    def ec2_10(self):
+        # Public EBS snapshots
+
+        results = {
+            "id" : "ec2_10",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure there are no Public EBS Snapshots",
+            "affected": "",
+            "analysis" : "No Public EBS Snapshots found",
+            "description" : "EBS Snapshots that are public are accessible by all AWS principals, and therefore anyone with an AWS account. To reduce the risk of sensitive data being exposed to unauthorised bearers only share EBS snapshots with trusted accounts.",
+            "remediation" : "Remove public access from your EBS snapshots and only share them with trusted accounts.",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_10")
+
+        failing_snapshots = []
+            
+        for region in self.regions:
+            client = boto3.client('ec2', region_name=region)
+            snapshots = client.describe_snapshots(OwnerIds=[self.account_id])["Snapshots"]
+            for snapshot in snapshots:
+                snapshot_id = snapshot["SnapshotId"]
+                try: # slow, but cant think of a better way
+                    permissions = client.describe_snapshot_attribute(SnapshotId=snapshot_id, Attribute="createVolumePermission")["CreateVolumePermissions"]
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    pass
+                else:
+                    for permission in permissions:
+                        try:
+                            if permission["Group"] == "all":
+                                failing_snapshots += [snapshot_id]
+                        except KeyError:
+                            pass
+
+        if failing_snapshots:
+            results["analysis"] = "the following EBS snapshots are public: {}".format(" ".join(failing_snapshots))
+            results["affected"] = ", ".join(failing_snapshots)
             results["pass_fail"] = "FAIL"
         
         return results
