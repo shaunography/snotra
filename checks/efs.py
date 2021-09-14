@@ -46,7 +46,6 @@ class efs(object):
                 all_file_systems += [file_system["Name"]]
                 try:
                     file_system_policy = client.describe_file_system_policy(FileSystemId=file_system_id)
-                    print(file_system_policy)
                 except boto3.exceptions.botocore.errorfactory.ClientError:
                     failing_file_systems += ["{}({})".format(file_system_id, region)]
         
