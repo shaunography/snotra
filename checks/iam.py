@@ -8,14 +8,15 @@ from utils.utils import get_account_id
 
 class iam(object):
 
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         self.client = self.get_client()
         self.account_summary = self.get_account_summary()
         self.credential_report = self.get_credential_report()
         self.password_policy = self.get_password_policy()
         self.users = self.list_users()
         self.policies = self.get_policies()
-        self.account_id = get_account_id()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -41,7 +42,7 @@ class iam(object):
         return findings
 
     def get_client(self):
-        return boto3.client('iam')
+        return self.session.client('iam')
     
     def get_account_summary(self):
         print("Getting Account Summary")

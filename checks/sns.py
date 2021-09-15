@@ -5,8 +5,9 @@ from utils.utils import describe_regions
 
 class sns(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
 
     def run(self):
         findings = []
@@ -39,7 +40,7 @@ class sns(object):
         failing_topics = []
         
         for region in self.regions:
-            client = boto3.client('sns', region_name=region)
+            client = self.session.client('sns', region_name=region)
             topics = client.list_topics()["Topics"]
             for topic in topics:
                 attributes = client.get_topic_attributes(TopicArn=topic["TopicArn"])["Attributes"]

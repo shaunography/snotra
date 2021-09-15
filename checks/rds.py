@@ -4,8 +4,9 @@ from utils.utils import describe_regions
 
 class rds(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
 
     def run(self):
         findings = []
@@ -38,7 +39,7 @@ class rds(object):
         failing_instances = []
         
         for region in self.regions:
-            client = boto3.client('rds', region_name=region)
+            client = self.session.client('rds', region_name=region)
             instances = client.describe_db_instances()["DBInstances"]
             for instance in instances:
                 db_instance_identifier = instance["DBInstanceIdentifier"]

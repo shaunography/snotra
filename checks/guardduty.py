@@ -4,8 +4,9 @@ from utils.utils import describe_regions
 
 class guardduty(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
 
     def run(self):
         findings = []
@@ -38,7 +39,7 @@ class guardduty(object):
         failing_regions = []
 
         for region in self.regions:
-            client = boto3.client('guardduty', region_name=region)
+            client = self.session.client('guardduty', region_name=region)
             if not client.list_detectors()["DetectorIds"]:
                 failing_regions += [region]
                 

@@ -6,9 +6,10 @@ from utils.utils import get_account_id
 
 class cloudtrail(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
-        self.account_id = get_account_id()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -50,7 +51,7 @@ class cloudtrail(object):
         multi_region_trails = []
         
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 trail_name = trail["Name"]
@@ -93,7 +94,7 @@ class cloudtrail(object):
         failing_trails = []
         
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             trails += trail_list
             for trail in trail_list:
@@ -137,10 +138,10 @@ class cloudtrail(object):
         failing_trails = []
         trails = []
 
-        s3_client = boto3.client('s3')
+        s3_client = self.session.client('s3')
         
         for region in self.regions:
-            cloudtrail_client = boto3.client('cloudtrail', region_name=region)
+            cloudtrail_client = self.session.client('cloudtrail', region_name=region)
             trail_list = cloudtrail_client.describe_trails()["trailList"]
             trails += trail_list
             for trail in trail_list:
@@ -220,14 +221,12 @@ class cloudtrail(object):
         trails = []
         
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
-                    try:
-                        cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
-                    except KeyError:
+                    if "CloudWatchLogsLogGroupArn" not in trail:
                         failing_trails += [trail["Name"]]
 
         if not trails:
@@ -268,17 +267,15 @@ class cloudtrail(object):
         failing_trails = []
         trails = []
 
-        s3_client = boto3.client('s3')
+        s3_client = self.session.client('s3')
         
         for region in self.regions:
-            cloudtrail_client = boto3.client('cloudtrail', region_name=region)
+            cloudtrail_client = self.session.client('cloudtrail', region_name=region)
             trail_list = cloudtrail_client.describe_trails()["trailList"]
             trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
-                    try:
-                        logging = s3_client.get_bucket_logging(Bucket=trail["S3BucketName"])["LoggingEnabled"]
-                    except KeyError:
+                    if "LoggingEnabled" not in s3_client.get_bucket_logging(Bucket=trail["S3BucketName"]):
                         failing_trails += [trail["Name"]]
 
         if not trails:
@@ -320,14 +317,12 @@ class cloudtrail(object):
         trails = []
         
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
-                    try:
-                        kms_key_id = trail["KmsKeyId"]
-                    except KeyError:
+                    if "KmsKeyId" not in trail:
                         failing_trails += [trail["Name"]]
 
         if not trails:
@@ -370,7 +365,7 @@ class cloudtrail(object):
         trails = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             trails += trail_list
             for trail in trail_list:
@@ -422,7 +417,7 @@ class cloudtrail(object):
         results["affected"] = self.account_id
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             trails += trail_list
             for trail in trail_list:

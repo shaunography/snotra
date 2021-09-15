@@ -6,18 +6,19 @@ from utils.utils import get_account_id
 
 class s3(object):
 
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         self.client = self.get_client()
         self.buckets = self.list_buckets()
-        self.account_id = get_account_id()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
-        findings += [ s3().s3_1() ]
-        findings += [ s3().s3_2() ]
-        findings += [ s3().s3_3() ]
-        findings += [ s3().s3_4() ]
-        findings += [ s3().s3_5() ]
+        findings += [ self.s3_1() ]
+        findings += [ self.s3_2() ]
+        findings += [ self.s3_3() ]
+        findings += [ self.s3_4() ]
+        findings += [ self.s3_5() ]
         return findings
 
     def list_buckets(self):
@@ -27,7 +28,7 @@ class s3(object):
     
     def get_client(self):
         # returns boto3 s3 client
-        return boto3.client('s3')
+        return self.session.client('s3')
 
     def s3_1(self):
         # Ensure all S3 buckets employ encryption-at-rest (Manual)
