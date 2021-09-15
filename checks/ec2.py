@@ -5,9 +5,10 @@ from utils.utils import get_account_id
 
 class ec2(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
-        self.account_id = get_account_id()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -50,7 +51,7 @@ class ec2(object):
         failing_instances = []
 
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             instance_description = client.describe_instances()
             reservations = instance_description["Reservations"]
             for reservation in reservations:
@@ -59,7 +60,7 @@ class ec2(object):
                     state = instance["State"]["Name"]
                     if state == "running":
                         instance_id = instance["InstanceId"]
-                        ec2 = boto3.resource('ec2', region_name=region)
+                        ec2 = self.session.resource('ec2', region_name=region)
                         ec2_instance = ec2.Instance(id=instance_id)
                         if not ec2_instance.iam_instance_profile:
                             failing_instances += ["{}({})".format(instance_id, region)]
@@ -98,7 +99,7 @@ class ec2(object):
         failing_regions = []
         
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             if client.get_ebs_encryption_by_default()["EbsEncryptionByDefault"] == False:
                 failing_regions += [region]
         
@@ -141,12 +142,11 @@ class ec2(object):
         failing_regions = []
         
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             flow_logs = client.describe_flow_logs()["FlowLogs"]
             if not flow_logs:
                 failing_regions += [region]
             
-
         if failing_regions:
             results["pass_fail"] = "FAIL"
 
@@ -185,7 +185,7 @@ class ec2(object):
         failing_nacls = []
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             network_acls = client.describe_network_acls()["NetworkAcls"]
             for acl in network_acls:
                 network_acl_id = acl["NetworkAclId"]
@@ -247,25 +247,16 @@ class ec2(object):
         failing_security_groups = []
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             security_groups = client.describe_security_groups()["SecurityGroups"]
             for group in security_groups:
                 group_id = group["GroupId"]
                 ip_permissions = group["IpPermissions"]
                 for ip_permission in ip_permissions:
 
-                    try:
-                        ip_ranges = ip_permission["IpRanges"]
-                    except KeyError:
-                        ip_ranges = False
-                    try:
-                        ipv6_ranges = ip_permission["Ipv6Ranges"]
-                    except KeyError:
-                        ipv6_ranges = False
-                    
                     # ipv4
-                    if ip_ranges:                    
-                        for ip_range in ip_ranges:
+                    if "IpRanges" in ip_permission:
+                        for ip_range in ip_permission["IpRanges"]:
                             if ip_range["CidrIp"] == "0.0.0.0/0":
                                 try:
                                     from_port = ip_permission["FromPort"]
@@ -277,8 +268,8 @@ class ec2(object):
                                     if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
                                         failing_security_groups += ["{}({})".format(group_id, region)]
                     # ipv6
-                    if ipv6_ranges:
-                        for ip_range in ipv6_ranges:
+                    if "Ipv6Ranges" in ip_permission:
+                        for ip_range in ip_permission["Ipv6Ranges"]:
                             if ip_range["CidrIpv6"] == "::/0":
                                 try:
                                     from_port = ip_permission["FromPort"]
@@ -324,7 +315,7 @@ class ec2(object):
         failing_security_groups = []
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             security_groups = client.describe_security_groups()["SecurityGroups"]
             for group in security_groups:
                 group_id = group["GroupId"]
@@ -365,16 +356,12 @@ class ec2(object):
         peering_connections = []
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             route_tables = client.describe_route_tables()["RouteTables"]
             for route_table in route_tables:
                 for route in route_table["Routes"]:
-                    try:
-                        vpc_peering_connection_id = route["VpcPeeringConnectionId"]
-                    except KeyError:
-                        pass
-                    else:
-                        peering_connections += ["{}({})".format(vpc_peering_connection_id, region)]
+                    if "VpcPeeringConnectionId" in route:
+                        peering_connections += ["{}({})".format(route["VpcPeeringConnectionId"], region)]
                     
         if peering_connections:
             results["analysis"] = "VPC peering in use - check routing tables for least access: {}".format(" ".join(set(peering_connections)))
@@ -410,7 +397,7 @@ class ec2(object):
         failing_security_groups = []
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             security_groups = client.describe_security_groups()["SecurityGroups"]
             for security_group in security_groups:
                 group_name = security_group["GroupName"]
@@ -455,15 +442,9 @@ class ec2(object):
         failing_addresses = []
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             addresses = client.describe_addresses()["Addresses"]
-            for address in addresses:
-                allocation_id = address["AllocationId"]
-                try:
-                    network_interface_id = address["NetworkInterfaceId"]
-                    association_id = address["AssociationId"]
-                except KeyError:
-                    failing_addresses += ["{}({})".format(allocation_id, region)]                
+            failing_addresses += ["{}({})".format(address["AllocationId"], region) for address in addresses if ("NetworkInterfaceId","AssociationId") not in address]             
 
         if failing_addresses:
             results["analysis"] = "the following elastic IPs are not being used: {}".format(" ".join(failing_addresses))
@@ -499,7 +480,7 @@ class ec2(object):
         failing_snapshots = []
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             snapshots = client.describe_snapshots(OwnerIds=[self.account_id])["Snapshots"]
             for snapshot in snapshots:
                 snapshot_id = snapshot["SnapshotId"]
@@ -546,7 +527,7 @@ class ec2(object):
         print("running check: ec2_11")
             
         for region in self.regions:
-            client = boto3.client('ec2', region_name=region)
+            client = self.session.client('ec2', region_name=region)
             images = client.describe_images(Owners=["self"])["Images"]
             failing_images = [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
 

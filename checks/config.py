@@ -4,8 +4,9 @@ from utils.utils import describe_regions
 
 class config(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
 
     def run(self):
         findings = []
@@ -38,7 +39,7 @@ class config(object):
         failing_regions = []
         
         for region in self.regions:
-            client = boto3.client('config', region_name=region)
+            client = self.session.client('config', region_name=region)
             recorder_list = client.describe_configuration_recorders()["ConfigurationRecorders"]
             if not recorder_list:
                 failing_regions += [region]

@@ -4,8 +4,9 @@ from utils.utils import describe_regions
 
 class efs(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
 
     def run(self):
         findings = []
@@ -39,7 +40,7 @@ class efs(object):
         all_file_systems = []
 
         for region in self.regions:
-            client = boto3.client('efs', region_name=region)
+            client = self.session.client('efs', region_name=region)
             file_systems = client.describe_file_systems()["FileSystems"]
             for file_system in file_systems:
                 file_system_id = file_system["FileSystemId"]

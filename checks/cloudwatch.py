@@ -5,9 +5,10 @@ from utils.utils import get_account_id
 
 class cloudwatch(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
-        self.account_id = get_account_id()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -61,7 +62,7 @@ class cloudwatch(object):
         ## What a mess, could probably be moved into a seperate function to be shared with the other metric/alarm checks
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -90,7 +91,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -109,14 +110,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):
 
                                                     # check alarm exists for filter
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -158,7 +159,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -187,7 +188,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -207,14 +208,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):
 
                                                     # check alarm exists for filter
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -256,7 +257,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -285,7 +286,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -305,14 +306,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):
                                                             
                                                     # check alarm exists for filter
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -353,7 +354,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -382,7 +383,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -401,14 +402,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -449,7 +450,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -478,7 +479,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -497,14 +498,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -545,7 +546,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -574,7 +575,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -593,14 +594,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -641,7 +642,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -670,7 +671,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -689,14 +690,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -737,7 +738,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -766,7 +767,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -785,14 +786,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -834,7 +835,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -863,7 +864,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -882,14 +883,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -931,7 +932,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -960,7 +961,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -979,14 +980,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -1028,7 +1029,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -1057,7 +1058,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -1076,14 +1077,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -1124,7 +1125,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -1153,7 +1154,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -1172,14 +1173,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -1220,7 +1221,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -1249,7 +1250,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -1268,14 +1269,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -1316,7 +1317,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -1345,7 +1346,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -1364,14 +1365,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -1412,7 +1413,7 @@ class cloudwatch(object):
         passing_metrics = []
      
         for region in self.regions:
-            client = boto3.client('cloudtrail', region_name=region)
+            client = self.session.client('cloudtrail', region_name=region)
             trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
@@ -1441,7 +1442,7 @@ class cloudwatch(object):
                                     if event_selectors["IncludeManagementEvents"] == True:
                                         
                                         # get cloud watch metrics
-                                        logs_client = boto3.client('logs', region_name=region)
+                                        logs_client = self.session.client('logs', region_name=region)
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
@@ -1460,14 +1461,14 @@ class cloudwatch(object):
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
-                                                    cloudwatch_client = boto3.client('cloudwatch', region_name=region)
+                                                    cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
                                                         if alarm["MetricName"] == metric_filter_name:
                                                             sns_topic_arn =  alarm["AlarmActions"][0]
                                                             
                                                             # check SNS topic has a subcriber
-                                                            sns_client = boto3.client('sns', region_name=region)
+                                                            sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
                                                                 passing_metrics += [metric_filter_name]
@@ -1506,7 +1507,7 @@ class cloudwatch(object):
         failing_alarms = []
      
         for region in self.regions:
-            client = boto3.client('cloudwatch', region_name=region)
+            client = self.session.client('cloudwatch', region_name=region)
             metric_alarms = client.describe_alarms()["MetricAlarms"]
             composite_alarms = client.describe_alarms()["CompositeAlarms"]
             

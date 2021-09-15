@@ -4,8 +4,9 @@ from utils.utils import describe_regions
 
 class access_analyzer(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
+    def __init__(self, session):
+        self.regions = describe_regions(session)
+        self.session = session
 
     def run(self):
         findings = []
@@ -38,7 +39,7 @@ class access_analyzer(object):
         failing_regions = []
 
         for region in self.regions:
-            client = boto3.client('accessanalyzer', region_name=region)
+            client = self.session.client('accessanalyzer', region_name=region)
             if not client.list_analyzers()["analyzers"]:
                 failing_regions += [region]
 

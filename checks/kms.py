@@ -4,8 +4,9 @@ from utils.utils import describe_regions
 
 class kms(object):
 
-    def __init__(self):
-        self.regions = describe_regions()
+    def __init__(self, session):
+        self.session = session
+        self.regions = describe_regions(session)
 
     def run(self):
         findings = []
@@ -38,7 +39,7 @@ class kms(object):
         failing_keys = []
         
         for region in self.regions:
-            client = boto3.client('kms', region_name=region)
+            client = self.session.client('kms', region_name=region)
             keys_list = client.list_keys()["Keys"]
             for key in keys_list:
                 key_id = key["KeyId"]
