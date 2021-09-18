@@ -34,7 +34,7 @@ class cloudwatch(object):
         
     def get_trail_list(self):
         trail_list = {}
-        print("getting cloudtrail trails")
+        print("getting trails")
         for region in self.regions:
             client = self.session.client('cloudtrail', region_name=region)
             trail_list[region] = client.describe_trails()["trailList"]
