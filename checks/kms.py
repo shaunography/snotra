@@ -47,9 +47,9 @@ class kms(object):
 
         failing_keys = []
         
-        for region, keys in self.keys.items():
+        for region, key_list in self.keys.items():
             client = self.session.client('kms', region_name=region)
-            for key in keys:
+            for key in key_list:
                 key_id = key["KeyId"]
                 try:
                     key_rotation_Status = client.get_key_rotation_status(KeyId=key_id)["KeyRotationEnabled"]
