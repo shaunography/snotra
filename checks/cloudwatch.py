@@ -1,4 +1,5 @@
 import boto3
+import re
 
 from utils.utils import describe_regions
 from utils.utils import get_account_id
@@ -9,6 +10,7 @@ class cloudwatch(object):
         self.session = session
         self.regions = describe_regions(session)
         self.account_id = get_account_id(session)
+        self.trail_list = self.get_trail_list()
 
     def run(self):
         findings = []
@@ -30,6 +32,14 @@ class cloudwatch(object):
         findings += [ self.cloudwatch_16() ]
         return findings
         
+    def get_trail_list(self):
+        trail_list = {}
+        print("getting cloudtrail trails")
+        for region in self.regions:
+            client = self.session.client('cloudtrail', region_name=region)
+            trail_list[region] = client.describe_trails()["trailList"]
+        return trail_list
+
     def cloudwatch_1(self):
         # Ensure a log metric filter and alarm exist for unauthorized API calls (Automated)
 
@@ -58,13 +68,11 @@ class cloudwatch(object):
         results["affected"] = self.account_id
         
         passing_metrics = []
-
-        ## What a mess, could probably be moved into a seperate function to be shared with the other metric/alarm checks
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -158,10 +166,10 @@ class cloudwatch(object):
         
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -256,10 +264,10 @@ class cloudwatch(object):
         
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -353,10 +361,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -449,10 +457,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -545,10 +553,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -641,10 +649,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -737,10 +745,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -834,10 +842,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -931,10 +939,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -1028,10 +1036,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -1124,10 +1132,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -1220,10 +1228,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -1316,10 +1324,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
@@ -1412,10 +1420,10 @@ class cloudwatch(object):
 
         passing_metrics = []
      
-        for region in self.regions:
+        for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            for trail in trail_list:
+            
+            for trail in trails:
                 if trail["HomeRegion"] == region:
                     try:
                         cloudwatch_logs_log_group_arn = trail["CloudWatchLogsLogGroupArn"]
