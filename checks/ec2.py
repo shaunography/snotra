@@ -9,6 +9,8 @@ class ec2(object):
         self.session = session
         self.regions = describe_regions(session)
         self.account_id = get_account_id(session)
+        self.security_groups = self.get_security_groups()
+        self.network_acls = self.get_network_acls()
 
     def run(self):
         findings = []
@@ -25,6 +27,22 @@ class ec2(object):
         findings += [ self.ec2_11() ]
         return findings
 
+    def get_security_groups(self):
+        security_groups = {}
+        print("getting security groups")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            security_groups[region] = client.describe_security_groups()["SecurityGroups"]
+        return security_groups
+    
+    def get_network_acls(self):
+        network_acls = {}
+        print("getting network acls")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            network_acls[region] = client.describe_network_acls()["NetworkAcls"]
+        return network_acls
+    
     def ec2_1(self):
         # Ensure IAM instance roles are used for AWS resource access from instances (Manual)
 
@@ -184,9 +202,7 @@ class ec2(object):
         
         failing_nacls = []
             
-        for region in self.regions:
-            client = self.session.client('ec2', region_name=region)
-            network_acls = client.describe_network_acls()["NetworkAcls"]
+        for region, network_acls in self.network_acls.items():
             for acl in network_acls:
                 network_acl_id = acl["NetworkAclId"]
                 entries = acl["Entries"]
@@ -246,10 +262,8 @@ class ec2(object):
 
         failing_security_groups = []
             
-        for region in self.regions:
-            client = self.session.client('ec2', region_name=region)
-            security_groups = client.describe_security_groups()["SecurityGroups"]
-            for group in security_groups:
+        for region, groups in self.security_groups.items():
+            for group in groups:
                 group_id = group["GroupId"]
                 ip_permissions = group["IpPermissions"]
                 for ip_permission in ip_permissions:
@@ -314,10 +328,8 @@ class ec2(object):
 
         failing_security_groups = []
             
-        for region in self.regions:
-            client = self.session.client('ec2', region_name=region)
-            security_groups = client.describe_security_groups()["SecurityGroups"]
-            for group in security_groups:
+        for region, groups in self.security_groups.items():
+            for group in groups:
                 group_id = group["GroupId"]
                 if group["GroupName"] == "default":
                     if group["IpPermissions"]:
@@ -396,13 +408,12 @@ class ec2(object):
 
         failing_security_groups = []
             
-        for region in self.regions:
+        for region, groups in self.security_groups.items():
             client = self.session.client('ec2', region_name=region)
-            security_groups = client.describe_security_groups()["SecurityGroups"]
-            for security_group in security_groups:
-                group_name = security_group["GroupName"]
+            for group in groups:
+                group_name = group["GroupName"]
                 if group_name != "default":
-                    group_id = security_group["GroupId"]
+                    group_id = group["GroupId"]
                     network_interfaces = client.describe_network_interfaces(Filters=[{ "Name": "group-id", "Values" : [group_id] }])["NetworkInterfaces"]
                     if not network_interfaces:
                         failing_security_groups += ["{}({})".format(group_name, region)]
