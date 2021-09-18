@@ -7,12 +7,21 @@ class kms(object):
     def __init__(self, session):
         self.session = session
         self.regions = describe_regions(session)
+        self.keys = self.get_keys()
 
     def run(self):
         findings = []
         findings += [ self.kms_1() ]
         return findings
         
+    def get_keys(self):
+        keys = {}
+        print("getting kms keys")
+        for region in self.regions:
+            client = self.session.client('kms', region_name=region)
+            keys[region] = client.list_keys()["Keys"]
+        return keys
+
     def kms_1(self):
         # Ensure rotation for customer created CMKs is enabled (Automated)
 
@@ -38,10 +47,9 @@ class kms(object):
 
         failing_keys = []
         
-        for region in self.regions:
+        for region, key_list in self.keys.items():
             client = self.session.client('kms', region_name=region)
-            keys_list = client.list_keys()["Keys"]
-            for key in keys_list:
+            for key in key_list:
                 key_id = key["KeyId"]
                 try:
                     key_rotation_Status = client.get_key_rotation_status(KeyId=key_id)["KeyRotationEnabled"]

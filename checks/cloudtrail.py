@@ -10,6 +10,7 @@ class cloudtrail(object):
         self.session = session
         self.regions = describe_regions(session)
         self.account_id = get_account_id(session)
+        self.trails = self.get_trails()
 
     def run(self):
         findings = []
@@ -23,6 +24,14 @@ class cloudtrail(object):
         findings += [ self.cloudtrail_8() ]
         return findings
     
+    def get_trails(self):
+        trails = {}
+        print("getting trails")
+        for region in self.regions:
+            client = self.session.client('cloudtrail', region_name=region)
+            trails[region] = client.describe_trails()["trailList"]
+        return trails
+
     def cloudtrail_1(self):
         # Ensure CloudTrail is enabled in all regions (Automated)
 
@@ -50,9 +59,8 @@ class cloudtrail(object):
         
         multi_region_trails = []
         
-        for region in self.regions:
+        for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
             for trail in trail_list:
                 trail_name = trail["Name"]
                 if trail["IsMultiRegionTrail"] == True:
@@ -90,18 +98,15 @@ class cloudtrail(object):
 
         print("running check: cloudtrail_2")
 
-        trails = []
         failing_trails = []
         
-        for region in self.regions:
-            client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            trails += trail_list
+        for region, trail_list in self.trails.items():
             for trail in trail_list:
-                if trail["LogFileValidationEnabled"] == False:
+                if trail["HomeRegion"] == region:
+                    if trail["LogFileValidationEnabled"] == False:
                         failing_trails += [trail["Name"]]
 
-        if not trails:
+        if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
@@ -136,14 +141,10 @@ class cloudtrail(object):
         print("running check: cloudtrail_3")
 
         failing_trails = []
-        trails = []
 
         s3_client = self.session.client('s3')
         
-        for region in self.regions:
-            cloudtrail_client = self.session.client('cloudtrail', region_name=region)
-            trail_list = cloudtrail_client.describe_trails()["trailList"]
-            trails += trail_list
+        for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     bucket_name = trail["S3BucketName"]
@@ -181,7 +182,7 @@ class cloudtrail(object):
                                     except KeyError:
                                         pass
 
-        if not trails:
+        if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
         
@@ -218,18 +219,14 @@ class cloudtrail(object):
         print("running check: cloudtrail_4")
 
         failing_trails = []
-        trails = []
         
-        for region in self.regions:
-            client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            trails += trail_list
+        for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if "CloudWatchLogsLogGroupArn" not in trail:
                         failing_trails += [trail["Name"]]
 
-        if not trails:
+        if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
@@ -265,20 +262,16 @@ class cloudtrail(object):
         print("running check: cloudtrail_5")
         
         failing_trails = []
-        trails = []
 
         s3_client = self.session.client('s3')
         
-        for region in self.regions:
-            cloudtrail_client = self.session.client('cloudtrail', region_name=region)
-            trail_list = cloudtrail_client.describe_trails()["trailList"]
-            trails += trail_list
+        for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if "LoggingEnabled" not in s3_client.get_bucket_logging(Bucket=trail["S3BucketName"]):
                         failing_trails += [trail["Name"]]
 
-        if not trails:
+        if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail trails in use"
             results["pass_fail"] = "FAIL"
         
@@ -314,18 +307,14 @@ class cloudtrail(object):
         print("running check: cloudtrail_6")
 
         failing_trails = []
-        trails = []
         
-        for region in self.regions:
-            client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            trails += trail_list
+        for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if "KmsKeyId" not in trail:
                         failing_trails += [trail["Name"]]
 
-        if not trails:
+        if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
@@ -362,12 +351,9 @@ class cloudtrail(object):
         results["affected"] = self.account_id
 
         passing_trails = []
-        trails = []
      
-        for region in self.regions:
+        for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if trail["HasCustomEventSelectors"] == True:
@@ -379,12 +365,12 @@ class cloudtrail(object):
                                     if resources["Type"] == "AWS::S3::Object":
                                         passing_trails += [trail_name]
         
-        if not trails:
-            results["analysis"] = "no CloudTrails Trails in use"
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
         if passing_trails:
-            results["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
+            results["analysis"] = "the following trails have S3 Object-Level logging for write events enabled: {}".format(" ".join(passing_trails))
             #results["affected"] = ", ".join(passing_trails)
             results["pass_fail"] = "PASS"
 
@@ -399,7 +385,7 @@ class cloudtrail(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "cloudtrail",
-            "name" : "Ensure that Object-level logging for write read is enabled for S3 bucket",
+            "name" : "Ensure that Object-level logging for read events is enabled for S3 bucket",
             "affected": "",
             "analysis" : "No trails were found with S3 Object-Level Logging enabled",
             "description" : "S3 object-level API operations such as GetObject, DeleteObject, and PutObject are called data events. By default, CloudTrail trails don't log data events and so it is recommended to enable Object-level logging for S3 buckets. Enabling object-level logging will help you meet data compliance requirements within your organization, perform comprehensive security analysis, monitor specific patterns of user behavior in your AWS account or take immediate actions on any object-level API activity using Amazon CloudWatch Events.",
@@ -412,14 +398,11 @@ class cloudtrail(object):
         }
         
         passing_trails = []
-        trails = []
 
         results["affected"] = self.account_id
      
-        for region in self.regions:
+        for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list = client.describe_trails()["trailList"]
-            trails += trail_list
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if trail["HasCustomEventSelectors"] == True:
@@ -431,12 +414,12 @@ class cloudtrail(object):
                                     if resources["Type"] == "AWS::S3::Object":
                                         passing_trails += [trail_name]
         
-        if not trails:
-            results["analysis"] = "no CloudTrails Trails in use"
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
         if passing_trails:
-            results["analysis"] = "the following trails have S3 Object-Level logging enabled: {}".format(" ".join(passing_trails))
+            results["analysis"] = "the following trails have S3 Object-Level logging for read events enabled: {}".format(" ".join(passing_trails))
             #results["affected"] = ", ".join(passing_trails)
             results["pass_fail"] = "PASS"
 
