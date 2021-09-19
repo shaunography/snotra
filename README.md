@@ -24,6 +24,12 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * public EBS snapshots (ec2)
 * public EC2 AMIs (ec2)
 * public SNS topics (sns)
+* security groups allow database traffic from 0.0.0.0/0
+* network acls allow database traffic from 0.0.0.0/0
+* default network acls allow all traffic
+* custom network acls allow all traffic
+* security hub not enabled
+* security hub does not have autoenablecontrols enabled
 
 ## requirements
 * Python3

@@ -14,17 +14,21 @@ class ec2(object):
 
     def run(self):
         findings = []
-        findings += [ self.ec2_1() ]
-        findings += [ self.ec2_2() ]
-        findings += [ self.ec2_3() ]
-        findings += [ self.ec2_4() ]
-        findings += [ self.ec2_5() ]
-        findings += [ self.ec2_6() ]
-        findings += [ self.ec2_7() ]
-        findings += [ self.ec2_8() ]
-        findings += [ self.ec2_9() ]
-        findings += [ self.ec2_10() ]
-        findings += [ self.ec2_11() ]
+        #findings += [ self.ec2_1() ]
+        #findings += [ self.ec2_2() ]
+        #findings += [ self.ec2_3() ]
+        #findings += [ self.ec2_4() ]
+        #findings += [ self.ec2_5() ]
+        #findings += [ self.ec2_6() ]
+        #findings += [ self.ec2_7() ]
+        #findings += [ self.ec2_8() ]
+        #findings += [ self.ec2_9() ]
+        #findings += [ self.ec2_10() ]
+        #findings += [ self.ec2_11() ]
+        #findings += [ self.ec2_12() ]
+        #findings += [ self.ec2_13() ]
+        findings += [ self.ec2_14() ]
+        findings += [ self.ec2_15() ]
         return findings
 
     def get_security_groups(self):
@@ -547,4 +551,244 @@ class ec2(object):
             results["affected"] = ", ".join(failing_images)
             results["pass_fail"] = "FAIL"
         
+        return results
+
+
+
+    def ec2_12(self):
+        # Ensure no security groups allow ingress from 0.0.0.0/0 to database ports
+
+        results = {
+            "id" : "ec2_11",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure no security groups allow ingress from 0.0.0.0/0 to database ports",
+            "affected": "",
+            "analysis" : "No security groups that allow database ingress traffic from 0.0.0.0/0 found",
+            "description" : "Security groups provide stateful filtering of ingress and egress network traffic to AWS resources. It is recommended that no Security Groups allows unrestricted ingress access to database ports, such as MySQL to port 3306, PostgreSQL to port 5432 and MSSQL to port 1433. Public access to remote database ports increases resource attack surface and unnecessarily raises the risk of resource compromise.",
+            "remediation" : "Apply the principle of least privilege and only allow direct database traffic from a whitelist of trusted IP addresses",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_11")
+
+        failing_security_groups = []
+            
+        for region, groups in self.security_groups.items():
+            for group in groups:
+                group_id = group["GroupId"]
+                ip_permissions = group["IpPermissions"]
+                for ip_permission in ip_permissions:
+
+                    # ipv4
+                    if "IpRanges" in ip_permission:
+                        for ip_range in ip_permission["IpRanges"]:
+                            if ip_range["CidrIp"] == "0.0.0.0/0":
+                                try:
+                                    from_port = ip_permission["FromPort"]
+                                    to_port = ip_permission["ToPort"]
+                                except KeyError:
+                                    # if no port range is defined, all ports are allowed
+                                    failing_security_groups += ["{}({})".format(group_id, region)]
+                                else:
+                                    if from_port == 3306 or from_port == 5432 or from_port == 1433 or 3306 in range(from_port, to_port) or 5432 in range(from_port, to_port) or 1433 in range(from_port, to_port):
+                                        failing_security_groups += ["{}({})".format(group_id, region)]
+                    # ipv6
+                    if "Ipv6Ranges" in ip_permission:
+                        for ip_range in ip_permission["Ipv6Ranges"]:
+                            if ip_range["CidrIpv6"] == "::/0":
+                                try:
+                                    from_port = ip_permission["FromPort"]
+                                    to_port = ip_permission["ToPort"]
+                                except KeyError:
+                                    # if no port range is defined, all ports are allowed
+                                    failing_security_groups += ["{}({})".format(group_id, region)]
+                                else:
+                                    if from_port == 3306 or from_port == 5432 or from_port == 1433 or 3306 in range(from_port, to_port) or 5432 in range(from_port, to_port) or 1433 in range(from_port, to_port):
+                                        failing_security_groups += ["{}({})".format(group_id, region)]
+
+        if failing_security_groups:
+            results["analysis"] = "the following security groups allow database ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_security_groups)))
+            results["affected"] = ", ".join(set(failing_security_groups))
+            results["pass_fail"] = "FAIL"
+
+        return results
+
+    def ec2_13(self):
+        # Ensure no Network ACLs allow ingress from 0.0.0.0/0 to database ports 
+
+        results = {
+            "id" : "ec2_13",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to database ports",
+            "affected": "",
+            "analysis" : "No NACLs that allow remote database ingress traffic from 0.0.0.0/0 found",
+            "description" : "The Network Access Control List (NACL) function provide stateless filtering of ingress and egress network traffic to AWS resources. It is recommended that no NACL allows unrestricted ingress access to database ports, such as MySQL to port 3306, PostgreSQL to port 5432 and MSSQL to port 1433. Public access to databse ports increases resource attack surface and unnecessarily raises the risk of resource compromise.",
+            "remediation" : "Apply the principle of least privilege and only allow database traffic from a whitelist of trusted IP addresses",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_13")
+        
+        failing_nacls = []
+            
+        for region, network_acls in self.network_acls.items():
+            for acl in network_acls:
+                network_acl_id = acl["NetworkAclId"]
+                entries = acl["Entries"]
+                for entry in entries:
+                    if entry["Egress"] == False:
+                        if entry["RuleAction"] == "allow":
+                            try:
+                                cidr_block = entry["CidrBlock"]
+                            except KeyError:
+                                cidr_block = False
+                            try:
+                                ipv6cidr_block = entry["Ipv6CidrBlock"]
+                            except KeyError:
+                                ipv6cidr_block = False
+                            
+                            if cidr_block == "0.0.0.0/0" or ipv6cidr_block == "::/0":
+                                try:
+                                    from_port = entry["PortRange"]["From"]
+                                    to_port = entry["PortRange"]["To"]
+                                except KeyError:
+                                    # NACLs with no port range defined allow all ports
+                                    failing_nacls += ["{}({})".format(network_acl_id, region)]
+                                else:
+                                    if from_port in (3306, 5432, 1433) or 3306 in range(from_port, to_port) or 5432 in range(from_port, to_port) or 1433 in range(from_port, to_port):
+                                        failing_nacls += ["{}({})".format(network_acl_id, region)]
+
+        if failing_nacls:
+            results["analysis"] = "the following Network ACLs allow database ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_nacls)))
+            results["affected"] = ", ".join(set(failing_nacls))
+            results["pass_fail"] = "FAIL"
+
+        return results
+    
+    def ec2_14(self):
+        # Ensure defualt Network ACLs are not defualt Allow
+
+        results = {
+            "id" : "ec2_14",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure default Network ACLs are not default allow",
+            "affected": "",
+            "analysis" : "No default Network ACLs that allow all traffic where found",
+            "description" : "Network Access Control Lists (NACLs) are stateless firewalls that allow you to control traffic flow in and out of your VPCs at the subnet layer. By default, NACLs are configured to allow all inbound and outbound traffic. NACLs provide a first line of defence against malicious network traffic and can provide defence in depth when used alongside strict security groups. Configuring NACLs can minimise the risk of a misconfigured security group or weak default security group exposing sensitive or vulnerable services to the internet and can provide a separation of responsibilities between developers and architecture teams. All Network Access Control Lists within the tested account are currently configured to allow all inbound and outbound traffic on all ports.",
+            "remediation" : "Configure all NACLs applying the principle of least privilege and only allows the traffic required for the application or service to function. NOTE: Because NACLs are stateless return traffic on ephemeral unprivileged ports will need to be accounted for. More Information http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_14")
+        
+        failing_nacls = []
+            
+        for region, network_acls in self.network_acls.items():
+            for acl in network_acls:
+                if acl["IsDefault"] == True:
+                    network_acl_id = acl["NetworkAclId"]
+                    entries = acl["Entries"]
+                    for entry in entries:
+                        if entry["Egress"] == False: # only ingress rules are checked
+                            if entry["RuleAction"] == "allow":
+                                try:
+                                    cidr_block = entry["CidrBlock"]
+                                except KeyError:
+                                    cidr_block = False
+                                try:
+                                    ipv6cidr_block = entry["Ipv6CidrBlock"]
+                                except KeyError:
+                                    ipv6cidr_block = False
+                                
+                                if cidr_block == "0.0.0.0/0" or ipv6cidr_block == "::/0":
+                                    if "PortRange" not in entry:
+                                        # no ports defined = allow all ports
+                                        failing_nacls += ["{}({})".format(network_acl_id, region)]
+
+        if failing_nacls:
+            results["analysis"] = "the following default Network ACLs allow all traffic: {}".format(" ".join(set(failing_nacls)))
+            results["affected"] = ", ".join(set(failing_nacls))
+            results["pass_fail"] = "FAIL"
+
+        return results
+
+    def ec2_15(self):
+        # Ensure custom Network ACLs are not defualt Allow
+
+        results = {
+            "id" : "ec2_15",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure custom Network ACLs do not allow all traffic",
+            "affected": "",
+            "analysis" : "No custom Network ACLs that allow all traffic where found",
+            "description" : "Network Access Control Lists (NACLs) are stateless firewalls that allow you to control traffic flow in and out of your VPCs at the subnet layer. By default, NACLs are configured to allow all inbound and outbound traffic. NACLs provide a first line of defence against malicious network traffic and can provide defence in depth when used alongside strict security groups. Configuring NACLs can minimise the risk of a misconfigured security group or weak default security group exposing sensitive or vulnerable services to the internet and can provide a separation of responsibilities between developers and architecture teams. All Network Access Control Lists within the tested account are currently configured to allow all inbound and outbound traffic on all ports.",
+            "remediation" : "Configure all NACLs applying the principle of least privilege and only allows the traffic required for the application or service to function. NOTE: Because NACLs are stateless return traffic on ephemeral unprivileged ports will need to be accounted for. More Information http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_15")
+        
+        failing_nacls = []
+        custom_nacls = []
+            
+        for region, network_acls in self.network_acls.items():
+            for acl in network_acls:
+                if acl["IsDefault"] == False:
+                    network_acl_id = acl["NetworkAclId"]
+                    entries = acl["Entries"]
+                    custom_nacls += [network_acl_id]
+                    for entry in entries:
+                        if entry["Egress"] == False: # only ingress rules are checked
+                            if entry["RuleAction"] == "allow":
+                                try:
+                                    cidr_block = entry["CidrBlock"]
+                                except KeyError:
+                                    cidr_block = False
+                                try:
+                                    ipv6cidr_block = entry["Ipv6CidrBlock"]
+                                except KeyError:
+                                    ipv6cidr_block = False
+                                
+                                if cidr_block == "0.0.0.0/0" or ipv6cidr_block == "::/0":
+                                    if "PortRange" not in entry:
+                                        # no ports defined = allow all ports
+                                        failing_nacls += ["{}({})".format(network_acl_id, region)]
+
+        if not custom_nacls:
+            results["analysis"] = "No Custom Network ACLs found"
+            results["pass_fail"] = "PASS"        
+        
+        if failing_nacls:
+            results["analysis"] = "the following custom Network ACLs allow all traffic: {}".format(" ".join(set(failing_nacls)))
+            results["affected"] = ", ".join(set(failing_nacls))
+            results["pass_fail"] = "FAIL"
+
         return results
