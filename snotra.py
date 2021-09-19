@@ -20,6 +20,7 @@ from checks.cloudwatch import cloudwatch
 from checks.guardduty import guardduty
 from checks.efs import efs
 from checks.sns import sns
+from checks.securityhub import securityhub
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -76,6 +77,7 @@ def main():
     results["findings"] += guardduty(session).run()
     results["findings"] += efs(session).run()
     results["findings"] += sns(session).run()
+    results["findings"] += securityhub(session).run()
 
     if not os.path.exists(args.o):
         print("results dir does not exist, creating it for you")
