@@ -96,7 +96,7 @@ class securityhub(object):
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "PAASS"
+            "pass_fail" : "PASS"
         }
 
         print("running check: securityhub_2")
