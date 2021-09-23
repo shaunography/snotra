@@ -1,5 +1,6 @@
 import boto3
 import time
+import re
 
 from datetime import date
 from datetime import timedelta
@@ -42,6 +43,7 @@ class iam(object):
         findings += [ self.iam_18() ]
         findings += [ self.iam_19() ]
         findings += [ self.iam_20() ]
+        findings += [ self.iam_21() ]
         return findings
 
     def get_client(self):
@@ -873,6 +875,46 @@ class iam(object):
         if failing_groups:
             results["analysis"] = "the following groups contain no users: {}".format(" ".join(failing_groups))
             results["affected"] = ", ".join(failing_groups)
+            results["pass_fail"] = "FAIL"
+
+        return results
+    
+    def iam_21(self):
+        # Cross-Account AssumeRole Policy Lacks External ID
+
+        results = {
+            "id" : "iam_21",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "iam",
+            "name" : "Cross-Account AssumeRole Policy Lacks External ID",
+            "affected": "",
+            "analysis" : "No failing roles found",
+            "description" : 'The affected AWS account has a number of Cross-Account assume role policies which lack an external ID. Policies which lack an external ID are vulnerable to what’s known as the “Confused Deputy Problem”.\nAn assume role policy allow a trust relationship to be set up between two accounts that allows users to assume a role and inherit permissions in other accounts. This is often used to allow third party access to your account to perform specific support roles or tasks like monitoring and maintenance. When the third party requires access to your account they can assume the IAM role and its temporary security credentials without needing to configure IAM users and share long-term credentials (for example, an IAM users access key) . Configuring cross account roles with external IDs and or MFA verification can help ensure that when using the role to access resources in your account they are acting under genuine circumstances and have been “confused” or socially engineered by a malicious actor to escalate permissions within or perform malicious actions on in your AWS account. Let say Example Corp requires access to certain resources in your AWS account. But in addition to you, Example Corp has other customers and needs a way to access each customers AWS resources. Instead of asking its customers for their AWS account access keys, which are secrets that should never be shared, Example Corp requests a role ARN from each customer. But another Example Corp customer might be able to guess or obtain your role ARN. That customer could then use your role ARN to gain access to your AWS resources by way of Example Corp. This form of permission escalation is known as the confused deputy problem. The external ID is a piece of data that can be passed to the AssumeRole API of the Security Token Service (STS). You can then use the external ID in the condition element in a role’s trust policy, allowing the role to be assumed only when a certain value is present in the external ID.',
+            "remediation" : 'All Cross-Account roles which provide a level of privileged access should be configured with a unique and complex external ID as well as performing re authentication via MFA.\nMore Information\nhttps://aws.amazon.com/blogs/security/how-to-use-external-id-when-granting-access-to-your-aws-resources/\nhttps://en.wikipedia.org/wiki/Confused_deputy_problem',
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:L/UI:R/S:C/C:L/I:L/A:L",
+            "cvss_score" : "5.5",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: iam_21")
+
+        failing_roles = []
+
+        for role in self.roles:
+            for statement in role["AssumeRolePolicyDocument"]["Statement"]:
+                if statement["Effect"] == "Allow":
+                    if "AWS" in statement["Principal"]:
+                        if statement["Action"] == "sts:AssumeRole":
+                            if not re.match(".*ExternalId.*", str(statement["Condition"])):
+                                failing_roles.append(role["RoleName"])
+
+        if failing_roles:
+            results["analysis"] = "the following cross account roles do not have an external ID configured:\n{}".format(" ".join(failing_roles))
+            results["affected"] = ", ".join(failing_roles)
             results["pass_fail"] = "FAIL"
 
         return results

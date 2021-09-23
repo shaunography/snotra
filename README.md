@@ -38,10 +38,16 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * unencrypted ebs volumes (ec2)
 * unencrypted ebs snapshots (ec2)
 * old ebs snapshots (ec2)
+* Cross-Account AssumeRole Policy Lacks External ID
 
 ## requirements
 * Python3
 * boto3
+
+## docker
+from the clone repo directory, run:
+`docker build -t snotra .`
+`docker run --rm -ti -v ~/.aws:/root/.aws/ snotra`
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
