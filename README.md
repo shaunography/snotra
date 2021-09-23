@@ -1,6 +1,17 @@
 # Snotra
 Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it uses boto3 to audit your AWS account against a list of common issues and compliance standards including the CIS benchmark. Snotra produces a results.json file that can be easily incorporated into existing reporting workflows.
 
+## requirements
+* Python3
+* boto3
+
+## docker
+from the clone repo directory, run:
+
+`docker build -t snotra .`
+
+`docker run --rm -ti -v ~/.aws:/root/.aws/ snotra`
+
 ## usage
 run audit using default aws profile
 
@@ -40,14 +51,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * old ebs snapshots (ec2)
 * Cross-Account AssumeRole Policy Lacks External ID
 
-## requirements
-* Python3
-* boto3
 
-## docker
-from the clone repo directory, run:
-`docker build -t snotra .`
-`docker run --rm -ti -v ~/.aws:/root/.aws/ snotra`
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
@@ -95,7 +99,7 @@ The results JSON file that Snotra produces is in the following format:
 - [ ] specify checks by groups (i.e. CIS, IAM, EC2, CIS_level_1 etc)
 - [ ] additional compliance standards
 - [ ] print list of all check names
-- [ ] dockerfile
+- [x] dockerfile
 - [ ] dockerhub
 - [ ] Azure?
 - [ ] git gud
