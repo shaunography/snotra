@@ -3,6 +3,9 @@ import boto3
 from utils.utils import describe_regions
 from utils.utils import get_account_id
 
+from datetime import date
+from datetime import timedelta
+
 class ec2(object):
 
     def __init__(self, session):
@@ -11,24 +14,35 @@ class ec2(object):
         self.account_id = get_account_id(session)
         self.security_groups = self.get_security_groups()
         self.network_acls = self.get_network_acls()
+        self.network_interfaces = self.get_network_interfaces()
+        self.instance_reservations = self.get_instance_reservations()
+        self.volumes = self.get_volumes()
+        self.snapshots = self.get_snapshots()
 
     def run(self):
         findings = []
-        #findings += [ self.ec2_1() ]
-        #findings += [ self.ec2_2() ]
-        #findings += [ self.ec2_3() ]
-        #findings += [ self.ec2_4() ]
-        #findings += [ self.ec2_5() ]
-        #findings += [ self.ec2_6() ]
-        #findings += [ self.ec2_7() ]
-        #findings += [ self.ec2_8() ]
-        #findings += [ self.ec2_9() ]
-        #findings += [ self.ec2_10() ]
-        #findings += [ self.ec2_11() ]
-        #findings += [ self.ec2_12() ]
-        #findings += [ self.ec2_13() ]
+        findings += [ self.ec2_1() ]
+        findings += [ self.ec2_2() ]
+        findings += [ self.ec2_3() ]
+        findings += [ self.ec2_4() ]
+        findings += [ self.ec2_5() ]
+        findings += [ self.ec2_6() ]
+        findings += [ self.ec2_7() ]
+        findings += [ self.ec2_8() ]
+        findings += [ self.ec2_9() ]
+        findings += [ self.ec2_10() ]
+        findings += [ self.ec2_11() ]
+        findings += [ self.ec2_12() ]
+        findings += [ self.ec2_13() ]
         findings += [ self.ec2_14() ]
         findings += [ self.ec2_15() ]
+        findings += [ self.ec2_16() ]
+        findings += [ self.ec2_17() ]
+        findings += [ self.ec2_18() ]
+        findings += [ self.ec2_19() ]
+        findings += [ self.ec2_20() ]
+        findings += [ self.ec2_21() ]
+        findings += [ self.ec2_22() ]
         return findings
 
     def get_security_groups(self):
@@ -46,6 +60,38 @@ class ec2(object):
             client = self.session.client('ec2', region_name=region)
             network_acls[region] = client.describe_network_acls()["NetworkAcls"]
         return network_acls
+    
+    def get_network_interfaces(self):
+        network_interfaces = {}
+        print("getting network interfaces")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            network_interfaces[region] = client.describe_network_interfaces()["NetworkInterfaces"]
+        return network_interfaces
+    
+    def get_instance_reservations(self):
+        reservations = {}
+        print("getting instance reservations")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            reservations[region] = client.describe_instances()["Reservations"]
+        return reservations
+    
+    def get_volumes(self):
+        volumes = {}
+        print("getting ebs volumes")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            volumes[region] = client.describe_volumes()["Volumes"]
+        return volumes
+    
+    def get_snapshots(self):
+        snapshots = {}
+        print("getting ebs snapshots")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            snapshots[region] = client.describe_snapshots()["Snapshots"]
+        return snapshots
     
     def ec2_1(self):
         # Ensure IAM instance roles are used for AWS resource access from instances (Manual)
@@ -72,15 +118,10 @@ class ec2(object):
 
         failing_instances = []
 
-        for region in self.regions:
-            client = self.session.client('ec2', region_name=region)
-            instance_description = client.describe_instances()
-            reservations = instance_description["Reservations"]
+        for region, reservations in self.instance_reservations.items():
             for reservation in reservations:
-                instances = reservation["Instances"]
-                for instance in instances:
-                    state = instance["State"]["Name"]
-                    if state == "running":
+                for instance in reservation["Instances"]:
+                    if instance["State"]["Name"] == "running":
                         instance_id = instance["InstanceId"]
                         ec2 = self.session.resource('ec2', region_name=region)
                         ec2_instance = ec2.Instance(id=instance_id)
@@ -88,7 +129,7 @@ class ec2(object):
                             failing_instances += ["{}({})".format(instance_id, region)]
 
         if failing_instances:
-            results["analysis"] = "the following running instances do not have an instance profile attached: {}".format(" ".join(failing_instances))
+            results["analysis"] = "the following running instances do not have an instance profile attached:\n{}".format(" ".join(failing_instances))
             results["affected"] = ", ".join(failing_instances)
             results["pass_fail"] = "FAIL"
 
@@ -106,9 +147,9 @@ class ec2(object):
             "service" : "ec2",
             "name" : "Ensure EBS volume encryption is enabled",
             "affected": "",
-            "analysis" : "All EBS Volumes are encrypted",
+            "analysis" : "Default EBS Volume encryption is enabled in all regions",
             "description" : "Elastic Compute Cloud (EC2) supports encryption at rest when using the Elastic Block Store (EBS) service. While disabled by default, forcing encryption at EBS volume creation is supported. Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.",
-            "remediation" : "Ensure EBS defualt volume encryption is enabled in all regions",
+            "remediation" : "Ensure EBS default volume encryption is enabled in all regions",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
@@ -132,7 +173,7 @@ class ec2(object):
                 results["analysis"] = "Default Encryption is not enabled in any region"
                 results["affected"] = ", ".join(self.regions)
             else:
-                results["analysis"] = "the following EC2 regions do not encrypt EBS volumes by default: {}".format(" ".join(failing_regions))
+                results["analysis"] = "the following EC2 regions do not encrypt EBS volumes by default:\n{}".format(" ".join(failing_regions))
                 results["affected"] = ", ".join(failing_regions)
         
         return results
@@ -176,7 +217,7 @@ class ec2(object):
                 results["analysis"] = "VPC Flow logging is not enabled in any region"
                 results["affected"] = ", ".join(self.regions)
             else:
-                results["analysis"] = "the following regions do not have any VPC FLow Logs enabled: {}".format(" ".join(failing_regions))
+                results["analysis"] = "the following regions do not have any VPC FLow Logs enabled:\n{}".format(" ".join(failing_regions))
                 results["affected"] = ", ".join(failing_regions)
         
         return results
@@ -234,7 +275,7 @@ class ec2(object):
                                         failing_nacls += ["{}({})".format(network_acl_id, region)]
 
         if failing_nacls:
-            results["analysis"] = "the following Network ACLs allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_nacls)))
+            results["analysis"] = "the following Network ACLs allow admin ingress traffic from 0.0.0.0/0:\n{}".format(" ".join(set(failing_nacls)))
             results["affected"] = ", ".join(set(failing_nacls))
             results["pass_fail"] = "FAIL"
 
@@ -300,7 +341,7 @@ class ec2(object):
                                         failing_security_groups += ["{}({})".format(group_id, region)]
 
         if failing_security_groups:
-            results["analysis"] = "the following security groups allow admin ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_security_groups)))
+            results["analysis"] = "the following security groups allow admin ingress traffic from 0.0.0.0/0:\n{}".format(" ".join(set(failing_security_groups)))
             results["affected"] = ", ".join(set(failing_security_groups))
             results["pass_fail"] = "FAIL"
 
@@ -340,7 +381,7 @@ class ec2(object):
                         failing_security_groups += ["{}({})".format(group_id, region)]
                     
         if failing_security_groups:
-            results["analysis"] = "the following default security groups have inbound rules configured: {}".format(" ".join(failing_security_groups))
+            results["analysis"] = "the following default security groups have inbound rules configured:\n{}".format(" ".join(failing_security_groups))
             results["affected"] = ", ".join(failing_security_groups)
             results["pass_fail"] = "FAIL"
 
@@ -380,7 +421,7 @@ class ec2(object):
                         peering_connections += ["{}({})".format(route["VpcPeeringConnectionId"], region)]
                     
         if peering_connections:
-            results["analysis"] = "VPC peering in use - check routing tables for least access: {}".format(" ".join(set(peering_connections)))
+            results["analysis"] = "VPC peering in use - check routing tables for least access:\n{}".format(" ".join(set(peering_connections)))
             results["pass_fail"] = "INFO"
 
         return results
@@ -413,19 +454,33 @@ class ec2(object):
         failing_security_groups = []
             
         for region, groups in self.security_groups.items():
-            client = self.session.client('ec2', region_name=region)
-            for group in groups:
-                group_name = group["GroupName"]
-                if group_name != "default":
-                    group_id = group["GroupId"]
-                    network_interfaces = client.describe_network_interfaces(Filters=[{ "Name": "group-id", "Values" : [group_id] }])["NetworkInterfaces"]
-                    if not network_interfaces:
-                        failing_security_groups += ["{}({})".format(group_name, region)]
 
-                
+            attached_security_group_ids = []
+            network_interfaces = self.network_interfaces[region]
+            for interface in network_interfaces:
+                for group in interface["Groups"]:
+                    attached_security_group_ids.append(group["GroupId"])
+
+            for group in groups:
+                if group["GroupName"] != "default":
+                    if group["GroupId"] not in attached_security_group_ids:
+                        failing_security_groups.append("{}({})".format(group["GroupId"], region))
+
+
+        ### more elegant but slower way ###
+        #failing_security_groups = []
+        #    
+        #for region, groups in self.security_groups.items():
+        #    client = self.session.client('ec2', region_name=region)
+        #    for group in groups:
+        #        if group["GroupName"] != "default":
+        #            group_id = group["GroupId"]
+        #            network_interfaces = client.describe_network_interfaces(Filters=[{ "Name": "group-id", "Values" : [group_id] }])["NetworkInterfaces"]
+        #            if not network_interfaces:
+        #                failing_security_groups += ["{}({})".format(group_id, region)]
 
         if failing_security_groups:
-            results["analysis"] = "the following security groups are not being used: {}".format(" ".join(failing_security_groups))
+            results["analysis"] = "the following security groups are not being used:\n{}".format(" ".join(failing_security_groups))
             results["affected"] = ", ".join(failing_security_groups)
             results["pass_fail"] = "FAIL"
         
@@ -462,7 +517,7 @@ class ec2(object):
             failing_addresses += ["{}({})".format(address["AllocationId"], region) for address in addresses if ("NetworkInterfaceId","AssociationId") not in address]             
 
         if failing_addresses:
-            results["analysis"] = "the following elastic IPs are not being used: {}".format(" ".join(failing_addresses))
+            results["analysis"] = "the following elastic IPs are not being used:\n{}".format(" ".join(failing_addresses))
             results["affected"] = ", ".join(failing_addresses)
             results["pass_fail"] = "FAIL"
         
@@ -512,7 +567,7 @@ class ec2(object):
                             pass
 
         if failing_snapshots:
-            results["analysis"] = "the following EBS snapshots are public: {}".format(" ".join(failing_snapshots))
+            results["analysis"] = "the following EBS snapshots are public:\n{}".format(" ".join(failing_snapshots))
             results["affected"] = ", ".join(failing_snapshots)
             results["pass_fail"] = "FAIL"
         
@@ -547,7 +602,7 @@ class ec2(object):
             failing_images = [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
 
         if failing_images:
-            results["analysis"] = "the following EC2 AMIs are public: {}".format(" ".join(failing_images))
+            results["analysis"] = "the following EC2 AMIs are public:\n{}".format(" ".join(failing_images))
             results["affected"] = ", ".join(failing_images)
             results["pass_fail"] = "FAIL"
         
@@ -614,7 +669,7 @@ class ec2(object):
                                         failing_security_groups += ["{}({})".format(group_id, region)]
 
         if failing_security_groups:
-            results["analysis"] = "the following security groups allow database ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_security_groups)))
+            results["analysis"] = "the following security groups allow database ingress traffic from 0.0.0.0/0:\n{}".format(" ".join(set(failing_security_groups)))
             results["affected"] = ", ".join(set(failing_security_groups))
             results["pass_fail"] = "FAIL"
 
@@ -673,7 +728,7 @@ class ec2(object):
                                         failing_nacls += ["{}({})".format(network_acl_id, region)]
 
         if failing_nacls:
-            results["analysis"] = "the following Network ACLs allow database ingress traffic from 0.0.0.0/0: {}".format(" ".join(set(failing_nacls)))
+            results["analysis"] = "the following Network ACLs allow database ingress traffic from 0.0.0.0/0:\,{}".format(" ".join(set(failing_nacls)))
             results["affected"] = ", ".join(set(failing_nacls))
             results["pass_fail"] = "FAIL"
 
@@ -727,7 +782,7 @@ class ec2(object):
                                         failing_nacls += ["{}({})".format(network_acl_id, region)]
 
         if failing_nacls:
-            results["analysis"] = "the following default Network ACLs allow all traffic: {}".format(" ".join(set(failing_nacls)))
+            results["analysis"] = "the following default Network ACLs allow all traffic:\n{}".format(" ".join(set(failing_nacls)))
             results["affected"] = ", ".join(set(failing_nacls))
             results["pass_fail"] = "FAIL"
 
@@ -787,8 +842,275 @@ class ec2(object):
             results["pass_fail"] = "PASS"        
         
         if failing_nacls:
-            results["analysis"] = "the following custom Network ACLs allow all traffic: {}".format(" ".join(set(failing_nacls)))
+            results["analysis"] = "the following custom Network ACLs allow all traffic:\n{}".format(" ".join(set(failing_nacls)))
             results["affected"] = ", ".join(set(failing_nacls))
             results["pass_fail"] = "FAIL"
 
+        return results
+    
+    def ec2_16(self):
+        # unused network interfaces
+
+        results = {
+            "id" : "ec2_16",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Unused Network Interfaces",
+            "affected": "",
+            "analysis" : "No unused Network Interfaces found",
+            "description" : "The affected Network Interfaces, are not attached to any instances and therefore are not being used. To maintain the hygiene of the environment, make maintenance and auditing easier and reduce cost, all old and temporary network interfaces should be removed.",
+            "remediation" : "remove network interfaces that are not in use and no longer required.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_16")
+
+        failing_interfaces = []
+
+        for region, interfaces in self.network_interfaces.items():
+            for interface in interfaces:
+                if interface["Status"] == "available":
+                    failing_interfaces.append("{}({})".format(interface["NetworkInterfaceId"], region))
+        
+        if failing_interfaces:
+            results["analysis"] = "the following network interfacces are not being used:\n{}".format(" ".join(failing_interfaces))
+            results["affected"] = ", ".join(failing_interfaces)
+            results["pass_fail"] = "FAIL"
+
+        return results
+
+
+    def ec2_17(self):
+        # Ensure running instances are not more than 365 days old
+
+        results = {
+            "id" : "ec2_17",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure running instances are not more than 365 days old",
+            "affected": "",
+            "analysis" : "No instances older than 365 days found",
+            "description" : "The account under review contains running EC2 instances that were launched more than 365 days ago. One of the biggest benefits of cloud based infrastructure is to have mutable and short lived infrastructure that can scale and shrink with demand. Instances should be reprovisioned and rebooted periodically to ensure software and hardware resources are up to date and subject to the latest security patches. Additionally, long lived instances may no longer be adequately sized or no longer required, consuming resources and generating a cost to the company.",
+            "remediation" : "Review the list of instances and ensure they subject to a regular patching policy and lifecycle management.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "info",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_17")
+
+        failing_instances = []
+       
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    if instance["State"]["Name"] == "running":
+                        year, month, day = str(instance["LaunchTime"]).split(" ")[0].split("-") #convert datetime to string so it can be converted to date and compare with time delta
+                        launch_date = date(int(year), int(month), int(day)) # extract date, ignore time
+                        if launch_date < (date.today() - timedelta(days=365)):
+                            failing_instances.append("{}({})".format(instance["InstanceId"], region))
+
+        if failing_instances:
+            results["analysis"] = "the following running instances do not have an instance profile attached:\n{}".format(" ".join(failing_instances))
+            results["affected"] = ", ".join(failing_instances)
+            results["pass_fail"] = "FAIL"
+
+        return results
+    
+    def ec2_18(self):
+        # Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required
+
+        results = {
+            "id" : "ec2_18",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required",
+            "affected": "",
+            "analysis" : "No failing instances found",
+            "description" : "The account under review contains EC2 instances that do not enforce the use of IMDSv2.\nTo help protect against Server Side Request Forgery (SSRF) and related vulnerabilities, which could be leveraged by an attacker to query the metadata service to steal the AWS API credentials associated with the instance profile for the running EC2 instance, AWS introduced IMDSv2 which now protects all requests with additional session authentication.",
+            "remediation" : "Configure IMDSv2 on all affected EC2 instances. See the following link for more information on how to transition to version 2 of the metadata service.",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_18")
+
+        failing_instances = []
+       
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    if instance["MetadataOptions"]["HttpEndpoint"] == "enabled":
+                        if instance["MetadataOptions"]["HttpTokens"] != "required":
+                            failing_instances.append("{}({})".format(instance["InstanceId"], region))
+
+        if failing_instances:
+            results["analysis"] = "the following running instances do not have IMDSv2 enabled:\n{}".format(" ".join(failing_instances))
+            results["affected"] = ", ".join(failing_instances)
+            results["pass_fail"] = "FAIL"
+
+        return results
+
+    def ec2_19(self):
+        # EC2 Instances Not Managed By AWS Systems Manager
+
+        results = {
+            "id" : "ec2_19",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "EC2 Instances Not Managed By AWS Systems Manager",
+            "affected": "",
+            "analysis" : "No failing instances found",
+            "description" : "The account under review contains running EC2 instances that are not managed by AWS Systems Manager. Systems Manager simplifies resource and application management, shortens the time to detect and resolve operational problems, and makes it easier to operate and manage your infrastructure at scale.\nAWS Systems Manager helps maintain security and compliance by scanning your instances against your patch, configuration, and custom policies. You can define patch baselines, maintain up-to-date anti-virus definitions, and enforce firewall policies. You can also remotely manage your servers at scale without manually logging in to each server. Systems Manager also provides a centralized store to manage your configuration data, whether it's plain text, such as database strings, or secrets, such as passwords. This allows you to separate your secrets and configuration data from code.",
+            "remediation" : "It is recommended to configure all EC2 instances to be monitored by Systems Manager by installing and registering the SSM agent on the affected hosts.\nMore Information\nhttps://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started.html",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_19")
+
+        failing_instances = []
+       
+        for region, reservations in self.instance_reservations.items():
+            client = self.session.client('ssm', region_name=region)
+            managed_instances = [ instance["InstanceId"] for instance in client.describe_instance_information()["InstanceInformationList"] ]
+            
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    if instance["InstanceId"] not in managed_instances:
+                        failing_instances.append("{}({})".format(instance["InstanceId"], region))
+
+        if failing_instances:
+            results["analysis"] = "the following running instances are not managed by Systems Manager:\n{}".format(" ".join(failing_instances))
+            results["affected"] = ", ".join(failing_instances)
+            results["pass_fail"] = "FAIL"
+
+        return results
+
+
+    def ec2_20(self):
+        # Unencrypted EBS Volumes
+
+        results = {
+            "id" : "ec2_20",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Unencrypted EBS Volumes",
+            "affected": "",
+            "analysis" : "All EBS Volumes are encrypted",
+            "description" : "To ensure the privacy of any data stored and processed by your EC2 instances it is recommended to enable encryption on EBS volumes. When you create an encrypted EBS volume and attach it to a supported instance type, the following types of data are encrypted:\n\n- Data at rest inside the volume\n- All data moving between the volume and the instance\n- All snapshots created from the volume\n- All volumes created from those snapshots ",
+            "remediation" : "There is no direct way to encrypt an existing unencrypted volume, or to remove encryption from an encrypted volume. However, you can migrate data between encrypted and unencrypted volumes. You can also apply a new encryption status while copying a snapshot:\nMore information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_20")
+        
+        failing_volumes = []
+        
+        for region, volumes in self.volumes.items():
+            failing_volumes += [ "{}({})".format(volume["VolumeId"], region) for volume in volumes if volume["Encrypted"] == False ]
+        
+        if failing_volumes:
+                results["analysis"] = "the following Volumes are not encrypted:\n{}".format(" ".join(failing_volumes))
+                results["affected"] = ", ".join(failing_volumes)
+        
+        
+        return results
+    
+    def ec2_21(self):
+        # Unencrypted EBS Snapshots
+
+        results = {
+            "id" : "ec2_21",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Unencrypted EBS Snapshots",
+            "affected": "",
+            "analysis" : "All EBS Snapshots are encrypted",
+            "description" : "To ensure the privacy of any data stored and processed by your EC2 instances it is recommended to enable encryption on EBS volumes. When you create an encrypted EBS volume and attach it to a supported instance type, the following types of data are encrypted:\n\n- Data at rest inside the volume\n- All data moving between the volume and the instance\n- All snapshots created from the volume\n- All volumes created from those snapshots ",
+            "remediation" : "There is no direct way to encrypt an existing unencrypted volume, or to remove encryption from an encrypted volume. However, you can migrate data between encrypted and unencrypted volumes. You can also apply a new encryption status while copying a snapshot:\nMore information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_21")
+        
+        failing_snapshots = []
+        
+        for region, snapshots in self.snapshots.items():
+            failing_snapshots += [ "{}({})".format(snapshot["SnapshotId"], region) for snapshot in snapshots if snapshot["Encrypted"] == False ]
+        
+        if failing_snapshots:
+                results["analysis"] = "the following Snapshots are not encrypted:\n{}".format(" ".join(failing_snapshots))
+                results["affected"] = ", ".join(failing_snapshots)
+        
+        return results
+    
+    def ec2_22(self):
+        # Snapshots older than 30 days
+
+        results = {
+            "id" : "ec2_22",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Snapshot older than 30 days",
+            "affected": "",
+            "analysis" : "All EBS Snapshots are encrypted",
+            "description" : "With an active EBS backup strategy that takes volume snapshots daily or weekly, your data can grow rapidly and add unexpected charges to your bill. Since AWS EBS volumes snapshots are incremental, deleting previous (older) snapshots do not affect the ability to restore the volume data from later snapshots which allows you keep just the necessary backup data and lower your AWS monthly costs.",
+            "remediation" : "Delete snapshots that are older than 30 days and consider implementing snapshot lifecycle management in AWS DLM",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_22")
+        
+        failing_snapshots = []
+        
+        for region, snapshots in self.snapshots.items():
+            for snapshot in snapshots:
+                year, month, day = str(snapshot["StartTime"]).split(" ")[0].split("-") #convert datetime to string so it can be converted to date and compare with time delta
+                start_date = date(int(year), int(month), int(day)) # extract date, ignore time
+                if start_date < (date.today() - timedelta(days=30)):
+                    failing_snapshots.append("{}({})".format(snapshot["SnapshotId"], region))
+        
+        if failing_snapshots:
+                results["analysis"] = "the following Volumes are not encrypted:\n{}".format(" ".join(failing_snapshots))
+                results["affected"] = ", ".join(failing_snapshots)
+        
         return results

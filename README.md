@@ -24,12 +24,20 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * public EBS snapshots (ec2)
 * public EC2 AMIs (ec2)
 * public SNS topics (sns)
-* security groups allow database traffic from 0.0.0.0/0
-* network acls allow database traffic from 0.0.0.0/0
-* default network acls allow all traffic
-* custom network acls allow all traffic
-* security hub not enabled
-* security hub does not have autoenablecontrols enabled
+* security groups allow database traffic from 0.0.0.0/0 (ec2)
+* network acls allow database traffic from 0.0.0.0/0 (ec2)
+* default network acls allow all traffic (ec2)
+* custom network acls allow all traffic (ec2)
+* security hub not enabled (securityhub)
+* security hub does not have autoenablecontrols enabled (securityhub)
+* unused IAM groups (iam)
+* unused network interfaces (ec2)
+* instances older than 365 days (ec2)
+* ensure EC2 instance metadata service version 2 (IMDSv2) is enabled and required (ec2)
+* instances not managed by AWS systems manager (ec2)
+* unencrypted ebs volumes (ec2)
+* unencrypted ebs snapshots (ec2)
+* old ebs snapshots (ec2)
 
 ## requirements
 * Python3
@@ -66,6 +74,7 @@ The results JSON file that Snotra produces is in the following format:
 ```
 ## reporting tools
 * [snotra_to_table](https://github.com/shaunography/snotra_to_table) - Converts Snotra results JSON file into a simple CSV table for pasting into reports.
+* [snotra_to_md](https://github.com/shaunography/snotra_to_md) - Converts Snotra results JSON file to a simple Mark Down file.
 
 
 ## todo
@@ -79,6 +88,7 @@ The results JSON file that Snotra produces is in the following format:
 - [ ] specifiy regions
 - [ ] specify checks by groups (i.e. CIS, IAM, EC2, CIS_level_1 etc)
 - [ ] additional compliance standards
+- [ ] print list of all check names
 - [ ] dockerfile
 - [ ] dockerhub
 - [ ] Azure?
@@ -91,4 +101,4 @@ The results JSON file that Snotra produces is in the following format:
 - [ ] hardware MFA check
 - [x] cacheing / minimise requests to API
     - [x] WTF is S3 doing? (FACEPALM!)
-- [ ] refactor cloudwatch CIS checks
+- [x] refactor cloudwatch CIS checks
