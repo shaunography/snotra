@@ -17,6 +17,8 @@ class iam(object):
         self.users = self.list_users()
         self.policies = self.get_policies()
         self.account_id = get_account_id(session)
+        self.groups = self.list_groups()
+        self.roles = self.list_roles()
 
     def run(self):
         findings = []
@@ -39,6 +41,7 @@ class iam(object):
         findings += [ self.iam_17() ]
         findings += [ self.iam_18() ]
         findings += [ self.iam_19() ]
+        findings += [ self.iam_20() ]
         return findings
 
     def get_client(self):
@@ -76,6 +79,24 @@ class iam(object):
     def get_policies(self):
         print("Getting Policies")
         return self.client.list_policies(OnlyAttached=True)["Policies"]
+    
+    def list_groups(self):
+        print("Getting Groups")
+        groups = []
+        for group in self.client.list_groups()["Groups"]:
+            raw_group = self.client.get_group(GroupName=group["GroupName"])
+            group = {} # only grap Group and User data discard the rest
+            group["Group"] = raw_group["Group"]
+            group["Users"] = raw_group["Users"]
+            groups.append(group)
+        return groups
+    
+    def list_roles(self):
+        print("Getting Roles")
+        roles = []
+        for role in self.client.list_roles()["Roles"]:
+            roles.append(self.client.get_role(RoleName=role["RoleName"])["Role"])
+        return roles
 
     def iam_1(self):
         # Maintain current contact details (Manual)
@@ -821,5 +842,37 @@ class iam(object):
         print("running check: iam_19")
 
         results["affected"] = self.account_id
+
+        return results
+    
+    def iam_20(self):
+        # unused groups
+
+        results = {
+            "id" : "iam_20",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "iam",
+            "name" : "Unused IAM Groups",
+            "affected": "",
+            "analysis" : "No unused IAM Groups found",
+            "description" : "The affected IAM groups, do not contain any users and are therefore not being used. To maintain the hygiene of the environment, make maintenance and auditing easier and reduce the risk of IAM groups erroneously being used and inadvertently granting more access than required, all old unused IAM groups should be removed.",
+            "remediation" : "Ensure all IAM groups that are temporary and not being used are deleted when no longer required.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: iam_20")
+
+        failing_groups = [ group["Group"]["GroupName"] for group in self.groups if not group["Users"]]
+
+        if failing_groups:
+            results["analysis"] = "the following groups contain no users: {}".format(" ".join(failing_groups))
+            results["affected"] = ", ".join(failing_groups)
+            results["pass_fail"] = "FAIL"
 
         return results
