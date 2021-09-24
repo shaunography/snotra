@@ -57,7 +57,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * cross-account assumerole policy lacks external ID (iam)
 * groups granting admin access (iam)
 * group name does not indicate admin access (iam)
-
+* default vpcs in use (ec2)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
