@@ -11,13 +11,14 @@ class iam(object):
 
     def __init__(self, session):
         self.session = session
+        self.account_id = get_account_id(session)
         self.client = self.get_client()
         self.account_summary = self.get_account_summary()
         self.credential_report = self.get_credential_report()
         self.password_policy = self.get_password_policy()
         self.users = self.list_users()
-        self.policies = self.get_policies()
-        self.account_id = get_account_id(session)
+        self.aws_policies = self.get_aws_policies()
+        self.customer_policies = self.get_customer_policies()
         self.groups = self.list_groups()
         self.roles = self.list_roles()
 
@@ -78,9 +79,33 @@ class iam(object):
         print("Getting User List")
         return self.client.list_users()["Users"]
     
-    def get_policies(self):
-        print("Getting Policies")
-        return self.client.list_policies(OnlyAttached=True)["Policies"]
+    def get_aws_policies(self):
+        print("Getting AWS Managed Policies")
+        #return self.client.list_policies(OnlyAttached=True)["Policies"]
+        policies = []
+        current_policies = self.client.list_policies(Scope="AWS")
+        policies += current_policies["Policies"]
+        is_truncated = current_policies["IsTruncated"]
+        if is_truncated == True:
+            while is_truncated == True:
+                current_policies = self.client.list_policies(Scope="AWS", Marker=current_policies["Marker"])
+                policies += current_policies["Policies"]
+                is_truncated = current_policies["IsTruncated"]
+        return policies
+    
+    def get_customer_policies(self):
+        print("Getting Customer Managed Policies")
+        #return self.client.list_policies(OnlyAttached=True)["Policies"]
+        policies = []
+        current_policies = self.client.list_policies(Scope="Local")
+        policies += current_policies["Policies"]
+        is_truncated = current_policies["IsTruncated"]
+        if is_truncated == True:
+            while is_truncated == True:
+                current_policies = self.client.list_policies(Scope="Local", Marker=current_policies["Marker"])
+                policies += current_policies["Policies"]
+                is_truncated = current_policies["IsTruncated"]
+        return policies
     
     def list_groups(self):
         print("Getting Groups")
@@ -708,22 +733,30 @@ class iam(object):
 
         failing_policies = []
 
-        for policy in self.policies:
+        for policy in self.customer_policies:
 
             arn = policy["Arn"]
             policy_name = policy["PolicyName"]
             #policy_id = policy["PolicyId"]
-            version_id = policy["DefaultVersionId"]
+            version_id = policy["DefaultVersionId"]        
 
             statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            
+            if type(statements) is not list:
+                statements = [ statements ]
+
             for statement in statements:
-                if statement["Effect"] == "Allow":
-                    if statement["Action"] == "*":
-                        if statement["Resource"] == "*":
-                            failing_policies += []
+                try:
+                    if statement["Effect"] == "Allow":
+                        if statement["Action"] == "*":
+                            if statement["Resource"] == "*":
+                                failing_policies.append(policy_name)
+                except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                    pass
 
         if failing_policies:
             results["analysis"] = "The following custom policies grant full *:* privileges: {}".format(" ".join(set(failing_policies)))
+            results["affected"] = ", ".join(failing_policies)
             results["pass_fail"] = "FAIL"
 
         return results
@@ -753,19 +786,21 @@ class iam(object):
 
         results["affected"] = self.account_id
 
-        for policy in self.policies:
+        for policy in self.aws_policies:
+
+            if policy["AttachmentCount"] != 0:
             
-            if policy["PolicyName"] == "AWSSupportAccess":                
-                results["analysis"] = "AWSSupportAccess Policy is attached - but not to a custom support role"
-                results["pass_fail"] = "FAIL"
-                
-                arn = policy["Arn"]
-                
-                policy_roles = self.client.list_entities_for_policy(PolicyArn=arn)["PolicyRoles"]
-                
-                if policy_roles:
-                    results["analysis"] = "AWSSupportAccess Policy is attached to role: {}".format(" ".join(policy_roles))
-                    results["pass_fail"] = "PASS"
+                if policy["PolicyName"] == "AWSSupportAccess":                
+                    results["analysis"] = "AWSSupportAccess Policy is attached - but not to a custom support role"
+                    results["pass_fail"] = "FAIL"
+                    
+                    arn = policy["Arn"]
+                    
+                    policy_roles = self.client.list_entities_for_policy(PolicyArn=arn)["PolicyRoles"]
+                    
+                    if policy_roles:
+                        results["analysis"] = "AWSSupportAccess Policy is attached to role: {}".format(" ".join(policy_roles))
+                        results["pass_fail"] = "PASS"
 
         return results
 
