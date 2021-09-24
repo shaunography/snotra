@@ -18,6 +18,7 @@ class ec2(object):
         self.instance_reservations = self.get_instance_reservations()
         self.volumes = self.get_volumes()
         self.snapshots = self.get_snapshots()
+        self.vpcs = self.get_vpcs()
 
     def run(self):
         findings = []
@@ -43,6 +44,7 @@ class ec2(object):
         findings += [ self.ec2_20() ]
         findings += [ self.ec2_21() ]
         findings += [ self.ec2_22() ]
+        findings += [ self.ec2_23() ]
         return findings
 
     def get_security_groups(self):
@@ -92,6 +94,14 @@ class ec2(object):
             client = self.session.client('ec2', region_name=region)
             snapshots[region] = client.describe_snapshots()["Snapshots"]
         return snapshots
+    
+    def get_vpcs(self):
+        vpcs = {}
+        print("getting vpcs")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            vpcs[region] = client.describe_vpcs()["Vpcs"]
+        return vpcs
     
     def ec2_1(self):
         # Ensure IAM instance roles are used for AWS resource access from instances (Manual)
@@ -1039,6 +1049,7 @@ class ec2(object):
         if failing_volumes:
                 results["analysis"] = "the following Volumes are not encrypted:\n{}".format(" ".join(failing_volumes))
                 results["affected"] = ", ".join(failing_volumes)
+                results["pass_fail"] = "FAIL"
         
         
         return results
@@ -1074,6 +1085,7 @@ class ec2(object):
         if failing_snapshots:
                 results["analysis"] = "the following Snapshots are not encrypted:\n{}".format(" ".join(failing_snapshots))
                 results["affected"] = ", ".join(failing_snapshots)
+                results["pass_fail"] = "FAIL"
         
         return results
     
@@ -1112,5 +1124,46 @@ class ec2(object):
         if failing_snapshots:
                 results["analysis"] = "the following Volumes are not encrypted:\n{}".format(" ".join(failing_snapshots))
                 results["affected"] = ", ".join(failing_snapshots)
+                results["pass_fail"] = "FAIL"
+        
+        return results
+    
+    def ec2_23(self):
+        # default VPCs in use
+
+        results = {
+            "id" : "ec2_23",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Default VPCs in use",
+            "affected": "",
+            "analysis" : "No Default VPCs in use",
+            "description" : "Default VPCs created by AWS can be considered overly permissive and it is recomened to create you own VPCs instead. Default VPCs include an internet gateway, default security groups and default allow all NACLs which could result in accidental exposure of EC2 instances and data to the internet.",
+            "remediation" : "Create you own VPCs as required applying the priciple of least privilege to network access controls",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: ec2_23")
+        
+        failing_vpcs = []
+
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    for vpc in self.vpcs[region]:
+                        if vpc["VpcId"] == instance["VpcId"]:
+                            if vpc["IsDefault"] == True:
+                                failing_vpcs.append("{}({})".format(vpc["VpcId"], region))
+        
+        if failing_vpcs:
+                results["analysis"] = "the following Volumes are not encrypted:\n{}".format(" ".join(failing_vpcs))
+                results["affected"] = ", ".join(failing_vpcs)
+                results["pass_fail"] = "FAIL"
         
         return results
