@@ -5,8 +5,13 @@ Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it
 * Python3
 * boto3
 
+## permissions
+The following AWS Managed Policies can be attached to the principal in order to grant the access keys the necessary permissions:
+* ReadOnlyAccess
+* SecurityAudit
+
 ## docker
-from the clone repo directory, run:
+from the cloned repo directory, run:
 
 `docker build -t snotra .`
 
@@ -52,7 +57,6 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * Cross-Account AssumeRole Policy Lacks External ID
 
 
-
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
 ```
@@ -86,29 +90,7 @@ The results JSON file that Snotra produces is in the following format:
 * [snotra_to_table](https://github.com/shaunography/snotra_to_table) - Converts Snotra results JSON file into a simple CSV table for pasting into reports.
 * [snotra_to_md](https://github.com/shaunography/snotra_to_md) - Converts Snotra results JSON file to a simple Mark Down file.
 
+## Contributions
+### Code
+Pull requests, bug reports and enhancement suggestions are more than welcome.
 
-## todo
-### features
-- [x] CIS benchmark
-    - [ ] pass/fail percentage
-- [x] non-CIS checks
-    - [ ] external attack surface
-- [x] JSON results file for consumption by other tools
-- [x] AWS profiles
-- [ ] specifiy regions
-- [ ] specify checks by groups (i.e. CIS, IAM, EC2, CIS_level_1 etc)
-- [ ] additional compliance standards
-- [ ] print list of all check names
-- [x] dockerfile
-- [ ] dockerhub
-- [ ] Azure?
-- [ ] git gud
-
-### improvements
-- [ ] better error handling
-- [ ] actually test CIS1_19
-- [ ] test CIS2_1_3 with mfa enabled buckets
-- [ ] hardware MFA check
-- [x] cacheing / minimise requests to API
-    - [x] WTF is S3 doing? (FACEPALM!)
-- [x] refactor cloudwatch CIS checks
