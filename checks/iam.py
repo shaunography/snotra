@@ -45,6 +45,8 @@ class iam(object):
         findings += [ self.iam_19() ]
         findings += [ self.iam_20() ]
         findings += [ self.iam_21() ]
+        findings += [ self.iam_22() ]
+        findings += [ self.iam_23() ]
         return findings
 
     def get_client(self):
@@ -950,6 +952,127 @@ class iam(object):
         if failing_roles:
             results["analysis"] = "the following cross account roles do not have an external ID configured:\n{}".format(" ".join(failing_roles))
             results["affected"] = ", ".join(failing_roles)
+            results["pass_fail"] = "FAIL"
+
+        return results
+    
+    def iam_22(self):
+        # Admin Groups
+
+        results = {
+            "id" : "iam_22",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "iam",
+            "name" : "Groups Granting Full Admin Access",
+            "affected": "",
+            "analysis" : "No Admin Groups Found",
+            "description" : 'The affected Groups grant member user full admin "*" access to the account',
+            "remediation" : 'ensure only users that require admin access have it.',
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: iam_22")
+
+        admin_groups = []
+
+        policies = self.customer_policies + self.aws_policies
+
+        for group in self.groups:
+            managed_policies = self.client.list_attached_group_policies(GroupName=group["Group"]["GroupName"])["AttachedPolicies"]
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            group_policies = managed_policies + inline_policies
+            
+            for group_policy in group_policies:
+
+                for policy in policies:
+                    arn = policy["Arn"]
+
+                    if group_policy["PolicyArn"] == arn:
+
+                        statements = self.client.get_policy_version(PolicyArn=arn, VersionId=policy["DefaultVersionId"])["PolicyVersion"]["Document"]["Statement"]
+                        
+                        if type(statements) is not list:
+                            statements = [ statements ]
+
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            admin_groups.append(group["Group"]["GroupName"])
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
+
+        if admin_groups:
+            results["analysis"] = "the following groups grant admin access:\n{}".format(" ".join(admin_groups))
+            results["affected"] = ", ".join(admin_groups)
+            results["pass_fail"] = "FAIL"
+
+        return results
+    
+    def iam_23(self):
+        # Group Name does not Indicate Admin Access
+
+        results = {
+            "id" : "iam_23",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "iam",
+            "name" : "Group Name does not Indicate Admin Access",
+            "affected": "",
+            "analysis" : "No Admin Groups Found",
+            "description" : 'An AWS principle was found that grants admin privileges within the AWS account. The name of this policy does not clearly indicate the level of privilege provided. To make maintaining the account as easy as possible and to reduce the risk of administrative privileges being granted to AWS principles that do not require them by mistake it is recommended to implement a common naming convention for all custom groups, roles and policies which indicates the level of access being granted. ',
+            "remediation" : 'Implement a simple naming convention for all custom groups, roles and policies which clearly indicates what permissions they grant and who they should apply to.',
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : "PASS"
+        }
+
+        print("running check: iam_23")
+
+        admin_groups = []
+
+        policies = self.customer_policies + self.aws_policies
+
+        for group in self.groups:
+            managed_policies = self.client.list_attached_group_policies(GroupName=group["Group"]["GroupName"])["AttachedPolicies"]
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            group_policies = managed_policies + inline_policies
+            
+            for group_policy in group_policies:
+
+                for policy in policies:
+                    arn = policy["Arn"]
+
+                    if group_policy["PolicyArn"] == arn:
+
+                        statements = self.client.get_policy_version(PolicyArn=arn, VersionId=policy["DefaultVersionId"])["PolicyVersion"]["Document"]["Statement"]
+                        
+                        if type(statements) is not list:
+                            statements = [ statements ]
+
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            if not re.match(".*[Aa][Dd][Mm][Ii][Nn].*", group["Group"]["GroupName"]):
+                                                admin_groups.append(group["Group"]["GroupName"])
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
+
+        if admin_groups:
+            results["analysis"] = "the following groups grant admin access which is not indicated by their name:\n{}".format(" ".join(admin_groups))
+            results["affected"] = ", ".join(admin_groups)
             results["pass_fail"] = "FAIL"
 
         return results
