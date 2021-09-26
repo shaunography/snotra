@@ -42,22 +42,18 @@ class cloudtrail(object):
             "level" : 1,
             "service" : "cloudtrail",
             "name" : "Ensure CloudTrail is enabled in all regions",
-            "affected": "",
-            "analysis" : "No multi region enabled trails were found",
+            "affected": [],
+            "analysis" : "",
             "description" : "AWS CloudTrail is a web service that records AWS API calls for your account and delivers log files to you. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, the request parameters, and the response elements returned by the AWS service. CloudTrail provides a history of AWS API calls for an account, including API calls made via the Management Console, SDKs, command line tools, and higher-level AWS services (such as CloudFormation).",
             "remediation" : "Enable CloudTrail in all regions",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         print("running check: cloudtrail_1")
-
-        results["affected"] = self.account_id
-        
-        multi_region_trails = []
         
         for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -66,12 +62,15 @@ class cloudtrail(object):
                 if trail["IsMultiRegionTrail"] == True:
                     if trail["HomeRegion"] == region:
                         if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                            multi_region_trails += [trail_name]
+                            results["affected"].append(trail_name)
 
-        if multi_region_trails:
-            results["analysis"] = "the following trails are multi region enabled: {}".format(" ".join(multi_region_trails))
-            #results["affected"] = ", ".join(multi_region_trails)
+        if results["affected"]:
+            results["analysis"] = "The affected trails are multi region enabled."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No multi region enabled trails were found."
+            results["pass_fail"] = "FAIL"
+
         
         return results
 
@@ -85,35 +84,35 @@ class cloudtrail(object):
             "level" : 2,
             "service" : "cloudtrail",
             "name" : "Ensure CloudTrail log file validation is enabled",
-            "affected": "",
-            "analysis" : "log file validation is enabled on all trails",
+            "affected": [],
+            "analysis" : "",
             "description" : "CloudTrail log file validation creates a digitally signed digest file containing a hash of each log that CloudTrail writes to S3. These digest files can be used to determine whether a log file was changed, deleted, or unchanged after CloudTrail delivered the log. It is recommended that file validation be enabled on all CloudTrails. Enabling log file validation will provide additional integrity checking of CloudTrail logs.",
             "remediation" : "Enabled log file validation on all your trails",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: cloudtrail_2")
-
-        failing_trails = []
         
         for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if trail["LogFileValidationEnabled"] == False:
-                        failing_trails += [trail["Name"]]
+                        results["affected"].append(trail["Name"])
 
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
-        if failing_trails:
-            results["analysis"] = "the following trails do not have log file validation enabled: {}".format(" ".join(failing_trails))
-            results["affected"] = ", ".join(failing_trails)
+        if results["affected"]:
+            results["analysis"] = "The affected trails do not have log file validation enabled."
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Log file validation is enabled on all trails."
+            results["pass_fail"] = "PASS"
         
         return results
 
@@ -127,20 +126,18 @@ class cloudtrail(object):
             "level" : 1,
             "service" : "cloudtrail",
             "name" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible",
-            "affected": "",
-            "analysis" : "no public cloud trail buckets found",
+            "affected": [],
+            "analysis" : "",
             "description" : "CloudTrail logs a record of every API call made in your AWS account. These logs file are stored in an S3 bucket. It is recommended that the bucket policy or access control list (ACL) applied to the S3 bucket that CloudTrail logs to prevent public access to the CloudTrail logs. Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected account's use or configuration.",
             "remediation" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: cloudtrail_3")
-
-        failing_trails = []
 
         s3_client = self.session.client('s3')
         
@@ -153,9 +150,9 @@ class cloudtrail(object):
                     for grant in grants:
                         try:
                             if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AllUsers":
-                                failing_trails += [trail_name]
+                                results["affected"].append(trail_name)
                             if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AuthenticatedUsers":
-                                failing_trails += [trail_name]
+                                results["affected"].append(trail_name)
                         except KeyError:
                             pass
                                      
@@ -172,13 +169,13 @@ class cloudtrail(object):
                                 if effect == "Allow":
                                     try:
                                         if statement["Principal"]["AWS"] == "*":
-                                            failing_trails += [trail_name]
+                                            results["affected"].append(trail_name)
                                     except KeyError:
                                         pass
 
                                     try:
                                         if statement["Principal"]["Service"] == "*":
-                                            failing_trails += [trail_name]
+                                            results["affected"].append(trail_name)
                                     except KeyError:
                                         pass
 
@@ -186,10 +183,12 @@ class cloudtrail(object):
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
         
-        if failing_trails:
-            results["analysis"] = "the following trails are using a potentially public S3 bucket: {}".format(" ".join(set(failing_trails)))
-            results["affected"] = ", ".join(set(failing_trails))
+        if results["affected"]:
+            results["analysis"] = "The affected trails are using a potentially public S3 bucket."
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No public cloud trail buckets found."
+            results["pass_fail"] = "PASS"
         
         return results
 
@@ -205,35 +204,35 @@ class cloudtrail(object):
             "level" : 1,
             "service" : "cloudtrail",
             "name" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
-            "affected": "",
-            "analysis" : "all trails are integrated with CloudWatch Logs",
+            "affected": [],
+            "analysis" : "",
             "description" : "AWS CloudTrail is a web service that records AWS API calls made in a given AWS account. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, the request parameters, and the response elements returned by the AWS service. CloudTrail uses Amazon S3 for log file storage and delivery, so log files are stored durably. In addition to capturing CloudTrail logs within a specified S3 bucket for long term analysis, realtime analysis can be performed by configuring CloudTrail to send logs to CloudWatch Logs. For a trail that is enabled in all regions in an account, CloudTrail sends log files from all those regions to a CloudWatch Logs log group. It is recommended that CloudTrail logs be sent to CloudWatch Logs. Note: The intent of this recommendation is to ensure AWS account activity is being captured, monitored, and appropriately alarmed on. CloudWatch Logs is a native way to accomplish this using AWS services but does not preclude the use of an alternate solution. Sending CloudTrail logs to CloudWatch Logs will facilitate real-time and historic activity logging based on user, API, resource, and IP address, and provides opportunity to establish alarms and notifications for anomalous or sensitivity account activity. ",
             "remediation" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: cloudtrail_4")
-
-        failing_trails = []
         
         for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if "CloudWatchLogsLogGroupArn" not in trail:
-                        failing_trails += [trail["Name"]]
+                        results["affected"].append(trail["Name"])
 
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
-        if failing_trails:
-            results["analysis"] = "the following trails are not integrated with CloudWatch Logs: {}".format(" ".join(failing_trails))
-            results["affected"] = ", ".join(failing_trails)
+        if results["affected"]:
+            results["analysis"] = "The affected trails are not integrated with CloudWatch Logs."
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All trails are integrated with CloudWatch Logs."
+            results["pass_fail"] = "PASS"
 
         return results
 
@@ -248,20 +247,18 @@ class cloudtrail(object):
             "level" : 1,
             "service" : "cloudtrail",
             "name" : "Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket",
-            "affected": "",
-            "analysis" : "S3 bucket access logging is enabled",
+            "affected": [],
+            "analysis" : "",
             "description" : "S3 Bucket Access Logging generates a log that contains access records for each request made to your S3 bucket. An access log record contains details about the request, such as the request type, the resources specified in the request worked, and the time and date the request was processed. It is recommended that bucket access logging be enabled on the CloudTrail S3 bucket. By enabling S3 bucket logging on target S3 buckets, it is possible to capture all events which may affect objects within any target buckets. Configuring logs to be placed in a separate bucket allows access to log information which can be useful in security and incident response workflows.",
             "remediation" : "Ensure the CloudTrail S3 bucket has access logging is enabled",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: cloudtrail_5")
-        
-        failing_trails = []
 
         s3_client = self.session.client('s3')
         
@@ -269,16 +266,18 @@ class cloudtrail(object):
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if "LoggingEnabled" not in s3_client.get_bucket_logging(Bucket=trail["S3BucketName"]):
-                        failing_trails += [trail["Name"]]
+                        results["affected"].append(trail["Name"])
 
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail trails in use"
             results["pass_fail"] = "FAIL"
         
-        if failing_trails:
-            results["analysis"] = "the following trails do not have S3 bucket access logging enabled: {}".format(" ".join(failing_trails))
-            results["affected"] = ", ".join(failing_trails)
+        if results["affected"]:
+            results["analysis"] = "The affected trails do not have S3 bucket access logging enabled."
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "S3 bucket access logging is enabled."
+            results["pass_fail"] = "PASS"
 
         return results
     
@@ -293,35 +292,35 @@ class cloudtrail(object):
             "level" : 2,
             "service" : "cloudtrail",
             "name" : "Ensure CloudTrail logs are encrypted at rest using KMS CMKs",
-            "affected": "",
-            "analysis" : "CloudTrail logs are encrypted at rest with KMS CMKs",
+            "affected": [],
+            "analysis" : "",
             "description" : "AWS CloudTrail is a web service that records AWS API calls for an account and makes those logs available to users and resources in accordance with IAM policies. AWS Key Management Service (KMS) is a managed service that helps create and control the encryption keys used to encrypt account data, and uses Hardware Security Modules (HSMs) to protect the security of encryption keys. CloudTrail logs can be configured to leverage server side encryption (SSE) and KMS customer created master keys (CMK) to further protect CloudTrail logs. It is recommended that CloudTrail be configured to use SSE-KMS. Configuring CloudTrail to use SSE-KMS provides additional confidentiality controls on log data as a given user must have S3 read permission on the corresponding log bucket and must be granted decrypt permission by the CMK policy.",
             "remediation" : "Configure CloudTrail to use SSE-KMS for encryption at rest.",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: cloudtrail_6")
-
-        failing_trails = []
         
         for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
                     if "KmsKeyId" not in trail:
-                        failing_trails += [trail["Name"]]
+                        results["affected"].append(trail["Name"])
 
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
-        if failing_trails:
-            results["analysis"] = "the following trails do not encrypt logs at rest: {}".format(" ".join(failing_trails))
-            results["affected"] = ", ".join(failing_trails)
+        if results["affected"]:
+            results["analysis"] = "The affected trails do not encrypt logs at rest."
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "CloudTrail logs are encrypted at rest with KMS CMKs."
+            results["pass_fail"] = "PASS"
         
         return results
 
@@ -335,22 +334,18 @@ class cloudtrail(object):
             "level" : 2,
             "service" : "cloudtrail",
             "name" : "Ensure that Object-level logging for write events is enabled for S3 bucket",
-            "affected": "",
-            "analysis" : "No trails were found with S3 Object-Level Logging enabled",
+            "affected": [],
+            "analysis" : "",
             "description" : "S3 object-level API operations such as GetObject, DeleteObject, and PutObject are called data events. By default, CloudTrail trails don't log data events and so it is recommended to enable Object-level logging for S3 buckets. Enabling object-level logging will help you meet data compliance requirements within your organization, perform comprehensive security analysis, monitor specific patterns of user behavior in your AWS account or take immediate actions on any object-level API activity within your S3 Buckets using Amazon CloudWatch Events.",
             "remediation" : "Enable S3 bucket Object-level logging for write events in CloudTrail",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
         
         print("running check: cloudtrail_7")
-
-        results["affected"] = self.account_id
-
-        passing_trails = []
      
         for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -363,16 +358,19 @@ class cloudtrail(object):
                             if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "WriteOnly":
                                 for resources in selector["DataResources"]:
                                     if resources["Type"] == "AWS::S3::Object":
-                                        passing_trails += [trail_name]
+                                        results["affected"].append(trail_name)
         
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
-        if passing_trails:
-            results["analysis"] = "the following trails have S3 Object-Level logging for write events enabled: {}".format(" ".join(passing_trails))
-            #results["affected"] = ", ".join(passing_trails)
+        if results["affected"]:
+            results["analysis"] = "The affected trails have S3 Object-Level logging for write events enabled."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No trails were found with S3 Object-Level Logging enabled."
+            results["affected"].append(self.account_id)
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -386,20 +384,16 @@ class cloudtrail(object):
             "level" : 2,
             "service" : "cloudtrail",
             "name" : "Ensure that Object-level logging for read events is enabled for S3 bucket",
-            "affected": "",
-            "analysis" : "No trails were found with S3 Object-Level Logging enabled",
+            "affected": [],
+            "analysis" : "",
             "description" : "S3 object-level API operations such as GetObject, DeleteObject, and PutObject are called data events. By default, CloudTrail trails don't log data events and so it is recommended to enable Object-level logging for S3 buckets. Enabling object-level logging will help you meet data compliance requirements within your organization, perform comprehensive security analysis, monitor specific patterns of user behavior in your AWS account or take immediate actions on any object-level API activity using Amazon CloudWatch Events.",
             "remediation" : "Enable S3 bucket Object-level logging for read events in CloudTrail",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
-        
-        passing_trails = []
-
-        results["affected"] = self.account_id
      
         for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -412,15 +406,18 @@ class cloudtrail(object):
                             if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "ReadOnly":
                                 for resources in selector["DataResources"]:
                                     if resources["Type"] == "AWS::S3::Object":
-                                        passing_trails += [trail_name]
+                                        results["affected"].append(trail_name)
         
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
 
-        if passing_trails:
-            results["analysis"] = "the following trails have S3 Object-Level logging for read events enabled: {}".format(" ".join(passing_trails))
-            #results["affected"] = ", ".join(passing_trails)
+        if results["affected"]:
+            results["analysis"] = "The affected trails have S3 Object-Level logging for read events enabled."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No trails were found with S3 Object-Level Logging enabled."
+            results["affected"].append(self.account_id)
+            results["pass_fail"] = "FAIL"
 
         return results

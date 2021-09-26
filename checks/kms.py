@@ -32,20 +32,18 @@ class kms(object):
             "level" : 2,
             "service" : "kms",
             "name" : "Ensure rotation for customer created CMKs is enabled",
-            "affected": "",
-            "analysis" : "rotation is enabled on all CMKs",
+            "affected": [],
+            "analysis" : "",
             "description" : "AWS Key Management Service (KMS) allows customers to rotate the backing key which is key material stored within the KMS which is tied to the key ID of the Customer Created customer master key (CMK). It is the backing key that is used to perform cryptographic operations such as encryption and decryption. Automated key rotation currently retains all prior backing keys so that decryption of encrypted data can take place transparently. It is recommended that CMK key rotation be enabled. Rotating encryption keys helps reduce the potential impact of a compromised key as data encrypted with a new key cannot be accessed with a previous key that may have been exposed.",
             "remediation" : "Enable key rotation on all customer created CMKs",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: kms_1")
-
-        failing_keys = []
         
         for region, key_list in self.keys.items():
             client = self.session.client('kms', region_name=region)
@@ -59,11 +57,13 @@ class kms(object):
                     pass
                 else:
                     if key_rotation_Status == False:
-                        failing_keys += ["{}({})".format(key_id, region)]
+                        results["affected"].append("{}({})".format(key_id, region))
 
-        if failing_keys:
-            results["analysis"] = "the following KMS keys do not have rotation enabled: {}".format(" ".join(failing_keys))
-            results["affected"] = ", ".join(failing_keys)
+        if results["affected"]:
+            results["analysis"] = "The affected KMS keys do not have rotation enabled."
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Rotation is enabled on all CMKs."
+            results["pass_fail"] = "PASS"
         
         return results

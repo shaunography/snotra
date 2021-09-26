@@ -45,36 +45,36 @@ class securityhub(object):
             "level" : "n/a",
             "service" : "securityhub",
             "name" : "Active Security Hub Subscription",
-            "affected": "",
-            "analysis" : "A Security hub subscription is active but no active standards subscriptions were found, ensure AWS config is enabled",
+            "affected": [],
+            "analysis" : "",
             "description" : "AWS Security Hub provides you with a comprehensive view of your security state in AWS and helps you check your environment against security industry standards and best practices. Security Hub collects security data from across AWS accounts, services, and supported third-party partner products and helps you analyse your security trends and identify the highest priority security issues.",
             "remediation" : "Consider maintaining a Security Hub subscription to help identify security vulnerabilites within your acount,ensure AWS config is enabled in all regions to allow Security hub to audit account configuration.",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         print("running check: securityhub_1")
 
-        results["affected"] =  self.account_id
-
-        passing_regions = []
-
         if not self.security_hubs:
             results["analysis"] = "No active Security Hub subscriptions found"
+            results["affected"].append(self.account_id)
             results["pass_fail"] = "FAIL"
         else:
             for region, hub in self.security_hubs.items():   
                 if [ i["StandardsSubscriptionArn"] for i in hub["StandardsSubscriptions"] if i["StandardsStatus"] == "READY"]:
-                    passing_regions.append(region)
+                    results["affected"].append(region)
                 #else:
                     #incomplete_standards = [ i["StandardsSubscriptionArn"] for i in hub["StandardsSubscriptions"] if i["StandardsStatus"] == "INCOMPLETE"]
             
-            if passing_regions:
-                results["analysis"] = "Security Hub Enabled with active Standards Subscripts in the following regions: {}".format(" ".join(passing_regions))
+            if results["affected"]:
+                results["analysis"] = "Security Hub Enabled with active Standards Subscripts in the affected regions."
                 results["pass_fail"] = "PASS"
+            else:
+                results["analysis"] = "A Security hub subscription is active but no active standards subscriptions were found, ensure AWS config is enabled."
+                results["pass_fail"] = "FAIL"
 
         return results
     
@@ -88,29 +88,31 @@ class securityhub(object):
             "level" : "n/a",
             "service" : "securityhub",
             "name" : "Security Hub Auto Enable Controls",
-            "affected": "",
-            "analysis" : "All Security Hubs have AutoEnableControls enabled",
+            "affected": [],
+            "analysis" : "",
             "description" : "AWS Security Hub provides you with a comprehensive view of your security state in AWS and helps you check your environment against security industry standards and best practices. Security Hub collects security data from across AWS accounts, services, and supported third-party partner products and helps you analyse your security trends and identify the highest priority security issues.",
             "remediation" : "It is recomened to auto enable new Security Hub controls as they are added to compliance standards",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: securityhub_2")
 
         if not self.security_hubs:
             results["analysis"] = "No active Security Hub subscriptions found"
-            results["affected"] =  self.account_id
+            results["affected"].append(self.account_id)
             results["pass_fail"] = "FAIL"
         else:
-            failing_hubs = [ hub["HubArn"] for region, hub in self.security_hubs.items() if hub["AutoEnableControls"] == False ]
+            results["affected"] = [ hub["HubArn"] for region, hub in self.security_hubs.items() if hub["AutoEnableControls"] == False ]
             
-            if failing_hubs:
-                results["analysis"] = "The following Security Hubs do not have AutoEnableControls enabled: {}".format(" ".join(failing_hubs))
-                results["affected"] = ", ".join(failing_hubs)
+            if results["affected"]:
+                results["analysis"] = "The affected Security Hubs do not have AutoEnableControls enabled."
+                results["pass_fail"] = "FAIL"
+            else:
+                results["analysis"] = "All Security Hubs have AutoEnableControls enabled."
                 results["pass_fail"] = "PASS"
 
         return results

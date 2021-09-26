@@ -2,14 +2,12 @@ import boto3
 import re
 
 from utils.utils import describe_regions
-from utils.utils import get_account_id
 
 class cloudwatch(object):
 
     def __init__(self, session):
         self.session = session
         self.regions = describe_regions(session)
-        self.account_id = get_account_id(session)
         self.trail_list = self.get_trail_list()
 
     def run(self):
@@ -50,25 +48,21 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for unauthorized API calls",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for unauthorized API calls could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for unauthorized API calls. Monitoring unauthorized API calls will help reveal application errors and may reduce time to detect malicious activity.",
             "remediation" : "Create a log metric filter and alarm for unauthorized API calls in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
         print("running check: cloudwatch_1")
 
-        results["affected"] = self.account_id
-        
-        passing_metrics = []
-     
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
             
@@ -103,8 +97,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -128,11 +122,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for unauthorized API calls: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for unauthorized API calls."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for unauthorized API calls could be found."
+            results["pass_fail"] = "FAIL"
 
         return results
 
@@ -147,24 +144,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for Management Console sign-in without MFA",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for Management Console sign-in without MFA could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for console logins that are not protected by multi-factor authentication (MFA). Monitoring for single-factor console logins will increase visibility into accounts that are not protected by MFA.",
             "remediation" : "Create a log metric filter and alarm for Management Console sign-in without MFA in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
         print("running check: cloudwatch_2")
-
-        results["affected"] = self.account_id
-        
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -200,8 +193,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -226,11 +219,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for Management Console sign-in without MFA: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for Management Console sign-in without MFA."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for Management Console sign-in without MFA could be found."
+            results["pass_fail"] = "FAIL"
 
         return results
         
@@ -245,24 +241,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for usage of root account",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for usage of 'root' account could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for 'root' login attempts. Monitoring for 'root' account logins will provide visibility into the use of a fully privileged account and an opportunity to reduce the use of it.",
             "remediation" : "Create a log metric filter and alarm for usage of root account in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
         print("running check: cloudwatch_3")
-
-        results["affected"] = self.account_id
-        
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -298,8 +290,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -324,11 +316,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for usage of 'root' account: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for usage of 'root' account."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for usage of 'root' account could be found."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -342,24 +337,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for IAM policy changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for IAM policy changes could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established changes made to Identity and Access Management (IAM) policies. Monitoring changes to IAM policies will help ensure authentication and authorization controls remain intact.",
             "remediation" : "Create a log metric filter and alarm for IAM policy changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_4")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -395,8 +386,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -420,11 +411,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for for IAM policy changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for for IAM policy changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for IAM policy changes could be found."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -438,24 +432,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for CloudTrail configuration changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for CloudTrail configuration changes could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for detecting changes to CloudTrail's configurations. Monitoring changes to CloudTrail's configuration will help ensure sustained visibility to activities performed in the AWS account.",
             "remediation" : "Create a log metric filter and alarm for CloudTrail configuration changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_5")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -491,8 +481,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -516,11 +506,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for CloudTrail configuration changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for CloudTrail configuration changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for CloudTrail configuration changes could be found"
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -534,24 +527,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for AWS Management Console authentication failures",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for AWS Management Console authentication failures could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for failed console authentication attempts. Monitoring failed console logins may decrease lead time to detect an attempt to brute force a credential, which may provide an indicator, such as source IP, that can be used in other event correlation.",
             "remediation" : "Create a log metric filter and alarm for AWS Management Console authentication failures in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_6")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -587,8 +576,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -612,11 +601,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for AWS Management Console authentication failures: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for AWS Management Console authentication failures."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for AWS Management Console authentication failures could be found."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -630,24 +622,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for disabling or scheduled deletion of customer created CMKs could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for customer created CMKs which have changed state to disabled or scheduled deletion. Data encrypted with disabled or deleted keys will no longer be accessible.",
             "remediation" : "Create a log metric filter and alarm for disabling or scheduled deletion of customer created CMKs in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_7")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -683,8 +671,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -708,11 +696,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for disabling or scheduled deletion of customer created CMKs: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for disabling or scheduled deletion of customer created CMKs."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for disabling or scheduled deletion of customer created CMKs could be found."
+            results["pass_fail"] = "FAIL"
 
         return results
 
@@ -726,24 +717,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for S3 bucket policy changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for S3 bucket policy changes could be found",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for changes to S3 bucket policies. Monitoring changes to S3 bucket policies may reduce time to detect and correct permissive policies on sensitive S3 buckets.",
             "remediation" : "Create a log metric filter and alarm for S3 bucket policy changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_8")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -779,8 +766,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -804,11 +791,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for S3 bucket policy changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for S3 bucket policy changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for S3 bucket policy changes could be found."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -823,25 +813,21 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for AWS Config configuration changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for AWS Config configuration changes",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for detecting changes to CloudTrail's configurations. Monitoring changes to AWS Config configuration will help ensure sustained visibility of configuration items within the AWS account.",
             "remediation" : "Create a log metric filter and alarm for AWS Config configuration changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_9")
 
-        results["affected"] = self.account_id
-
-        passing_metrics = []
-     
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
             
@@ -876,8 +862,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -901,11 +887,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for AWS Config configuration changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for AWS Config configuration changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for AWS Config configuration changes."
+            results["pass_fail"] = "FAIL"
 
         return results
 
@@ -920,24 +909,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for security group changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for security group changes",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
             "remediation" : "Create a log metric filter and alarm for security group changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_10")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
+        print("running check: cloudwatch_10") 
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -973,8 +958,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -998,11 +983,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for security group changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for security group changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for security group changes."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -1017,25 +1005,21 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL)",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for changes to Network Access Control Lists (NACL)",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
             "remediation" : "Create a log metric filter and alarm for changes to Network Access Control Lists (NACL) in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_11")
 
-        results["affected"] = self.account_id
-
-        passing_metrics = []
-     
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
             
@@ -1070,8 +1054,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -1095,11 +1079,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for changes to Network Access Control Lists (NACL): {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for changes to Network Access Control Lists (NACL)."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for changes to Network Access Control Lists (NACL)."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -1113,24 +1100,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for changes to network gateways",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for changes to network gateways",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
             "remediation" : "Create a log metric filter and alarm for changes to network gateways in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_12")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1166,8 +1149,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -1191,11 +1174,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for changes to network gateways: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for changes to network gateways."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for changes to network gateways."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -1209,24 +1195,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for route table changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for route table changes",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Routing tables are used to route network traffic between subnets and to network gateways. It is recommended that a metric filter and alarm be established for changes to route tables. Monitoring changes to route tables will help ensure that all VPC traffic flows through an expected path. ",
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_13")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1262,8 +1244,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -1287,11 +1269,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for route table changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for route table changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for route table changes."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -1305,25 +1290,21 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for VPC changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for VPC changes",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is possible to have more than 1 VPC within an account, in addition it is also possible to create a peer connection between 2 VPCs enabling network traffic to route between VPCs. It is recommended that a metric filter and alarm be established for changes made to VPCs. Monitoring changes to VPC will help ensure VPC traffic flow is not getting impacted.",
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_14")
 
-        results["affected"] = self.account_id
-
-        passing_metrics = []
-     
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
             
@@ -1358,8 +1339,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -1383,11 +1364,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for VPC changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for VPC changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for VPC changes."
+            results["pass_fail"] = "FAIL"
 
         return results
     
@@ -1401,24 +1385,20 @@ class cloudwatch(object):
             "level" : 1,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for AWS Organizations changes",
-            "affected": "",
-            "analysis" : "No log metric filter and alarm for AWS Organizations changes",
+            "affected": [],
+            "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for AWS Organizations changes made in the master AWS Account. Monitoring AWS Organizations changes can help you prevent any unwanted, accidental or intentional modifications that may lead to unauthorized access or other security breaches. This monitoring technique helps you to ensure that any unexpected changes performed within your AWS Organizations can be investigated and any unwanted changes can be rolled back.",
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "FAIL"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_15")
-
-        results["affected"] = self.account_id
-
-        passing_metrics = []
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1454,8 +1434,8 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            results["analysis"] = "could not access CloudWatch Logs Log Group: {}".format(cloudwatch_logs_log_group_arn)
-                                            results["pass_fail"] = "INFO"
+                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            
 
                                         else:
                                             for filter in metric_filters:
@@ -1479,11 +1459,14 @@ class cloudwatch(object):
                                                             sns_client = self.session.client('sns', region_name=region)
                                                             subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                             if subscriptions:
-                                                                passing_metrics += [metric_filter_name]
+                                                                results["affected"].append(metric_filter_name)
 
-        if passing_metrics:
-            results["analysis"] = "the following metric filters were found for AWS Organizations changes: {}".format(" ".join(passing_metrics))
+        if results["affected"]:
+            results["analysis"] = "The affected metric filters were found for AWS Organizations changes."
             results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "No log metric filter and alarm for AWS Organizations changes."
+            results["pass_fail"] = "FAIL"
 
         return results
 
@@ -1497,22 +1480,20 @@ class cloudwatch(object):
             "level" : "n/a",
             "service" : "cloudwatch",
             "name" : "CloudWatch Alarms with no actions",
-            "affected": "",
-            "analysis" : "All CloudWatch alarms have actions configured",
+            "affected": [],
+            "analysis" : "",
             "description" : "The account under review contains CloudWatch alarms that have not been configured with any actions. To enable effective active monitoring of the account for suspicious activities all alarms should be configured with at least one action, normally raising a notification via the AWS SNS.",
             "remediation" : "Ensure all CloudWatch alarms are configured with at least one action. More Information: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
         print("running check: cloudwatch_16")
-
-        failing_alarms = []
      
         for region in self.regions:
             client = self.session.client('cloudwatch', region_name=region)
@@ -1522,16 +1503,18 @@ class cloudwatch(object):
             for alarm in metric_alarms:
                 alarm_name = alarm["AlarmName"]
                 if not alarm["AlarmActions"] and not alarm["OKActions"]:
-                    failing_alarms += ["{}({})".format(alarm_name, region)]
+                    results["affected"].append("{}({})".format(alarm_name, region))
                 
             for alarm in composite_alarms:
                 alarm_name = alarm["AlarmName"]
                 if not alarm["AlarmActions"] and not alarm["OKActions"]:
-                    failing_alarms += ["{}({})".format(alarm_name, region)]
+                    results["affected"].append("{}({})".format(alarm_name, region))
 
-        if failing_alarms:
-            results["analysis"] = "the following CloudWatch Alarms have no actions configured: {}".format(" ".join(failing_alarms))
-            results["affected"] = ", ".join(failing_alarms)
+        if results["affected"]:
+            results["analysis"] = "The affected CloudWatch Alarms have no actions configured."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All CloudWatch alarms have actions configured."
             results["pass_fail"] = "PASS"
 
         return results
