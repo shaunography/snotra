@@ -23,34 +23,34 @@ class guardduty(object):
             "level" : "n/a",
             "service" : "guardduty",
             "name" : "Enable GuardDuty in all regions",
-            "affected": "",
-            "analysis" : "GuardDuty is enabled in all regions",
+            "affected": [],
+            "analysis" : "",
             "description" : "GuardDuty is an AWS threat detection service that detects compromised access keys, EC2 instances, and more, allowing you to identify malicious activity and unauthorised behaviour within your account.",
             "remediation" : "Enable Guardduty in all AWS regions",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
             "cvss_score" : "n/a",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         print("running check: guardduty_1")
 
-        failing_regions = []
-
         for region in self.regions:
             client = self.session.client('guardduty', region_name=region)
             if not client.list_detectors()["DetectorIds"]:
-                failing_regions += [region]
+                results["affected"] += [region]
                 
                 
-        if failing_regions:
+        if results["affected"]:
             results["pass_fail"] = "FAIL"
-            if set(failing_regions) == set(self.regions):
+            if set(results["affected"]) == set(self.regions):
                 results["analysis"] = "AWS Config is not enabled in any region"
-                results["affected"] = ", ".join(self.regions)
             else:
-                results["analysis"] = "the following regions do not have AWS config enabled: {}".format(" ".join(failing_regions))
-                results["affected"] = ", ".join(failing_regions)
+                results["analysis"] = "The affected regions do not have AWS config enabled."
+        else:
+            results["analysis"] = "GuardDuty is enabled in all regions"
+            results["pass_fail"] = "PASS"
+
         
         return results
