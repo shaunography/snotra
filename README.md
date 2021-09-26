@@ -74,7 +74,7 @@ The results JSON file that Snotra produces is in the following format:
             "level": level,                     # CIS level e.g 1 (int)
             "service": service,                 # AWS service e.g "iam" (string)
             "name": name,                       # finding name e.g. "Ensure that encryption is enabled for RDS Instances" (string)
-            "affected": affected,               # affected resources e.g. [eu-west-2, eu-west-1] (list)
+            "affected": affected,               # affected resources e.g. ["eu-west-2", "eu-west-1"] (list)
             "analysis": analysis,               # technical analysis e.g. "AWS config is not enabled in eu-west-1" (string)
             "description": description,         # description of issue e.g. "AWS Config is a web service that performs ..." (string)
             "remediation": remediation,         # remediation advice e.g. "enable AWS Config in all regions" (string)
@@ -96,8 +96,8 @@ The results JSON file that Snotra produces is in the following format:
 ### code
 Pull requests, bug reports and enhancement suggestions are more than welcome.
 
-#### checks
-All check are a function/method of the relevent class and are in the following format:
+### checks
+All checks are a function/method of the relevent class and are in the following format:
 
 ```
     def service_n(self):
