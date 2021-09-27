@@ -552,10 +552,9 @@ class ec2(object):
         }
 
         print("running check: ec2_10")
-            
-        for region in self.regions:
+
+        for region, snapshots in self.snapshots.items():
             client = self.session.client('ec2', region_name=region)
-            snapshots = client.describe_snapshots(OwnerIds=[self.account_id])["Snapshots"]
             for snapshot in snapshots:
                 snapshot_id = snapshot["SnapshotId"]
                 try: # slow, but cant think of a better way
@@ -566,7 +565,7 @@ class ec2(object):
                     for permission in permissions:
                         try:
                             if permission["Group"] == "all":
-                                results["affected"].append(snapshot_id)
+                                results["affected"].append("{}({})".format(snapshot_id, region))
                         except KeyError:
                             pass
 
