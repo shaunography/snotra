@@ -1018,7 +1018,6 @@ class iam(object):
                                             users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                             except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                                 pass
-        print(users)
 
         if results["affected"]:
             results["analysis"] = "The affected groups grant admin access.\nAffected Groups and Users:\n{}".format(json.dumps(users))
@@ -1082,7 +1081,6 @@ class iam(object):
                                                 users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                             except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                                 pass
-        print(users)
 
         if results["affected"]:
             results["analysis"] = "The affected groups grant admin access which is not indicated by their name.\nAffected Groups and Users:\n{}".format(json.dumps(users))
