@@ -1,6 +1,7 @@
 import boto3
 import time
 import re
+import json
 
 from datetime import date
 from datetime import timedelta
@@ -989,6 +990,7 @@ class iam(object):
         print("running check: iam_22")
 
         policies = self.customer_policies + self.aws_policies
+        users = {}
 
         for group in self.groups:
             managed_policies = self.client.list_attached_group_policies(GroupName=group["Group"]["GroupName"])["AttachedPolicies"]
@@ -1013,11 +1015,13 @@ class iam(object):
                                     if statement["Action"] == "*":
                                         if statement["Resource"] == "*":
                                             results["affected"].append(group["Group"]["GroupName"])
+                                            users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                             except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                                 pass
+        print(users)
 
         if results["affected"]:
-            results["analysis"] = "The affected groups grant admin access." # TODO list group members in analysis
+            results["analysis"] = "The affected groups grant admin access.\nAffected Groups and Users:\n{}".format(json.dumps(users))
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Admin Groups Found."
@@ -1037,7 +1041,7 @@ class iam(object):
             "name" : "Group Name does not Indicate Admin Access",
             "affected": [],
             "analysis" : "",
-            "description" : 'An AWS principle was found that grants admin privileges within the AWS account. The name of this policy does not clearly indicate the level of privilege provided. To make maintaining the account as easy as possible and to reduce the risk of administrative privileges being granted to AWS principles that do not require them by mistake it is recommended to implement a common naming convention for all custom groups, roles and policies which indicates the level of access being granted. ',
+            "description" : 'An AWS principle was found that grants admin privileges within the AWS account. The name of this group does not clearly indicate the level of privilege provided. To make maintaining the account as easy as possible and to reduce the risk of administrative privileges being granted to AWS principles that do not require them by mistake it is recommended to implement a common naming convention for all custom groups, roles and policies which indicates the level of access being granted. ',
             "remediation" : 'Implement a simple naming convention for all custom groups, roles and policies which clearly indicates what permissions they grant and who they should apply to.',
             "impact" : "info",
             "probability" : "info",
@@ -1049,6 +1053,7 @@ class iam(object):
         print("running check: iam_23")
 
         policies = self.customer_policies + self.aws_policies
+        users = {}
 
         for group in self.groups:
             managed_policies = self.client.list_attached_group_policies(GroupName=group["Group"]["GroupName"])["AttachedPolicies"]
@@ -1074,11 +1079,13 @@ class iam(object):
                                         if statement["Resource"] == "*":
                                             if not re.match(".*[Aa][Dd][Mm][Ii][Nn].*", group["Group"]["GroupName"]):
                                                 results["affected"].append(group["Group"]["GroupName"])
+                                                users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                             except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                                 pass
+        print(users)
 
         if results["affected"]:
-            results["analysis"] = "The affected groups grant admin access which is not indicated by their name." # TODO include group members
+            results["analysis"] = "The affected groups grant admin access which is not indicated by their name.\nAffected Groups and Users:\n{}".format(json.dumps(users))
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Admin Groups Found."
