@@ -1,5 +1,6 @@
 import boto3
 import json
+import logging
 
 from utils.utils import describe_regions
 
@@ -35,7 +36,7 @@ class sns(object):
             "pass_fail" : ""
         }
 
-        print("running check: sns_1")
+        logging.info(results["name"])
         
         for region in self.regions:
             client = self.session.client('sns', region_name=region)

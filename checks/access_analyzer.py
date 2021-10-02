@@ -1,4 +1,5 @@
 import boto3
+import logging
 
 from utils.utils import describe_regions
 
@@ -34,7 +35,7 @@ class access_analyzer(object):
             "pass_fail" : ""
         }
 
-        print("running check: access_analyzer_1")
+        logging.info(results["name"])
 
         for region in self.regions:
             client = self.session.client('accessanalyzer', region_name=region)

@@ -1,4 +1,5 @@
 import boto3
+import logging
 
 from utils.utils import describe_regions
 
@@ -16,7 +17,7 @@ class kms(object):
         
     def get_keys(self):
         keys = {}
-        print("getting kms keys")
+        logging.info("getting kms keys")
         for region in self.regions:
             client = self.session.client('kms', region_name=region)
             keys[region] = client.list_keys()["Keys"]
@@ -43,7 +44,7 @@ class kms(object):
             "pass_fail" : ""
         }
 
-        print("running check: kms_1")
+        logging.info(results["name"])
         
         for region, key_list in self.keys.items():
             client = self.session.client('kms', region_name=region)
@@ -53,7 +54,7 @@ class kms(object):
                     key_rotation_Status = client.get_key_rotation_status(KeyId=key_id)["KeyRotationEnabled"]
                 #botocore.exceptions.ClientError: An error occurred (AccessDeniedException) when calling the GetKeyRotationStatus operation
                 except boto3.exceptions.botocore.exceptions.ClientError:
-                    print("access denied - KMS KeyID:{}({})".format(key_id, region))
+                    logging.warning("access denied - KMS KeyID:{}({})".format(key_id, region))
                     pass
                 else:
                     if key_rotation_Status == False:

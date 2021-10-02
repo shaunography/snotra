@@ -1,4 +1,5 @@
 import boto3
+import logging
 
 from utils.utils import describe_regions
 
@@ -34,7 +35,7 @@ class efs(object):
             "pass_fail" : ""
         }
 
-        print("running check: efs_1")
+        logging.info(results["name"])
 
         all_file_systems = []
 

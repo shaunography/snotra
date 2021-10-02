@@ -2,6 +2,7 @@ import boto3
 import time
 import re
 import json
+import logging
 
 from datetime import date
 from datetime import timedelta
@@ -54,15 +55,15 @@ class iam(object):
         return self.session.client('iam')
     
     def get_account_summary(self):
-        print("Getting Account Summary")
+        logging.info("Getting Account Summary")
         return self.client.get_account_summary()["SummaryMap"]
 
     def get_credential_report(self):
         try:
-            print("Getting Credential Report")
+            logging.info("Getting Credential Report")
             return self.client.get_credential_report()
         except:
-            print("Generating Credential Report")
+            logging.info("Generating Credential Report")
             while True:
                 if self.client.generate_credential_report()["State"] == "COMPLETE":
                     return self.client.get_credential_report()
@@ -71,7 +72,7 @@ class iam(object):
 
     def get_password_policy(self):
         try:
-            print("Getting Password Policy")
+            logging.info("Getting Password Policy")
             return self.client.get_account_password_policy()["PasswordPolicy"]
         # botocore.errorfactory.NoSuchEntityException: An error occurred (NoSuchEntity) when calling the GetAccountPasswordPolicy operation:
         except:
@@ -79,11 +80,11 @@ class iam(object):
             return False
 
     def list_users(self):
-        print("Getting User List")
+        logging.info("Getting User List")
         return self.client.list_users()["Users"]
     
     def get_aws_policies(self):
-        print("Getting AWS Managed Policies")
+        logging.info("Getting AWS Managed Policies")
         #return self.client.list_policies(OnlyAttached=True)["Policies"]
         policies = []
         current_policies = self.client.list_policies(Scope="AWS")
@@ -97,7 +98,7 @@ class iam(object):
         return policies
     
     def get_customer_policies(self):
-        print("Getting Customer Managed Policies")
+        logging.info("Getting Customer Managed Policies")
         #return self.client.list_policies(OnlyAttached=True)["Policies"]
         policies = []
         current_policies = self.client.list_policies(Scope="Local")
@@ -111,7 +112,7 @@ class iam(object):
         return policies
     
     def list_groups(self):
-        print("Getting Groups")
+        logging.info("Getting Groups")
         groups = []
         for group in self.client.list_groups()["Groups"]:
             raw_group = self.client.get_group(GroupName=group["GroupName"])
@@ -122,7 +123,7 @@ class iam(object):
         return groups
     
     def list_roles(self):
-        print("Getting Roles")
+        logging.info("Getting Roles")
         roles = []
         for role in self.client.list_roles()["Roles"]:
             roles.append(self.client.get_role(RoleName=role["RoleName"])["Role"])
@@ -148,7 +149,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_1")
+        logging.info(results["name"])
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
@@ -176,7 +177,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_2")
+        logging.info(results["name"])
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
@@ -203,7 +204,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_3")
+        logging.info(results["name"])
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
@@ -231,7 +232,7 @@ class iam(object):
             "pass_fail" : "PASS"
         }
 
-        print("running check: iam_4")
+        logging.info(results["name"])
 
         if self.account_summary["AccountAccessKeysPresent"] != 0:
             results["analysis"] = "Root Access Keys Found"
@@ -261,7 +262,7 @@ class iam(object):
             "pass_fail" : "PASS"
         }
 
-        print("running check: iam_5")
+        logging.info(results["name"])
         
 
         if self.account_summary["AccountMFAEnabled"] == 0:
@@ -292,7 +293,7 @@ class iam(object):
             "pass_fail" : "PASS"
         }
 
-        print("running check: iam_6")
+        logging.info(results["name"])
         
 
         if self.account_summary["AccountMFAEnabled"] == 0:
@@ -324,7 +325,7 @@ class iam(object):
             "pass_fail" : "INFO"
         }
 
-        print("running check: iam_7")
+        logging.info(results["name"])
 
         report_content = self.credential_report["Content"].decode('ascii')
         root = report_content.split("\n")[1]
@@ -357,7 +358,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_8")
+        logging.info(results["name"])
      
         if self.password_policy:
             password_length = self.password_policy["MinimumPasswordLength"]        
@@ -396,7 +397,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_9")
+        logging.info(results["name"])
 
 
         if self.password_policy:
@@ -441,7 +442,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_10")
+        logging.info(results["name"])
 
         report_content = self.credential_report["Content"].decode('ascii')
 
@@ -483,7 +484,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_11")
+        logging.info(results["name"])
 
         report_content = self.credential_report["Content"].decode('ascii')
 
@@ -530,7 +531,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_12")
+        logging.info(results["name"])
 
         report_content = self.credential_report["Content"].decode('ascii')
 
@@ -595,7 +596,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_13")
+        logging.info(results["name"])
 
         report_content = self.credential_report["Content"].decode('ascii')
 
@@ -639,7 +640,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_14")
+        logging.info(results["name"])
 
         report_content = self.credential_report["Content"].decode('ascii')
 
@@ -693,7 +694,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_15")
+        logging.info(results["name"])
 
         for user in self.users:
             inline_policies = self.client.list_user_policies(UserName=user["UserName"])
@@ -735,7 +736,7 @@ class iam(object):
             "pass_fail" : "PASS"
         }
 
-        print("running check: iam_16")
+        logging.info(results["name"])
 
         for policy in self.customer_policies:
 
@@ -788,7 +789,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_17")
+        logging.info(results["name"])
 
         for policy in self.aws_policies:
             
@@ -834,7 +835,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_18")
+        logging.info(results["name"])
 
         server_certificates = self.client.list_server_certificates()["ServerCertificateMetadataList"]
 
@@ -885,7 +886,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_19")
+        logging.info(results["name"])
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
@@ -913,7 +914,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_20")
+        logging.info(results["name"])
 
         results["affected"] = [ group["Group"]["GroupName"] for group in self.groups if not group["Users"]]
 
@@ -947,7 +948,8 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_21")
+        logging.info(results["name"])
+        affected_statements = {}
 
         for role in self.roles:
             for statement in role["AssumeRolePolicyDocument"]["Statement"]:
@@ -956,9 +958,10 @@ class iam(object):
                         if statement["Action"] == "sts:AssumeRole":
                             if not re.match(".*ExternalId.*", str(statement["Condition"])):
                                 results["affected"].append(role["RoleName"])
+                                affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
-            results["analysis"] = "The affected cross account roles do not have an external ID configured." # TODO include affected statement in analysis
+            results["analysis"] = "The affected cross account roles do not have an external ID configured.\nAffected Roles and Statements:\n{}".format(json.dumps(affected_statements))
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing roles found."
@@ -987,7 +990,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_22")
+        logging.info(results["name"])
 
         policies = self.customer_policies + self.aws_policies
         users = {}
@@ -1049,7 +1052,7 @@ class iam(object):
             "pass_fail" : ""
         }
 
-        print("running check: iam_23")
+        logging.info(results["name"])
 
         policies = self.customer_policies + self.aws_policies
         users = {}

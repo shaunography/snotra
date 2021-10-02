@@ -1,5 +1,6 @@
 import boto3
 import re
+import logging
 
 from utils.utils import describe_regions
 
@@ -32,7 +33,7 @@ class cloudwatch(object):
         
     def get_trail_list(self):
         trail_list = {}
-        print("getting trails")
+        logging.info("getting trails")
         for region in self.regions:
             client = self.session.client('cloudtrail', region_name=region)
             trail_list[region] = client.describe_trails()["trailList"]
@@ -61,7 +62,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
-        print("running check: cloudwatch_1")
+        logging.info(results["name"])
 
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -97,7 +98,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -157,7 +158,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
-        print("running check: cloudwatch_2")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -193,7 +194,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -254,7 +255,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
 
-        print("running check: cloudwatch_3")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -290,7 +291,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -350,7 +351,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_4")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -386,7 +387,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -445,7 +446,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_5")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -481,7 +482,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -540,7 +541,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_6")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -576,7 +577,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -635,7 +636,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_7")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -671,7 +672,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -730,7 +731,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_8")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -766,7 +767,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -826,7 +827,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_9")
+        logging.info(results["name"])
 
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -862,7 +863,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -922,7 +923,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_10") 
+        logging.info(results["name"]) 
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -958,7 +959,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -1018,7 +1019,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_11")
+        logging.info(results["name"])
 
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1054,7 +1055,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -1113,7 +1114,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_12")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1149,7 +1150,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -1208,7 +1209,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_13")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1244,7 +1245,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -1303,7 +1304,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_14")
+        logging.info(results["name"])
 
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1339,7 +1340,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -1398,7 +1399,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_15")
+        logging.info(results["name"])
      
         for region, trails in self.trail_list.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -1434,7 +1435,7 @@ class cloudwatch(object):
                                         try:
                                             metric_filters = logs_client.describe_metric_filters(logGroupName=cloudtrail_log_group_name)["metricFilters"]
                                         except boto3.exceptions.botocore.exceptions.ClientError:
-                                            print("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
+                                            logging.warning("could not access log group: {}".format(cloudwatch_logs_log_group_arn))
                                             
 
                                         else:
@@ -1493,7 +1494,7 @@ class cloudwatch(object):
 
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/include/check3x
         
-        print("running check: cloudwatch_16")
+        logging.info(results["name"])
      
         for region in self.regions:
             client = self.session.client('cloudwatch', region_name=region)
