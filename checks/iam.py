@@ -949,6 +949,7 @@ class iam(object):
         }
 
         logging.info(results["name"])
+        affected_statements = {}
 
         for role in self.roles:
             for statement in role["AssumeRolePolicyDocument"]["Statement"]:
@@ -957,9 +958,10 @@ class iam(object):
                         if statement["Action"] == "sts:AssumeRole":
                             if not re.match(".*ExternalId.*", str(statement["Condition"])):
                                 results["affected"].append(role["RoleName"])
+                                affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
-            results["analysis"] = "The affected cross account roles do not have an external ID configured." # TODO include affected statement in analysis
+            results["analysis"] = "The affected cross account roles do not have an external ID configured.\nAffected Roles and Statements:\n{}".format(json.dumps(affected_statements))
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing roles found."

@@ -65,7 +65,11 @@ def main():
     # init results dictionary
     results = {}
 
-    logging.info("Running test with {}".format(get_user(session)))
+    try:
+        logging.info("Running test with {}".format(get_user(session)))
+    except boto3.exceptions.botocore.exceptions.ClientError:
+        logging.error("invalid credentals!")
+        sys.exit(0)
 
     results["account"] = get_account_id(session)
     results["user"] = get_user(session)
