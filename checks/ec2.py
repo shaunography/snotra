@@ -1,4 +1,5 @@
 import boto3
+import logging
 
 from utils.utils import describe_regions
 from utils.utils import get_account_id
@@ -49,7 +50,7 @@ class ec2(object):
 
     def get_security_groups(self):
         security_groups = {}
-        print("getting security groups")
+        logging.info("getting security groups")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             security_groups[region] = client.describe_security_groups()["SecurityGroups"]
@@ -57,7 +58,7 @@ class ec2(object):
     
     def get_network_acls(self):
         network_acls = {}
-        print("getting network acls")
+        logging.info("getting network acls")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             network_acls[region] = client.describe_network_acls()["NetworkAcls"]
@@ -65,7 +66,7 @@ class ec2(object):
     
     def get_network_interfaces(self):
         network_interfaces = {}
-        print("getting network interfaces")
+        logging.info("getting network interfaces")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             network_interfaces[region] = client.describe_network_interfaces()["NetworkInterfaces"]
@@ -73,7 +74,7 @@ class ec2(object):
     
     def get_instance_reservations(self):
         reservations = {}
-        print("getting instance reservations")
+        logging.info("getting instance reservations")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             reservations[region] = client.describe_instances()["Reservations"]
@@ -81,7 +82,7 @@ class ec2(object):
     
     def get_volumes(self):
         volumes = {}
-        print("getting ebs volumes")
+        logging.info("getting ebs volumes")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             volumes[region] = client.describe_volumes()["Volumes"]
@@ -89,7 +90,7 @@ class ec2(object):
     
     def get_snapshots(self):
         snapshots = {}
-        print("getting ebs snapshots")
+        logging.info("getting ebs snapshots")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             snapshots[region] = client.describe_snapshots()["Snapshots"]
@@ -97,7 +98,7 @@ class ec2(object):
     
     def get_vpcs(self):
         vpcs = {}
-        print("getting vpcs")
+        logging.info("getting vpcs")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             vpcs[region] = client.describe_vpcs()["Vpcs"]
@@ -124,7 +125,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_1")
+        logging.info(results["name"])
 
         for region, reservations in self.instance_reservations.items():
             for reservation in reservations:
@@ -167,7 +168,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_2")
+        logging.info(results["name"])
         
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
@@ -208,7 +209,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_3")
+        logging.info(results["name"])
         
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
@@ -249,7 +250,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_4")
+        logging.info(results["name"])
             
         for region, network_acls in self.network_acls.items():
             for acl in network_acls:
@@ -309,7 +310,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_5")
+        logging.info(results["name"])
             
         for region, groups in self.security_groups.items():
             for group in groups:
@@ -375,7 +376,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_6")
+        logging.info(results["name"])
             
         for region, groups in self.security_groups.items():
             for group in groups:
@@ -414,7 +415,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_7")
+        logging.info(results["name"])
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
@@ -456,7 +457,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_8")
+        logging.info(results["name"])
             
         for region, groups in self.security_groups.items():
 
@@ -513,7 +514,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_9")
+        logging.info(results["name"])
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
@@ -551,7 +552,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_10")
+        logging.info(results["name"])
 
         for region, snapshots in self.snapshots.items():
             client = self.session.client('ec2', region_name=region)
@@ -599,7 +600,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_11")
+        logging.info(results["name"])
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
@@ -638,7 +639,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_11")
+        logging.info(results["name"])
             
         for region, groups in self.security_groups.items():
             for group in groups:
@@ -703,7 +704,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_13")
+        logging.info(results["name"])
             
         for region, network_acls in self.network_acls.items():
             for acl in network_acls:
@@ -762,7 +763,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_14")
+        logging.info(results["name"])
             
         for region, network_acls in self.network_acls.items():
             for acl in network_acls:
@@ -816,7 +817,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_15")
+        logging.info(results["name"])
         
         custom_nacls = []
             
@@ -877,7 +878,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_16")
+        logging.info(results["name"])
 
         for region, interfaces in self.network_interfaces.items():
             for interface in interfaces:
@@ -915,7 +916,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_17")
+        logging.info(results["name"])
        
         for region, reservations in self.instance_reservations.items():
             for reservation in reservations:
@@ -956,7 +957,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_18")
+        logging.info(results["name"])
        
         for region, reservations in self.instance_reservations.items():
             for reservation in reservations:
@@ -995,7 +996,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_19")
+        logging.info(results["name"])
        
         for region, reservations in self.instance_reservations.items():
             client = self.session.client('ssm', region_name=region)
@@ -1037,7 +1038,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_20")
+        logging.info(results["name"])
         
         for region, volumes in self.volumes.items():
             results["affected"] += [ "{}({})".format(volume["VolumeId"], region) for volume in volumes if volume["Encrypted"] == False ]
@@ -1073,7 +1074,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_21")
+        logging.info(results["name"])
         
         for region, snapshots in self.snapshots.items():
             results["affected"] += [ "{}({})".format(snapshot["SnapshotId"], region) for snapshot in snapshots if snapshot["Encrypted"] == False ]
@@ -1108,7 +1109,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_22")
+        logging.info(results["name"])
         
         for region, snapshots in self.snapshots.items():
             for snapshot in snapshots:
@@ -1147,7 +1148,7 @@ class ec2(object):
             "pass_fail" : ""
         }
 
-        print("running check: ec2_23")
+        logging.info(results["name"])
 
         for region, reservations in self.instance_reservations.items():
             for reservation in reservations:

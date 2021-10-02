@@ -1,5 +1,6 @@
 import boto3
 import json
+import logging
 
 from utils.utils import describe_regions
 from utils.utils import get_account_id
@@ -26,7 +27,7 @@ class cloudtrail(object):
     
     def get_trails(self):
         trails = {}
-        print("getting trails")
+        logging.info("getting trails")
         for region in self.regions:
             client = self.session.client('cloudtrail', region_name=region)
             trails[region] = client.describe_trails()["trailList"]
@@ -53,7 +54,7 @@ class cloudtrail(object):
             "pass_fail" : ""
         }
 
-        print("running check: cloudtrail_1")
+        logging.info(results["name"])
         
         for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -95,7 +96,7 @@ class cloudtrail(object):
             "pass_fail" : ""
         }
 
-        print("running check: cloudtrail_2")
+        logging.info(results["name"])
         
         for region, trail_list in self.trails.items():
             for trail in trail_list:
@@ -137,7 +138,7 @@ class cloudtrail(object):
             "pass_fail" : ""
         }
 
-        print("running check: cloudtrail_3")
+        logging.info(results["name"])
 
         s3_client = self.session.client('s3')
         
@@ -215,7 +216,7 @@ class cloudtrail(object):
             "pass_fail" : ""
         }
 
-        print("running check: cloudtrail_4")
+        logging.info(results["name"])
         
         for region, trail_list in self.trails.items():
             for trail in trail_list:
@@ -258,7 +259,7 @@ class cloudtrail(object):
             "pass_fail" : ""
         }
 
-        print("running check: cloudtrail_5")
+        logging.info(results["name"])
 
         s3_client = self.session.client('s3')
         
@@ -303,7 +304,7 @@ class cloudtrail(object):
             "pass_fail" : ""
         }
 
-        print("running check: cloudtrail_6")
+        logging.info(results["name"])
         
         for region, trail_list in self.trails.items():
             for trail in trail_list:
@@ -345,7 +346,7 @@ class cloudtrail(object):
             "pass_fail" : ""
         }
         
-        print("running check: cloudtrail_7")
+        logging.info(results["name"])
      
         for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)
@@ -394,6 +395,8 @@ class cloudtrail(object):
             "cvss_score" : "n/a",
             "pass_fail" : ""
         }
+
+        logging.info(results["name"])
      
         for region, trail_list in self.trails.items():
             client = self.session.client('cloudtrail', region_name=region)

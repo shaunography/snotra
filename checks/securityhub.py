@@ -1,4 +1,5 @@
 import boto3
+import logging
 
 from utils.utils import describe_regions
 from utils.utils import get_account_id
@@ -19,7 +20,7 @@ class securityhub(object):
 
     def get_security_hubs(self):
         security_hubs = {}
-        print("getting security hubs and enabled standards")
+        logging.info("getting security hubs and enabled standards")
         for region in self.regions:
             client = self.session.client('securityhub', region_name=region)
             try:
@@ -56,7 +57,7 @@ class securityhub(object):
             "pass_fail" : ""
         }
 
-        print("running check: securityhub_1")
+        logging.info(results["name"])
 
         if not self.security_hubs:
             results["analysis"] = "No active Security Hub subscriptions found"
@@ -99,7 +100,7 @@ class securityhub(object):
             "pass_fail" : ""
         }
 
-        print("running check: securityhub_2")
+        logging.info(results["name"])
 
         if not self.security_hubs:
             results["analysis"] = "No active Security Hub subscriptions found"

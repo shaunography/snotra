@@ -1,6 +1,7 @@
 import boto3
 import json
 import re
+import logging
 
 from utils.utils import get_account_id
 
@@ -23,7 +24,7 @@ class s3(object):
 
     def list_buckets(self):
         # returns list of s3 buckets names
-        print("Getting Bucket List")
+        logging.info("Getting Bucket List")
         return [ bucket["Name"] for bucket in self.client.list_buckets()["Buckets"] ]
     
     def get_client(self):
@@ -51,7 +52,7 @@ class s3(object):
             "pass_fail" : ""
         }
 
-        print("running check: s3_1")
+        logging.info(results["name"])
 
         for bucket in self.buckets:
             try:
@@ -91,7 +92,7 @@ class s3(object):
         
         # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/checks/check_extra764
 
-        print("running check: s3_2")
+        logging.info(results["name"])
 
         passing_buckets = []
 
@@ -152,7 +153,7 @@ class s3(object):
             "pass_fail" : ""
         }
 
-        print("running check: s3_3")
+        logging.info(results["name"])
 
         passing_buckets = []
 
@@ -199,7 +200,7 @@ class s3(object):
         }
 
         #client = boto3.client('macie2', region_name="eu-west-2")
-        print("running check: s3_4")
+        logging.info(results["name"])
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
@@ -227,7 +228,7 @@ class s3(object):
             "pass_fail" : ""
         }
 
-        print("running check: s3_5")
+        logging.info(results["name"])
 
         passing_buckets = []      
 

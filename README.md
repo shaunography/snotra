@@ -27,7 +27,7 @@ run audit with named profile
 `$ python3 snotra.py --results-dir ./snotra/ --profile prod_web`
 
 
-## Checks
+## checks
 ### CIS Benchmark v1.4.0
 Snotra currently completes all checks included in the latest CIS Benchmark. Although Snotra reports on them, a few of the checks can not be completed programatically - these are marked accordingly.
 
@@ -121,7 +121,7 @@ All checks are a function/method of the relevent class and are in the following 
             "pass_fail" : ""
         }
 
-        print("running check: service_n")
+        logging.info(results["name"])
 
         # actual check logic here
 

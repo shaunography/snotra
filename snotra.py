@@ -5,6 +5,7 @@ import boto3
 import json
 import os
 import sys
+import logging
 
 from datetime import datetime
 
@@ -26,6 +27,12 @@ from utils.utils import get_user
 from utils.utils import get_account_id
 
 def main():
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s : %(levelname)s : %(funcName)s - %(message)s"
+    )
+
     parser = argparse.ArgumentParser(description="AWS Auditor")
     parser.add_argument(
         "--results-dir",
@@ -47,18 +54,18 @@ def main():
         try:
             session = boto3.session.Session(profile_name=args.p)
         except boto3.exceptions.botocore.exceptions.ProfileNotFound:
-            print("profile not found! try harder...")
+            logging.error("profile not found! try harder...")
             sys.exit(0)
     else:        
         session = boto3.session.Session()
         if session.get_credentials() == None:
-            print("you have not configured any default credentials in ~/.aws/credentials")
+            logging.error("you have not configured any default credentials in ~/.aws/credentials")
             sys.exit(0)
     
     # init results dictionary
     results = {}
 
-    print("Running test with: {}".format(get_user(session)))
+    logging.info("Running test with {}".format(get_user(session)))
 
     results["account"] = get_account_id(session)
     results["user"] = get_user(session)
@@ -80,11 +87,11 @@ def main():
     results["findings"] += securityhub(session).run()
 
     if not os.path.exists(args.o):
-        print("results dir does not exist, creating it for you")
+        logging.info("results dir does not exist, creating it for you")
         os.makedirs(args.o)
     
-    print("writing results json")
     filename = os.path.join(args.o, "results_{}.json".format(get_account_id(session)))
+    logging.info("writing results json {}".format(filename))
     with open(filename, 'w') as f:
         json.dump(results, f)
 

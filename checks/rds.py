@@ -1,4 +1,5 @@
 import boto3
+import logging
 
 from utils.utils import describe_regions
 
@@ -34,7 +35,7 @@ class rds(object):
             "pass_fail" : ""
         }
 
-        print("running check: rds_1")
+        logging.info(results["name"])
         
         for region in self.regions:
             client = self.session.client('rds', region_name=region)
