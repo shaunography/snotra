@@ -93,7 +93,7 @@ class ec2(object):
         logging.info("getting ebs snapshots")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            snapshots[region] = client.describe_snapshots()["Snapshots"]
+            snapshots[region] = client.describe_snapshots(OwnerIds=["self"])["Snapshots"]
         return snapshots
     
     def get_vpcs(self):
