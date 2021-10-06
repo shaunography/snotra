@@ -843,14 +843,10 @@ class iam(object):
             results["analysis"] = "No server certificates found"
             results["pass_fail"] = "PASS"
         
-        #############################################
-        # NEEDS TESTING WITH ACTUAL EXPIRED CERTS!!!#
-        #############################################
         for cert in server_certificates:
             expiration = cert["Expiration"]
             server_certificate_name = cert["ServerCertificateName"]
-            year, month, day = expiration.split("T")[0].split("-")
-            expiration_date = date(int(year), int(month), int(day))
+            expiration_date = date(expiration.year, expiration.month, expiration.day)
             if expiration_date < date.today():
                 results["affected"].append(server_certificate_name)
 
