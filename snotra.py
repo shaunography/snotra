@@ -22,6 +22,7 @@ from checks.guardduty import guardduty
 from checks.efs import efs
 from checks.sns import sns
 from checks.securityhub import securityhub
+from checks.elb import elb
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -67,8 +68,8 @@ def main():
 
     try:
         logging.info("Running test with {}".format(get_user(session)))
-    except boto3.exceptions.botocore.exceptions.ClientError:
-        logging.error("invalid credentals!")
+    except boto3.exceptions.botocore.exceptions.ClientError as e:
+        logging.error("Client error - %s" % e.response["Error"]["Code"])
         sys.exit(0)
 
     results["account"] = get_account_id(session)
@@ -89,6 +90,7 @@ def main():
     results["findings"] += efs(session).run()
     results["findings"] += sns(session).run()
     results["findings"] += securityhub(session).run()
+    results["findings"] += elb(session).run()
 
     if not os.path.exists(args.o):
         logging.info("results dir does not exist, creating it for you")
