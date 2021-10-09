@@ -36,7 +36,10 @@ class cloudwatch(object):
         logging.info("getting trails")
         for region in self.regions:
             client = self.session.client('cloudtrail', region_name=region)
-            trail_list[region] = client.describe_trails()["trailList"]
+            try:
+                trail_list[region] = client.describe_trails()["trailList"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting trails - %s" % e.response["Error"]["Code"])
         return trail_list
 
     def cloudwatch_1(self):

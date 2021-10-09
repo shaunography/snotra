@@ -58,11 +58,11 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * groups granting admin access (iam)
 * group name does not indicate admin access (iam)
 * default vpcs in use (ec2)
-* internet facing load balancers
-* internet facing load balancers using unencrypted http listeners
-* ELB listeners with weak TLS configuration
-* ALBs not configured to drop invalid headers
-* desync mitigation mode not enabled
+* internet facing load balancers (elb)
+* internet facing load balancers using unencrypted http listeners (elb)
+* ELB listeners with weak TLS configuration (elb)
+* ALBs not configured to drop invalid headers (elb)
+* desync mitigation mode not enabled (elb)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:

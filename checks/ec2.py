@@ -53,7 +53,10 @@ class ec2(object):
         logging.info("getting security groups")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            security_groups[region] = client.describe_security_groups()["SecurityGroups"]
+            try:
+                security_groups[region] = client.describe_security_groups()["SecurityGroups"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting security groups - %s" % e.response["Error"]["Code"])
         return security_groups
     
     def get_network_acls(self):
@@ -61,7 +64,10 @@ class ec2(object):
         logging.info("getting network acls")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            network_acls[region] = client.describe_network_acls()["NetworkAcls"]
+            try:
+                network_acls[region] = client.describe_network_acls()["NetworkAcls"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting network acls - %s" % e.response["Error"]["Code"])
         return network_acls
     
     def get_network_interfaces(self):
@@ -69,7 +75,10 @@ class ec2(object):
         logging.info("getting network interfaces")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            network_interfaces[region] = client.describe_network_interfaces()["NetworkInterfaces"]
+            try:
+                network_interfaces[region] = client.describe_network_interfaces()["NetworkInterfaces"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting network interfaces - %s" % e.response["Error"]["Code"])
         return network_interfaces
     
     def get_instance_reservations(self):
@@ -77,7 +86,10 @@ class ec2(object):
         logging.info("getting instance reservations")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            reservations[region] = client.describe_instances()["Reservations"]
+            try:
+                reservations[region] = client.describe_instances()["Reservations"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting instance reservations - %s" % e.response["Error"]["Code"])
         return reservations
     
     def get_volumes(self):
@@ -85,7 +97,10 @@ class ec2(object):
         logging.info("getting ebs volumes")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            volumes[region] = client.describe_volumes()["Volumes"]
+            try:
+                volumes[region] = client.describe_volumes()["Volumes"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting ebs volumes - %s" % e.response["Error"]["Code"])
         return volumes
     
     def get_snapshots(self):
@@ -93,7 +108,10 @@ class ec2(object):
         logging.info("getting ebs snapshots")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            snapshots[region] = client.describe_snapshots(OwnerIds=["self"])["Snapshots"]
+            try:
+                snapshots[region] = client.describe_snapshots(OwnerIds=["self"])["Snapshots"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting ebs snapshots - %s" % e.response["Error"]["Code"])
         return snapshots
     
     def get_vpcs(self):
@@ -101,7 +119,10 @@ class ec2(object):
         logging.info("getting vpcs")
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            vpcs[region] = client.describe_vpcs()["Vpcs"]
+            try:
+                vpcs[region] = client.describe_vpcs()["Vpcs"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting vpcs - %s" % e.response["Error"]["Code"])
         return vpcs
     
     def ec2_1(self):
