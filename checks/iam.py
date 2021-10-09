@@ -67,27 +67,31 @@ class iam(object):
             while True:
                 if self.client.generate_credential_report()["State"] == "COMPLETE":
                     return self.client.get_credential_report()
-                    break
                 time.sleep(3)
 
     def get_password_policy(self):
         try:
             logging.info("Getting Password Policy")
             return self.client.get_account_password_policy()["PasswordPolicy"]
-        # botocore.errorfactory.NoSuchEntityException: An error occurred (NoSuchEntity) when calling the GetAccountPasswordPolicy operation:
-        except:
-            # No password policy created
-            return False
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "NoSuchEntity": # no password policy created
+                return False
 
     def list_users(self):
         logging.info("Getting User List")
-        return self.client.list_users()["Users"]
+        try:
+            return self.client.list_users()["Users"]
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            logging.error("Error getting users - %s" % e.response["Error"]["Code"])
     
     def get_aws_policies(self):
         logging.info("Getting AWS Managed Policies")
         #return self.client.list_policies(OnlyAttached=True)["Policies"]
         policies = []
-        current_policies = self.client.list_policies(Scope="AWS")
+        try:
+            current_policies = self.client.list_policies(Scope="AWS")
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            logging.error("Error getting managed policies - %s" % e.response["Error"]["Code"])
         policies += current_policies["Policies"]
         is_truncated = current_policies["IsTruncated"]
         if is_truncated == True:
@@ -101,12 +105,18 @@ class iam(object):
         logging.info("Getting Customer Managed Policies")
         #return self.client.list_policies(OnlyAttached=True)["Policies"]
         policies = []
-        current_policies = self.client.list_policies(Scope="Local")
+        try:
+            current_policies = self.client.list_policies(Scope="Local")
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            logging.error("Error getting customer managed policies - %s" % e.response["Error"]["Code"])
         policies += current_policies["Policies"]
         is_truncated = current_policies["IsTruncated"]
         if is_truncated == True:
             while is_truncated == True:
-                current_policies = self.client.list_policies(Scope="Local", Marker=current_policies["Marker"])
+                try:
+                    current_policies = self.client.list_policies(Scope="Local", Marker=current_policies["Marker"])
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting customer managed polcies - %s" % e.response["Error"]["Code"]) 
                 policies += current_policies["Policies"]
                 is_truncated = current_policies["IsTruncated"]
         return policies
@@ -115,7 +125,10 @@ class iam(object):
         logging.info("Getting Groups")
         groups = []
         for group in self.client.list_groups()["Groups"]:
-            raw_group = self.client.get_group(GroupName=group["GroupName"])
+            try:
+                raw_group = self.client.get_group(GroupName=group["GroupName"])
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting groups - %s" % e.response["Error"]["Code"])
             group = {} # only grap Group and User data discard the rest
             group["Group"] = raw_group["Group"]
             group["Users"] = raw_group["Users"]
@@ -126,7 +139,10 @@ class iam(object):
         logging.info("Getting Roles")
         roles = []
         for role in self.client.list_roles()["Roles"]:
-            roles.append(self.client.get_role(RoleName=role["RoleName"])["Role"])
+            try:
+                roles.append(self.client.get_role(RoleName=role["RoleName"])["Role"])
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting roles - %s" % e.response["Error"]["Code"])
         return roles
 
     def iam_1(self):

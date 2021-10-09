@@ -2,7 +2,7 @@ import boto3
 import time
 
 def get_user(session):
-    client = session.client('sts')    
+    client = session.client('sts') 
     return client.get_caller_identity()["Arn"]
 
 def get_account_id(session):

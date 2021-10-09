@@ -20,7 +20,10 @@ class kms(object):
         logging.info("getting kms keys")
         for region in self.regions:
             client = self.session.client('kms', region_name=region)
-            keys[region] = client.list_keys()["Keys"]
+            try:
+                keys[region] = client.list_keys()["Keys"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting keys - %s" % e.response["Error"]["Code"])
         return keys
 
     def kms_1(self):

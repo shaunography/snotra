@@ -25,7 +25,10 @@ class s3(object):
     def list_buckets(self):
         # returns list of s3 buckets names
         logging.info("Getting Bucket List")
-        return [ bucket["Name"] for bucket in self.client.list_buckets()["Buckets"] ]
+        try:
+            return [ bucket["Name"] for bucket in self.client.list_buckets()["Buckets"] ]
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting bucket list - %s" % e.response["Error"]["Code"])
     
     def get_client(self):
         # returns boto3 s3 client
@@ -89,8 +92,6 @@ class s3(object):
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
-        
-        # https://github.com/toniblyx/prowler/blob/3b6bc7fa64a94dfdfb104de6f3d32885c630628f/checks/check_extra764
 
         logging.info(results["name"])
 
