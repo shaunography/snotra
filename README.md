@@ -64,6 +64,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * ALBs not configured to drop invalid headers (elb)
 * desync mitigation mode not enabled (elb)
 * S3 buckets without object versioning enabled (s3)
+* ECR Image Scan on Push is not Enabled (ecr)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
