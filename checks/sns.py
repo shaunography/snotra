@@ -13,6 +13,7 @@ class sns(object):
     def run(self):
         findings = []
         findings += [ self.sns_1() ]
+        findings += [ self.sns_2() ]
         return findings
         
     def sns_1(self):
@@ -55,6 +56,49 @@ class sns(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No public SNS Topics found."
+            results["pass_fail"] = "PASS"
+        
+        return results
+    
+    
+    def sns_2(self):
+        # Unencrypted SNS Topics
+
+        results = {
+            "id" : "sns_2",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "sns",
+            "name" : "Unencrypted SNS Topics",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The AWS account under review contains an AWS SNS Topic which is not configured to use server side data encryption. When you are using AWS SNS Topics to send and receive messages that contain sensitive data, it is highly recommended to implement encryption to add an additional layer of data confidentiality by making the contents of these messages unavailable to unauthorized users. The encryption and decryption is handled transparently by SQS SSE and does not require any additional action from you or your application",
+            "remediation" : "Configure the affected SNS Topics to use server side encryption using the Amazon KMS service.",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        
+        for region in self.regions:
+            client = self.session.client('sns', region_name=region)
+            topics = client.list_topics()["Topics"]
+            for topic in topics:
+                attributes = client.get_topic_attributes(TopicArn=topic["TopicArn"])["Attributes"]
+                try:
+                    kms_master_key_id = attributes["KmsMasterKeyId"]
+                except KeyError:
+                    results["affected"].append(topic["TopicArn"])
+
+        if results["affected"]:
+            results["analysis"] = "The affected SNS Topics are not encrypted."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No unencrypted SNS Topics found."
             results["pass_fail"] = "PASS"
         
         return results

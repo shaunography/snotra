@@ -20,6 +20,7 @@ class s3(object):
         findings += [ self.s3_3() ]
         findings += [ self.s3_4() ]
         findings += [ self.s3_5() ]
+        findings += [ self.s3_6() ]
         return findings
 
     def list_buckets(self):
@@ -212,7 +213,7 @@ class s3(object):
         # Ensure that S3 Buckets are configured with 'Block public access (bucket settings)' (Automated)
 
         results = {
-            "id" : "cis26",
+            "id" : "s3_5",
             "ref" : "2.1.5",
             "compliance" : "cis",
             "level" : 1,
@@ -254,6 +255,50 @@ class s3(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "All Buckets block public access."
+            results["pass_fail"] = "PASS"
+        
+        return results
+
+    def s3_6(self):
+        # Check if S3 buckets have object versioning enabled
+
+        results = {
+            "id" : "s3_6",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "s3",
+            "name" : "S3 buckets without object versioning enabled",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The AWS account under review contains S3 buckets that do not have versioning enabled. By preserving a version history of objects in your S3 bucket, versioning can be used for data protection and retention scenarios such as recovering objects that have been accidentally/intentionally deleted or overwritten. Once you enable Versioning for a bucket, Amazon S3 preserves existing objects anytime you perform a PUT, POST, COPY, or DELETE operation on them. By default, GET requests will retrieve the most recently written version. Older versions of an overwritten or deleted object can be retrieved by specifying a version in the request.",
+            "remediation" : "Consider enabling versioning for at least buckets that contain important and sensitive information, this is enabled at the bucket level and can be done via the AWS web console. Note: an additional cost will be incurred for the extra storage space versioning will inevitably use. More Information: https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for bucket in self.buckets:
+            try:
+                bucket_versioning_status = self.client.get_bucket_versioning(Bucket=bucket)["Status"]
+            #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+            except KeyError:
+                # no public access block configuration exists
+                results["affected"].append(bucket)
+                pass
+            else:
+                if bucket_versioning_status == "Suspended":
+                    results["affected"].append(bucket)
+        
+        if results["affected"]:
+            results["analysis"] = "The affected buckets do not have Object Versioning enabled."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All Buckets have Object Versioning enabled.."
             results["pass_fail"] = "PASS"
         
         return results

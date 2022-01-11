@@ -12,6 +12,7 @@ class rds(object):
     def run(self):
         findings = []
         findings += [ self.rds_1() ]
+        findings += [ self.rds_2() ]
         return findings
         
     def rds_1(self):
@@ -47,7 +48,47 @@ class rds(object):
                     results["affected"] += [db_instance_identifier]
 
         if results["affected"]:
-            results["analysis"] = "The affected EC2 regions do not encrypt EBS volumes by default."
+            results["analysis"] = "The affected RDS instances do not have encryption enabled."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All RDS instances have encryption enabled."
+            results["pass_fail"] = "PASS"
+        
+        return results
+
+
+    def rds_2(self):
+        # RDS Instances Do Not Have Deletion Protection Enabled
+
+        results = {
+            "id" : "rds_2",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "rds",
+            "name" : "RDS Instances Do Not Have Deletion Protection Enabled",
+            "affected": [],
+            "analysis" : "",
+            "description" : "RDS instances were were identified which do not have deletion protection enabled. To minimise the risk of data loss it recommended to enabled deletion protection on at least production databases. Amazon RDS enforces deletion protection when you use the console, the CLI, or the API to delete a DB instance. To delete a DB instance that has deletion protection enabled, first modify the instance and disable deletion protection. Enabling or disabling deletion protection doesn't cause an outage.",
+            "remediation" : "Enable Deletion Protection on all affected RDS instances.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "n/a",
+            "cvss_score" : "n/a",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        
+        for region in self.regions:
+            client = self.session.client('rds', region_name=region)
+            instances = client.describe_db_instances()["DBInstances"]
+            for instance in instances:
+                if instance["DeletionProtection"] == False:
+                    results["affected"].append(instance["DBInstanceIdentifier"])
+
+        if results["affected"]:
+            results["analysis"] = "The affected RDS Instances do not have deletion protection enabled."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "All RDS instances have encryption enabled."

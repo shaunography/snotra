@@ -968,9 +968,14 @@ class iam(object):
                 if statement["Effect"] == "Allow":
                     if "AWS" in statement["Principal"]:
                         if statement["Action"] == "sts:AssumeRole":
-                            if not re.match(".*ExternalId.*", str(statement["Condition"])):
+                            try:
+                                if not re.match(".*ExternalId.*", str(statement["Condition"])):
+                                    results["affected"].append(role["RoleName"])
+                                    affected_statements[role["RoleName"]] = statement
+                            except KeyError: # no conditions defined
                                 results["affected"].append(role["RoleName"])
                                 affected_statements[role["RoleName"]] = statement
+
 
         if results["affected"]:
             results["analysis"] = "The affected cross account roles do not have an external ID configured.\nAffected Roles and Statements:\n{}".format(json.dumps(affected_statements))
