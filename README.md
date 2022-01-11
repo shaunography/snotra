@@ -66,6 +66,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * S3 buckets without object versioning enabled (s3)
 * ECR Image Scan on Push is not Enabled (ecr)
 * RDS Instances Do Not Have Deletion Protection Enabled (rds)
+* Unencrypted SNS Topics (sns)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
