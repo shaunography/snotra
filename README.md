@@ -63,6 +63,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * ELB listeners with weak TLS configuration (elb)
 * ALBs not configured to drop invalid headers (elb)
 * desync mitigation mode not enabled (elb)
+* S3 buckets without object versioning enabled (s3)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
