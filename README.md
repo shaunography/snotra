@@ -65,6 +65,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * desync mitigation mode not enabled (elb)
 * S3 buckets without object versioning enabled (s3)
 * ECR Image Scan on Push is not Enabled (ecr)
+* RDS Instances Do Not Have Deletion Protection Enabled (rds)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
