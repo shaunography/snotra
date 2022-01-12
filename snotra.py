@@ -24,6 +24,7 @@ from checks.sns import sns
 from checks.securityhub import securityhub
 from checks.elb import elb
 from checks.ecr import ecr
+from checks.route53 import route53
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -93,6 +94,7 @@ def main():
     results["findings"] += securityhub(session).run()
     results["findings"] += elb(session).run()
     results["findings"] += ecr(session).run()
+    results["findings"] += route53(session).run()
 
     if not os.path.exists(args.o):
         logging.info("results dir does not exist, creating it for you")

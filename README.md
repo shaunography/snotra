@@ -67,6 +67,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * ECR Image Scan on Push is not Enabled (ecr)
 * RDS Instances Do Not Have Deletion Protection Enabled (rds)
 * Unencrypted SNS Topics (sns)
+* Domain Does Not Have Domain Transfer Lock Set (route53)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
