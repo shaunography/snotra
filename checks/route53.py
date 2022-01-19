@@ -19,7 +19,7 @@ class route53(object):
         return findings
     
     def get_client(self):
-        # returns boto3 s3 client
+        # returns boto3 route53domains client
         return self.session.client('route53domains', region_name="us-east-1")
     
     def route53_1(self):
@@ -44,7 +44,7 @@ class route53(object):
         }
 
         logging.info(results["name"])
-
+        
         domains = self.client.list_domains()["Domains"]
         
         for domain in domains:

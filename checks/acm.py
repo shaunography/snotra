@@ -2,6 +2,8 @@ import boto3
 import json
 import logging
 
+from utils.utils import describe_regions
+
 from datetime import datetime
 from datetime import timedelta
 
@@ -9,26 +11,26 @@ class acm(object):
 
     def __init__(self, session):
         self.session = session
-        self.client = self.get_client()
+        self.regions = describe_regions(session)
         self.certificates = self.get_certificates()
 
     def run(self):
         findings = []
-        #findings += [ self.acm_1() ]
+        findings += [ self.acm_1() ]
         findings += [ self.acm_2() ]
         return findings
-    
-    def get_client(self):
-        # returns boto3 acm client
-        return self.session.client('acm')
     
     def get_certificates(self):
         # returns list of certificates
         logging.info("Getting Certificate List")
-        try:
-            return self.client.list_certificates()["CertificateSummaryList"]
-        except boto3.exceptions.botocore.exceptions.ClientError as e:
+        certificates = {}
+        for region in self.regions:
+            client = self.session.client('acm', region_name=region)
+            try:
+                certificates[region] = client.list_certificates()["CertificateSummaryList"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting certificate list - %s" % e.response["Error"]["Code"])
+        return certificates
 
 
     def acm_1(self):
@@ -54,10 +56,12 @@ class acm(object):
 
         logging.info(results["name"])
         
-        for certificate in self.certificates:
-            description = self.client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
-            if description["Options"]["CertificateTransparencyLoggingPreference"] != "ENABLED":
-                results["affected"].append(certificate["CertificateArn"])
+        for region, certificates in self.certificates.items():
+            client = self.session.client('acm', region_name=region)
+            for certificate in certificates:
+                description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
+                if description["Options"]["CertificateTransparencyLoggingPreference"] != "ENABLED":
+                    results["affected"].append(certificate["CertificateArn"])
 
         if results["affected"]:
             results["analysis"] = "The affected Certificates do not have transparancy logging enabled."
@@ -91,11 +95,12 @@ class acm(object):
 
         logging.info(results["name"])
         
-        for certificate in self.certificates:
-            description = self.client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
-            
-            if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
-                results["affected"].append(certificate["CertificateArn"])
+        for region, certificates in self.certificates.items():
+            client = self.session.client('acm', region_name=region)
+            for certificate in certificates:
+                description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
+                if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
+                    results["affected"].append(certificate["CertificateArn"])
 
         if results["affected"]:
             results["analysis"] = "The affected Certificates havhe expired."

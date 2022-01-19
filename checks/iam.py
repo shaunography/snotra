@@ -3,6 +3,7 @@ import time
 import re
 import json
 import logging
+import sys
 
 from datetime import date
 from datetime import timedelta
@@ -56,7 +57,14 @@ class iam(object):
     
     def get_account_summary(self):
         logging.info("Getting Account Summary")
-        return self.client.get_account_summary()["SummaryMap"]
+        try:
+            return self.client.get_account_summary()["SummaryMap"]
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            logging.error("Error getting certificate list - %s" % e.response["Error"]["Code"])
+            if e.response["Error"]["Code"] == "AccessDenied":
+                logging.error("Access Denied! - Check your credentials have the required policies applied before running Snotra")
+                sys.exit(0)
+
 
     def get_credential_report(self):
         try:
