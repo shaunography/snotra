@@ -696,7 +696,7 @@ class ec2(object):
                                         results["affected"].append("{}({})".format(group_id, region))
 
         if results["affected"]:
-            results["analysis"] = "The affected security groups allow database ingress traffic from 0.0.0.0/0."
+            results["analysis"] = "The affected security groups are considerd to be overly permissive and allow database ingress traffic from 0.0.0.0/0."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No security groups that allow database ingress traffic from 0.0.0.0/0 found"

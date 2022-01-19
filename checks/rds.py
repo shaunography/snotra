@@ -69,7 +69,7 @@ class rds(object):
             "name" : "RDS Instances Do Not Have Deletion Protection Enabled",
             "affected": [],
             "analysis" : "",
-            "description" : "RDS instances were were identified which do not have deletion protection enabled. To minimise the risk of data loss it recommended to enabled deletion protection on at least production databases. Amazon RDS enforces deletion protection when you use the console, the CLI, or the API to delete a DB instance. To delete a DB instance that has deletion protection enabled, first modify the instance and disable deletion protection. Enabling or disabling deletion protection doesn't cause an outage.",
+            "description" : "RDS instances were identified which do not have deletion protection enabled. To minimise the risk of data loss it recommended to enabled deletion protection on at least production databases. Amazon RDS enforces deletion protection when you use the console, the CLI, or the API to delete a DB instance. To delete a DB instance that has deletion protection enabled, first modify the instance and disable deletion protection. Enabling or disabling deletion protection doesn't cause an outage.",
             "remediation" : "Enable Deletion Protection on all affected RDS instances.",
             "impact" : "info",
             "probability" : "info",

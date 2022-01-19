@@ -27,11 +27,13 @@ class securityhub(object):
                 hub_description = client.describe_hub()
                 security_hubs[region] = {}
                 security_hubs[region]["HubArn"] = hub_description["HubArn"]
-                security_hubs[region]["SubscribedAt"] = hub_description["SubscribedAt"]
-                security_hubs[region]["AutoEnableControls"] = hub_description["AutoEnableControls"]
+                security_hubs[region]["SubscribedAt"] = hub_description["SubscribedAt"]       
+                try:
+                    security_hubs[region]["AutoEnableControls"] = hub_description["AutoEnableControls"]
+                except KeyError: # if AutoEnableControls is not returned (sometimes happens), assume it is enabled
+                    security_hubs[region]["AutoEnableControls"] = True
             except boto3.exceptions.botocore.exceptions.ClientError:
-                # no active subscription
-                pass
+                pass # no active subscription
             else:
                 security_hubs[region]["StandardsSubscriptions"] = client.get_enabled_standards()["StandardsSubscriptions"]
         return security_hubs
@@ -75,6 +77,7 @@ class securityhub(object):
                 results["pass_fail"] = "PASS"
             else:
                 results["analysis"] = "A Security hub subscription is active but no active standards subscriptions were found, ensure AWS config is enabled."
+                results["affected"].append(self.account_id)
                 results["pass_fail"] = "FAIL"
 
         return results

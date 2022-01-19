@@ -150,38 +150,42 @@ class cloudtrail(object):
                 if trail["HomeRegion"] == region:
                     bucket_name = trail["S3BucketName"]
                     trail_name = trail["Name"]
-                    grants = s3_client.get_bucket_acl(Bucket=bucket_name)["Grants"]
-                    for grant in grants:
-                        try:
-                            if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AllUsers":
-                                results["affected"].append(trail_name)
-                            if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AuthenticatedUsers":
-                                results["affected"].append(trail_name)
-                        except KeyError:
-                            pass
-                                     
-                        try:
-                            policy = json.loads(s3_client.get_bucket_policy(Bucket=bucket_name)["Policy"])
-                        # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
-                        except boto3.exceptions.botocore.exceptions.ClientError:
-                            # no bucket policy exists
-                            pass
-                        else:
-                            statements = policy["Statement"]
-                            for statement in statements:
-                                effect = statement["Effect"]
-                                if effect == "Allow":
-                                    try:
-                                        if statement["Principal"]["AWS"] == "*":
-                                            results["affected"].append(trail_name)
-                                    except KeyError:
-                                        pass
+                    try:
+                        grants = s3_client.get_bucket_acl(Bucket=bucket_name)["Grants"]
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting acl for bucket %s - %s" % (bucket_name, e.response["Error"]["Code"]))
+                    else:
+                        for grant in grants:
+                            try:
+                                if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AllUsers":
+                                    results["affected"].append(trail_name)
+                                if grant["Grantee"]["URI"] == "https://acs.amazonaws.com/groups/global/AuthenticatedUsers":
+                                    results["affected"].append(trail_name)
+                            except KeyError:
+                                pass
+                                        
+                            try:
+                                policy = json.loads(s3_client.get_bucket_policy(Bucket=bucket_name)["Policy"])
+                            # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
+                            except boto3.exceptions.botocore.exceptions.ClientError:
+                                # no bucket policy exists
+                                pass
+                            else:
+                                statements = policy["Statement"]
+                                for statement in statements:
+                                    effect = statement["Effect"]
+                                    if effect == "Allow":
+                                        try:
+                                            if statement["Principal"]["AWS"] == "*":
+                                                results["affected"].append(trail_name)
+                                        except KeyError:
+                                            pass
 
-                                    try:
-                                        if statement["Principal"]["Service"] == "*":
-                                            results["affected"].append(trail_name)
-                                    except KeyError:
-                                        pass
+                                        try:
+                                            if statement["Principal"]["Service"] == "*":
+                                                results["affected"].append(trail_name)
+                                        except KeyError:
+                                            pass
 
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
@@ -269,8 +273,11 @@ class cloudtrail(object):
         for region, trail_list in self.trails.items():
             for trail in trail_list:
                 if trail["HomeRegion"] == region:
-                    if "LoggingEnabled" not in s3_client.get_bucket_logging(Bucket=trail["S3BucketName"]):
-                        results["affected"].append(trail["Name"])
+                    try:
+                        if "LoggingEnabled" not in s3_client.get_bucket_logging(Bucket=trail["S3BucketName"]):
+                            results["affected"].append(trail["Name"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting logging for bucket %s - %s" % (trail["S3BucketName"], e.response["Error"]["Code"]))
 
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail trails in use"
@@ -357,12 +364,16 @@ class cloudtrail(object):
                 if trail["HomeRegion"] == region:
                     if trail["HasCustomEventSelectors"] == True:
                         trail_name = trail["Name"]
-                        event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
-                        for selector in event_selectors:
-                            if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "WriteOnly":
-                                for resources in selector["DataResources"]:
-                                    if resources["Type"] == "AWS::S3::Object":
-                                        results["affected"].append(trail_name)
+                        try:
+                            event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
+                        except boto3.exceptions.botocore.exceptions.ClientError as e:
+                            logging.error("Error getting event selectors - %s" % e.response["Error"]["Code"])
+                        else:
+                            for selector in event_selectors:
+                                if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "WriteOnly":
+                                    for resources in selector["DataResources"]:
+                                        if resources["Type"] == "AWS::S3::Object":
+                                            results["affected"].append(trail_name)
         
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
@@ -407,12 +418,16 @@ class cloudtrail(object):
                 if trail["HomeRegion"] == region:
                     if trail["HasCustomEventSelectors"] == True:
                         trail_name = trail["Name"]
-                        event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
-                        for selector in event_selectors:
-                            if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "ReadOnly":
-                                for resources in selector["DataResources"]:
-                                    if resources["Type"] == "AWS::S3::Object":
-                                        results["affected"].append(trail_name)
+                        try:
+                            event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
+                        except boto3.exceptions.botocore.exceptions.ClientError as e:
+                            logging.error("Error getting event selectors - %s" % e.response["Error"]["Code"])
+                        else:                        
+                            for selector in event_selectors:
+                                if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "ReadOnly":
+                                    for resources in selector["DataResources"]:
+                                        if resources["Type"] == "AWS::S3::Object":
+                                            results["affected"].append(trail_name)
         
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"

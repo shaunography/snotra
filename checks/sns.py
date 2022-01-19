@@ -9,13 +9,40 @@ class sns(object):
     def __init__(self, session):
         self.session = session
         self.regions = describe_regions(session)
+        self.topics = self.get_topics()
+        self.attributes = self.get_topic_attributes()
 
     def run(self):
         findings = []
         findings += [ self.sns_1() ]
         findings += [ self.sns_2() ]
         return findings
+
+    def get_topics(self):
+        logging.info("getting SNS topics")
+        topics = {}
+        for region in self.regions:
+            client = self.session.client('sns', region_name=region)
+            try:
+                topics[region] = client.list_topics()["Topics"]      
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting topics - %s" % e.response["Error"]["Code"])
+        return topics
         
+    def get_topic_attributes(self):
+        logging.info("getting SNS topic attributes")
+        attributes = {}
+        for region, topics in self.topics.items():
+            attributes[region] = {}
+            for topic in topics:
+                client = self.session.client('sns', region_name=region)
+                try:
+                    attributes[region][topic["TopicArn"]] = client.get_topic_attributes(TopicArn=topic["TopicArn"])["Attributes"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting topics - %s" % e.response["Error"]["Code"])
+        return attributes
+
+
     def sns_1(self):
         # SNS topc allows actions to all aws principals
 
@@ -39,17 +66,14 @@ class sns(object):
 
         logging.info(results["name"])
         
-        for region in self.regions:
-            client = self.session.client('sns', region_name=region)
-            topics = client.list_topics()["Topics"]
-            for topic in topics:
-                attributes = client.get_topic_attributes(TopicArn=topic["TopicArn"])["Attributes"]
+        for region in self.regions: 
+            for arn, attributes in self.attributes[region].items():
                 statements = json.loads(attributes["Policy"])["Statement"]
                 for statement in statements:
                     if statement["Effect"] == "Allow":
                         if statement["Principal"] == {"AWS": "*"} or statement["Principal"] == {"CanonicalUser": "*"}:
                             if "Condition" not in statement:
-                                results["affected"].append(topic["TopicArn"])
+                                results["affected"].append(arn)
 
         if results["affected"]:
             results["analysis"] = "The affected SNS Topics Allow all principals to perform actions."
@@ -84,15 +108,12 @@ class sns(object):
 
         logging.info(results["name"])
         
-        for region in self.regions:
-            client = self.session.client('sns', region_name=region)
-            topics = client.list_topics()["Topics"]
-            for topic in topics:
-                attributes = client.get_topic_attributes(TopicArn=topic["TopicArn"])["Attributes"]
+        for region in self.regions: 
+            for arn, attributes in self.attributes[region].items():
                 try:
                     kms_master_key_id = attributes["KmsMasterKeyId"]
                 except KeyError:
-                    results["affected"].append(topic["TopicArn"])
+                    results["affected"].append(arn)
 
         if results["affected"]:
             results["analysis"] = "The affected SNS Topics are not encrypted."

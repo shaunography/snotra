@@ -23,11 +23,11 @@ class guardduty(object):
             "compliance" : "n/a",
             "level" : "n/a",
             "service" : "guardduty",
-            "name" : "Enable GuardDuty in all regions",
+            "name" : "GuardDuty Not Enabled In All Regions",
             "affected": [],
             "analysis" : "",
             "description" : "GuardDuty is an AWS threat detection service that detects compromised access keys, EC2 instances, and more, allowing you to identify malicious activity and unauthorised behaviour within your account.",
-            "remediation" : "Enable Guardduty in all AWS regions",
+            "remediation" : "Enable GuardDuty in all AWS regions",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
@@ -46,9 +46,9 @@ class guardduty(object):
         if results["affected"]:
             results["pass_fail"] = "FAIL"
             if set(results["affected"]) == set(self.regions):
-                results["analysis"] = "AWS Config is not enabled in any region"
+                results["analysis"] = "AWS GuardDuty is not enabled in any region"
             else:
-                results["analysis"] = "The affected regions do not have AWS config enabled."
+                results["analysis"] = "The affected regions do not have GuardDuty enabled."
         else:
             results["analysis"] = "GuardDuty is enabled in all regions"
             results["pass_fail"] = "PASS"
