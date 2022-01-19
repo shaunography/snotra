@@ -68,6 +68,8 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * RDS Instances Do Not Have Deletion Protection Enabled (rds)
 * Unencrypted SNS Topics (sns)
 * Domain Does Not Have Domain Transfer Lock Set (route53)
+* ACM Certificate with Transparency Logging Set to Disabled (acm)
+* Expired ACM Certificates (acm)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:

@@ -25,6 +25,7 @@ from checks.securityhub import securityhub
 from checks.elb import elb
 from checks.ecr import ecr
 from checks.route53 import route53
+from checks.acm import acm
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -95,12 +96,13 @@ def main():
     results["findings"] += elb(session).run()
     results["findings"] += ecr(session).run()
     results["findings"] += route53(session).run()
+    results["findings"] += acm(session).run()
 
     if not os.path.exists(args.o):
         logging.info("results dir does not exist, creating it for you")
         os.makedirs(args.o)
     
-    filename = os.path.join(args.o, "results_{}.json".format(get_account_id(session)))
+    filename = os.path.join(args.o, "snotra_results_{}.json".format(get_account_id(session)))
     logging.info("writing results json {}".format(filename))
     with open(filename, 'w') as f:
         json.dump(results, f)
