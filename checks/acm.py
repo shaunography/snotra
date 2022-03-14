@@ -49,7 +49,7 @@ class acm(object):
             "remediation" : "Enable Certificate Transparancy Logging on all certificates.",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -88,7 +88,7 @@ class acm(object):
             "remediation" : "Monitor certificate expiration and take action to renew; replace or remove expired certificates as requried. AWS Config can be used to monitor your account for expired certificates with the managed rule acm-certificate-expiration-check.",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -100,10 +100,11 @@ class acm(object):
             for certificate in certificates:
                 description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
                 if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
+                    print(certificate)
                     results["affected"].append(certificate["CertificateArn"])
 
         if results["affected"]:
-            results["analysis"] = "The affected Certificates havhe expired."
+            results["analysis"] = "The affected Certificates have expired."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No expired certificates found."

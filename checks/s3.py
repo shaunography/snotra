@@ -51,7 +51,7 @@ class s3(object):
             "remediation" : "Ensure all S3 buckets employ encryption-at-rest",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -89,7 +89,7 @@ class s3(object):
             "remediation" : "Enforce HTTPS requests for all buckets within your account",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -150,7 +150,7 @@ class s3(object):
             "remediation" : "configure MFA delete on all S3 buckets within your account",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -225,7 +225,7 @@ class s3(object):
             "remediation" : "Ensure that S3 Buckets are configured with Block public access",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
