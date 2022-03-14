@@ -141,7 +141,7 @@ class ec2(object):
             "remediation" : "",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -184,7 +184,7 @@ class ec2(object):
             "remediation" : "Ensure EBS default volume encryption is enabled in all regions",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -266,7 +266,7 @@ class ec2(object):
             "remediation" : "Apply the principle of least privilege and only allow RDP and SSH traffic from a whitelist of trusted IP addresses",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -326,7 +326,7 @@ class ec2(object):
             "remediation" : "Apply the principle of least privilege and only allow RDP and SSH traffic from a whitelist of trusted IP addresses",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -392,7 +392,7 @@ class ec2(object):
             "remediation" : "Configure default security groups in all VPCs to be default deny and restrict all traffic",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -431,7 +431,7 @@ class ec2(object):
             "remediation" : "Configure routing tables for VPC perring following the principle of least access",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -540,8 +540,8 @@ class ec2(object):
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
             addresses = client.describe_addresses()["Addresses"]
-            results["affected"] += ["{}({})".format(address["AllocationId"], region) for address in addresses if ("NetworkInterfaceId","AssociationId") not in address]             
-
+            results["affected"] += ["{}({})".format(address["PublicIp"], region) for address in addresses if "AssociationId" not in address]             
+            
         if results["affected"]:
             results["analysis"] = "the affected elastic IPs are not associated with any network interfaces and are therefore not being used"
             results["pass_fail"] = "FAIL"
@@ -568,7 +568,7 @@ class ec2(object):
             "remediation" : "Remove public access from your EBS snapshots and only share them with trusted accounts.",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -616,7 +616,7 @@ class ec2(object):
             "remediation" : "Remove public access from your EC2 AMIs and only share them with trusted accounts.",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -655,7 +655,7 @@ class ec2(object):
             "remediation" : "Apply the principle of least privilege and only allow direct database traffic from a whitelist of trusted IP addresses",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -720,7 +720,7 @@ class ec2(object):
             "remediation" : "Apply the principle of least privilege and only allow database traffic from a whitelist of trusted IP addresses",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -779,7 +779,7 @@ class ec2(object):
             "remediation" : "Configure all NACLs applying the principle of least privilege and only allows the traffic required for the application or service to function. NOTE: Because NACLs are stateless return traffic on ephemeral unprivileged ports will need to be accounted for. More Information http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -833,7 +833,7 @@ class ec2(object):
             "remediation" : "Configure all NACLs applying the principle of least privilege and only allows the traffic required for the application or service to function. NOTE: Because NACLs are stateless return traffic on ephemeral unprivileged ports will need to be accounted for. More Information http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_ACLs.html",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "5.3",
             "pass_fail" : ""
         }
@@ -973,7 +973,7 @@ class ec2(object):
             "remediation" : "Configure IMDSv2 on all affected EC2 instances. See the following link for more information on how to transition to version 2 of the metadata service.",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -1054,7 +1054,7 @@ class ec2(object):
             "remediation" : "There is no direct way to encrypt an existing unencrypted volume, or to remove encryption from an encrypted volume. However, you can migrate data between encrypted and unencrypted volumes. You can also apply a new encryption status while copying a snapshot:\nMore information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -1090,7 +1090,7 @@ class ec2(object):
             "remediation" : "There is no direct way to encrypt an existing unencrypted volume, or to remove encryption from an encrypted volume. However, you can migrate data between encrypted and unencrypted volumes. You can also apply a new encryption status while copying a snapshot:\nMore information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -1161,7 +1161,7 @@ class ec2(object):
             "affected": [],
             "analysis" : "",
             "description" : "Default VPCs created by AWS can be considered overly permissive and it is recomened to create you own VPCs instead. Default VPCs include an internet gateway, default security groups and default allow all NACLs which could result in accidental exposure of EC2 instances and data to the internet.",
-            "remediation" : "Create you own VPCs as required applying the priciple of least privilege to network access controls",
+            "remediation" : "Create you own VPCs as required applying the principle of least privilege to network access controls",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
@@ -1175,9 +1175,12 @@ class ec2(object):
             for reservation in reservations:
                 for instance in reservation["Instances"]:
                     for vpc in self.vpcs[region]:
-                        if vpc["VpcId"] == instance["VpcId"]:
-                            if vpc["IsDefault"] == True:
-                                results["affected"].append("{}({})".format(vpc["VpcId"], region))
+                        try:
+                            if vpc["VpcId"] == instance["VpcId"]:
+                                if vpc["IsDefault"] == True:
+                                    results["affected"].append("{}({})".format(vpc["VpcId"], region))
+                        except KeyError: # instance has no VpcID
+                            pass
         
         if results["affected"]:
             results["analysis"] = "The affected VPCs are in use and default."

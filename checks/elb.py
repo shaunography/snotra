@@ -134,7 +134,7 @@ class elb(object):
             "remediation" : 'Disable existing HTTP listeners and replace them with HTTPS listeners as required. You can also configure HTTP listeners to redirect to HTTPS if preferred.\nMore information,nhttps://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html',
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N",
             "cvss_score" : "5.4",
             "pass_fail" : ""
         }
@@ -194,7 +194,7 @@ class elb(object):
             "remediation" : 'In short, the following summarises SSL/TLS hardening options that should be considered:\n- Use 2048-bit RSA private keys and 256bit ECDSA private keys\n- Renew certificates on an annual basis\n- Use strong certificate signature algorithms (sha256)\n- Disable SSL v2, SSL v3,TLS v1.0 and TLS v1.1 - support TLS 1.2 and 1.3.\n- Disable insecure cipher suites (ADH, Null, Export, RC4 and 3DES)\n- Support Forward Secrecy (ECDHE)\n- Use strong key exchange algorithms (ECDHE and DHE > 2048-bit)\n- Ensure the underlying software is patched and up to date\n- Encrypt everything and eliminate mixed HTTP/HTTPS content\n- Implement HTTP Strict Transport Security (HSTS) to ensure secure connections cannot be downgraded to an insecure connection.\n- Support TLS_FALLBACK_SCSV to prevent protocol downgrade attacks\n- Disable SSL/TLS Compression.\nNote: Implementing a strong SSL/TLS configuration can result in user agents no longer being able to connect to your site due to lack of compatible cipher suites.',
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
             "cvss_score" : "7.4",
             "pass_fail" : ""
         }

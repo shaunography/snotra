@@ -42,7 +42,7 @@ class kms(object):
             "remediation" : "Enable key rotation on all customer created CMKs",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }

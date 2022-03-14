@@ -59,7 +59,7 @@ class sns(object):
             "remediation" : "Ensure that your AWS Simple Notification Service (SNS) topics do not allow Everyone to subscribe. The entities that can subscribe to your SNS topics can be: Everyone (anonymous access), users whose endpoint URL, protocol, email address or ARN from a Subscribe request match a certain value, specific AWS users or resources and the topic owner. From this list of topic subscribers, you should make sure that the Everyone entity is not used with any SNS topics created within your AWS account in order to protect the messages published to your topics against attackers or unauthorized personnel.",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
             "cvss_score" : "6.5",
             "pass_fail" : ""
         }
@@ -101,7 +101,7 @@ class sns(object):
             "remediation" : "Configure the affected SNS Topics to use server side encryption using the Amazon KMS service.",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }

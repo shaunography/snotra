@@ -251,7 +251,7 @@ class iam(object):
             "remediation" : "Ensure no root user account access key exists",
             "impact" : "high",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
             "cvss_score" : "8.1",
             "pass_fail" : "PASS"
         }
@@ -344,7 +344,7 @@ class iam(object):
             "remediation" : "Create dedicated Admin users in IAM for administrative and daily tasks",
             "impact" : "high",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
             "cvss_score" : "8.1",
             "pass_fail" : "INFO"
         }
@@ -377,7 +377,7 @@ class iam(object):
             "remediation" : "Ensure IAM password policy requires minimum length of 14 or greater",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -416,7 +416,7 @@ class iam(object):
             "remediation" : "Ensure IAM password policy prevents password reuse",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -461,7 +461,7 @@ class iam(object):
             "remediation" : "Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -503,7 +503,7 @@ class iam(object):
             "remediation" : "Do not setup access keys during initial user setup",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -550,7 +550,7 @@ class iam(object):
             "remediation" : "Ensure credentials unused for 45 days or greater are disabled",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -615,7 +615,7 @@ class iam(object):
             "remediation" : "Ensure there is only one active access key available for any single IAM user",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -659,7 +659,7 @@ class iam(object):
             "remediation" : "Ensure access keys are rotated every 90 days or less",
             "impact" : "medium",
             "probability" : "medium",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -755,7 +755,7 @@ class iam(object):
             "remediation" : "Policies that grant full administrative privileges should be removed in favour of AWS Managed policies and applied using the principle of least privilege",
             "impact" : "high",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
             "cvss_score" : "8.1",
             "pass_fail" : "PASS"
         }
@@ -854,7 +854,7 @@ class iam(object):
             "remediation" : "Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
             "cvss_score" : "5.6",
             "pass_fail" : ""
         }
@@ -963,7 +963,7 @@ class iam(object):
             "remediation" : 'All Cross-Account roles which provide a level of privileged access should be configured with a unique and complex external ID as well as performing re authentication via MFA.\nMore Information\nhttps://aws.amazon.com/blogs/security/how-to-use-external-id-when-granting-access-to-your-aws-resources/\nhttps://en.wikipedia.org/wiki/Confused_deputy_problem',
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:L/UI:R/S:C/C:L/I:L/A:L",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:L/UI:R/S:C/C:L/I:L/A:L",
             "cvss_score" : "5.5",
             "pass_fail" : ""
         }
@@ -1022,18 +1022,12 @@ class iam(object):
 
         for group in self.groups:
             managed_policies = self.client.list_attached_group_policies(GroupName=group["Group"]["GroupName"])["AttachedPolicies"]
-            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
-            group_policies = managed_policies + inline_policies
             
-            for group_policy in group_policies:
-
+            for group_policy in managed_policies:
                 for policy in policies:
                     arn = policy["Arn"]
-
                     if group_policy["PolicyArn"] == arn:
-
                         statements = self.client.get_policy_version(PolicyArn=arn, VersionId=policy["DefaultVersionId"])["PolicyVersion"]["Document"]["Statement"]
-                        
                         if type(statements) is not list:
                             statements = [ statements ]
 
@@ -1046,6 +1040,24 @@ class iam(object):
                                             users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                             except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                                 pass
+            
+            
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+
+            for policy_name in inline_policies:
+                statements = self.client.get_group_policy(GroupName=group["Group"]["GroupName"], PolicyName=policy_name)["PolicyDocument"]["Statement"]
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(group["Group"]["GroupName"])
+                                    users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
 
         if results["affected"]:
             results["analysis"] = "The affected groups grant admin access.\nAffected Groups and Users:\n{}".format(json.dumps(users))
@@ -1084,18 +1096,12 @@ class iam(object):
 
         for group in self.groups:
             managed_policies = self.client.list_attached_group_policies(GroupName=group["Group"]["GroupName"])["AttachedPolicies"]
-            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
-            group_policies = managed_policies + inline_policies
             
-            for group_policy in group_policies:
-
+            for group_policy in managed_policies:
                 for policy in policies:
                     arn = policy["Arn"]
-
                     if group_policy["PolicyArn"] == arn:
-
                         statements = self.client.get_policy_version(PolicyArn=arn, VersionId=policy["DefaultVersionId"])["PolicyVersion"]["Document"]["Statement"]
-                        
                         if type(statements) is not list:
                             statements = [ statements ]
 
@@ -1109,6 +1115,25 @@ class iam(object):
                                                 users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                             except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                                 pass
+            
+            
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+
+            for policy_name in inline_policies:
+                statements = self.client.get_group_policy(GroupName=group["Group"]["GroupName"], PolicyName=policy_name)["PolicyDocument"]["Statement"]
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    if not re.match(".*[Aa][Dd][Mm][Ii][Nn].*", group["Group"]["GroupName"]):
+                                        results["affected"].append(group["Group"]["GroupName"])
+                                        users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
 
         if results["affected"]:
             results["analysis"] = "The affected groups grant admin access which is not indicated by their name.\nAffected Groups and Users:\n{}".format(json.dumps(users))

@@ -136,7 +136,7 @@ class cloudtrail(object):
             "remediation" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
@@ -309,7 +309,7 @@ class cloudtrail(object):
             "remediation" : "Configure CloudTrail to use SSE-KMS for encryption at rest.",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
             "cvss_score" : "3.7",
             "pass_fail" : ""
         }
