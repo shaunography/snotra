@@ -568,7 +568,7 @@ class iam(object):
             access_key_2_last_used = user.split(",")[15]
 
             if password_enabled == "true":
-                if password_last_used != "N/A":
+                if password_last_used != "N/A" and password_last_used != "no_information":
                     year, month, day = password_last_used.split("T")[0].split("-")
                     password_last_used_date = date(int(year), int(month), int(day))
                     if password_last_used_date < (date.today() - timedelta(days=45)):
@@ -831,7 +831,7 @@ class iam(object):
                 policy_roles = self.client.list_entities_for_policy(PolicyArn=policy["Arn"])["PolicyRoles"]
                 
                 if policy_roles:
-                    results["analysis"] = "AWSSupportAccess Policy is attached to role: {}".format(" ".join(policy_roles))
+                    results["analysis"] = "AWSSupportAccess Policy is attached to role: {}".format(" ".join(policy_roles["RoleName"]))
                     results["affected"].append(self.account_id)
                     results["pass_fail"] = "PASS"
 
