@@ -933,7 +933,7 @@ class ec2(object):
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "n/a",
-            "cvss_score" : "info",
+            "cvss_score" : "n/a",
             "pass_fail" : ""
         }
 
@@ -949,7 +949,7 @@ class ec2(object):
                             results["affected"].append("{}({})".format(instance["InstanceId"], region))
 
         if results["affected"]:
-            results["analysis"] = "The affected running instances do not have an instance profile attached."
+            results["analysis"] = "The affected instances are more than 365 days old."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No instances older than 365 days found."

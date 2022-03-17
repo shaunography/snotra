@@ -70,6 +70,8 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * Domain Does Not Have Domain Transfer Lock Set (route53)
 * ACM Certificate with Transparency Logging Set to Disabled (acm)
 * Expired ACM Certificates (acm)
+* Lack of ELB Access Logging (elb)
+* Load Balancer Deletion Protection not Configured (elb)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
