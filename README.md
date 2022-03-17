@@ -73,6 +73,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * Lack of ELB Access Logging (elb)
 * Load Balancer Deletion Protection not Configured (elb)
 * Group with inline policies (iam)
+* High Risk Guard Duty Findings (guardduty)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
