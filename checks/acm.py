@@ -100,7 +100,6 @@ class acm(object):
             for certificate in certificates:
                 description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
                 if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
-                    print(certificate)
                     results["affected"].append(certificate["CertificateArn"])
 
         if results["affected"]:
