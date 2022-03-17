@@ -193,8 +193,11 @@ class ec2(object):
         
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            if client.get_ebs_encryption_by_default()["EbsEncryptionByDefault"] == False:
-                results["affected"].append(region)
+            try:
+                if client.get_ebs_encryption_by_default()["EbsEncryptionByDefault"] == False:
+                    results["affected"].append(region)
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting encryption informaiton - %s" % e.response["Error"]["Code"])
         
         if results["affected"]:
             results["pass_fail"] = "FAIL"
@@ -225,8 +228,8 @@ class ec2(object):
             "remediation" : "Enable VPC Flow Logs on all VPCs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -234,9 +237,13 @@ class ec2(object):
         
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            flow_logs = client.describe_flow_logs()["FlowLogs"]
-            if not flow_logs:
-                results["affected"].append(region)
+            try:
+                flow_logs = client.describe_flow_logs()["FlowLogs"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting flow logs - %s" % e.response["Error"]["Code"])
+            else:
+                if not flow_logs:
+                    results["affected"].append(region)
             
         if results["affected"]:
             results["pass_fail"] = "FAIL"
@@ -440,11 +447,15 @@ class ec2(object):
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            route_tables = client.describe_route_tables()["RouteTables"]
-            for route_table in route_tables:
-                for route in route_table["Routes"]:
-                    if "VpcPeeringConnectionId" in route:
-                        results["affected"].append("{}({})".format(route["VpcPeeringConnectionId"], region))
+            try:
+                route_tables = client.describe_route_tables()["RouteTables"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting route tables - %s" % e.response["Error"]["Code"])
+            else:
+                for route_table in route_tables:
+                    for route in route_table["Routes"]:
+                        if "VpcPeeringConnectionId" in route:
+                            results["affected"].append("{}({})".format(route["VpcPeeringConnectionId"], region))
                     
         if results["affected"]:
             results["analysis"] = "VPC peering in use - check affected routing tables for least access"
@@ -462,9 +473,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_8",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no unused security groups",
             "affected": [],
@@ -473,8 +484,8 @@ class ec2(object):
             "remediation" : "Ensure all security groups that are temporary and not being used are deleted when no longer required.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -519,9 +530,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_9",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no unused elastic IPs",
             "affected": [],
@@ -530,8 +541,8 @@ class ec2(object):
             "remediation" : "To release an Elastic IP address using the console: 1. Open the Amazon EC2 console at https://console.aws.amazon.com/ec2/. 2. In the navigation pane, choose Elastic IPs. 3. Select the Elastic IP address, choose Actions, and then select Release addresses. Choose Release when prompted. More information: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -539,8 +550,12 @@ class ec2(object):
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            addresses = client.describe_addresses()["Addresses"]
-            results["affected"] += ["{}({})".format(address["PublicIp"], region) for address in addresses if "AssociationId" not in address]             
+            try:
+                addresses = client.describe_addresses()["Addresses"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting public ips - %s" % e.response["Error"]["Code"])
+            else:
+                results["affected"] += ["{}({})".format(address["PublicIp"], region) for address in addresses if "AssociationId" not in address]             
             
         if results["affected"]:
             results["analysis"] = "the affected elastic IPs are not associated with any network interfaces and are therefore not being used"
@@ -557,9 +572,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_10",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no Public EBS Snapshots",
             "affected": [],
@@ -605,9 +620,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_11",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no Public EC2 AMIs",
             "affected": [],
@@ -625,8 +640,12 @@ class ec2(object):
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            images = client.describe_images(Owners=["self"])["Images"]
-            results["affected"] += [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
+            try:
+                images = client.describe_images(Owners=["self"])["Images"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting images - %s" % e.response["Error"]["Code"])
+            else:
+                results["affected"] += [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
 
         if results["affected"]:
             results["analysis"] = "the affected EC2 AMIs are public."
@@ -644,9 +663,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_11",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure no security groups allow ingress from 0.0.0.0/0 to database ports",
             "affected": [],
@@ -709,9 +728,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_13",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to database ports",
             "affected": [],
@@ -768,9 +787,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_14",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure default Network ACLs are not default allow",
             "affected": [],
@@ -822,9 +841,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_15",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure custom Network ACLs do not allow all traffic",
             "affected": [],
@@ -883,9 +902,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_16",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Unused Network Interfaces",
             "affected": [],
@@ -894,8 +913,8 @@ class ec2(object):
             "remediation" : "remove network interfaces that are not in use and no longer required.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -921,9 +940,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_17",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure running instances are not more than 365 days old",
             "affected": [],
@@ -932,8 +951,8 @@ class ec2(object):
             "remediation" : "Review the list of instances and ensure they subject to a regular patching policy and lifecycle management.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -949,7 +968,7 @@ class ec2(object):
                             results["affected"].append("{}({})".format(instance["InstanceId"], region))
 
         if results["affected"]:
-            results["analysis"] = "The affected running instances do not have an instance profile attached."
+            results["analysis"] = "The affected instances are more than 365 days old."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No instances older than 365 days found."
@@ -962,9 +981,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_18",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required",
             "affected": [],
@@ -1001,9 +1020,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_19",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "EC2 Instances Not Managed By AWS Systems Manager",
             "affected": [],
@@ -1012,8 +1031,8 @@ class ec2(object):
             "remediation" : "It is recommended to configure all EC2 instances to be monitored by Systems Manager by installing and registering the SSM agent on the affected hosts.\nMore Information\nhttps://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started.html",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1021,12 +1040,15 @@ class ec2(object):
        
         for region, reservations in self.instance_reservations.items():
             client = self.session.client('ssm', region_name=region)
-            managed_instances = [ instance["InstanceId"] for instance in client.describe_instance_information()["InstanceInformationList"] ]
-            
-            for reservation in reservations:
-                for instance in reservation["Instances"]:
-                    if instance["InstanceId"] not in managed_instances:
-                        results["affected"].append("{}({})".format(instance["InstanceId"], region))
+            try:
+                managed_instances = [ instance["InstanceId"] for instance in client.describe_instance_information()["InstanceInformationList"] ]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting instance information - %s" % e.response["Error"]["Code"])
+            else:
+                for reservation in reservations:
+                    for instance in reservation["Instances"]:
+                        if instance["InstanceId"] not in managed_instances:
+                            results["affected"].append("{}({})".format(instance["InstanceId"], region))
 
         if results["affected"]:
             results["analysis"] = "The affected instances are running and not managed by Systems Manager."
@@ -1043,9 +1065,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_20",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Unencrypted EBS Volumes",
             "affected": [],
@@ -1079,9 +1101,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_21",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Unencrypted EBS Snapshots",
             "affected": [],
@@ -1114,9 +1136,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_22",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Snapshot older than 30 days",
             "affected": [],
@@ -1125,8 +1147,8 @@ class ec2(object):
             "remediation" : "Delete snapshots that are older than 30 days and consider implementing snapshot lifecycle management in AWS DLM",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1153,9 +1175,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_23",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Default VPCs in use",
             "affected": [],
@@ -1164,8 +1186,8 @@ class ec2(object):
             "remediation" : "Create you own VPCs as required applying the principle of least privilege to network access controls",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

@@ -24,9 +24,9 @@ class ecr(object):
 
         results = {
             "id" : "ecr_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ecr",
             "name" : "ECR Image Scan on Push is not Enabled",
             "affected": [],
@@ -35,8 +35,8 @@ class ecr(object):
             "remediation" : "Enable scan on push for all repositories in the affected account. More Information: https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html#scanning-repository",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -44,10 +44,14 @@ class ecr(object):
 
         for region in self.regions:
             client = self.session.client('ecr', region_name=region)
-            repositories = client.describe_repositories()["repositories"]
-            for repository in repositories:
-                if repository["imageScanningConfiguration"]["scanOnPush"] == False:
-                    results["affected"].append(repository["repositoryName"])
+            try:
+                repositories = client.describe_repositories()["repositories"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting repositories - %s" % e.response["Error"]["Code"])
+            else:
+                for repository in repositories:
+                    if repository["imageScanningConfiguration"]["scanOnPush"] == False:
+                        results["affected"].append(repository["repositoryName"])
 
 
         if results["affected"]:

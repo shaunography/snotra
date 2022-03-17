@@ -52,8 +52,8 @@ class cloudtrail(object):
             "remediation" : "Enable CloudTrail in all regions",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -65,8 +65,11 @@ class cloudtrail(object):
                 trail_name = trail["Name"]
                 if trail["IsMultiRegionTrail"] == True:
                     if trail["HomeRegion"] == region:
-                        if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                            results["affected"].append(trail_name)
+                        try:
+                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                results["affected"].append(trail_name)
+                        except boto3.exceptions.botocore.exceptions.ClientError as e:
+                            logging.error("Error getting trail status - %s" % e.response["Error"]["Code"])
 
         if results["affected"]:
             results["analysis"] = "The affected trails are multi region enabled."
@@ -94,8 +97,8 @@ class cloudtrail(object):
             "remediation" : "Enabled log file validation on all your trails",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -218,8 +221,8 @@ class cloudtrail(object):
             "remediation" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -261,8 +264,8 @@ class cloudtrail(object):
             "remediation" : "Ensure the CloudTrail S3 bucket has access logging is enabled",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -351,8 +354,8 @@ class cloudtrail(object):
             "remediation" : "Enable S3 bucket Object-level logging for write events in CloudTrail",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
         
@@ -405,8 +408,8 @@ class cloudtrail(object):
             "remediation" : "Enable S3 bucket Object-level logging for read events in CloudTrail",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

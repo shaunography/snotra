@@ -50,6 +50,7 @@ class iam(object):
         findings += [ self.iam_21() ]
         findings += [ self.iam_22() ]
         findings += [ self.iam_23() ]
+        findings += [ self.iam_24() ]
         return findings
 
     def get_client(self):
@@ -168,8 +169,8 @@ class iam(object):
             "remediation" : "Ensure contact email and telephone details for AWS accounts are current",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -196,8 +197,8 @@ class iam(object):
             "remediation" : "Ensure security contact information is registered",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -223,8 +224,8 @@ class iam(object):
             "remediation" : "Ensure security questions are registered in the AWS account",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -281,8 +282,8 @@ class iam(object):
             "remediation" : "Enable MFA for the root user account",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : "PASS"
         }
 
@@ -312,8 +313,8 @@ class iam(object):
             "remediation" : "Ensure hardware MFA is enabled for the root user account",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : "PASS"
         }
 
@@ -713,8 +714,8 @@ class iam(object):
             "remediation" : "Ensure IAM Users Receive Permissions Only Through Groups",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -808,8 +809,8 @@ class iam(object):
             "remediation" : "Ensure a support role has been created",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -828,10 +829,10 @@ class iam(object):
                     results["affected"].append(self.account_id)
                     results["pass_fail"] = "FAIL"
                 
-                policy_roles = self.client.list_entities_for_policy(PolicyArn=policy["Arn"])["PolicyRoles"]
+                policy_roles = [ i["RoleName"] for i in self.client.list_entities_for_policy(PolicyArn=policy["Arn"])["PolicyRoles"]]
                 
                 if policy_roles:
-                    results["analysis"] = "AWSSupportAccess Policy is attached to role: {}".format(" ".join(policy_roles["RoleName"]))
+                    results["analysis"] = "AWSSupportAccess Policy is attached to roles: {}".format(" ".join(policy_roles))
                     results["affected"].append(self.account_id)
                     results["pass_fail"] = "PASS"
 
@@ -901,8 +902,8 @@ class iam(object):
             "remediation" : "manage IAM user centrally and have them assume roles, configured following the priniciple of least privilege, within target accounts when requiring access",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -918,9 +919,9 @@ class iam(object):
 
         results = {
             "id" : "iam_20",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Unused IAM Groups",
             "affected": [],
@@ -929,8 +930,8 @@ class iam(object):
             "remediation" : "Ensure all IAM groups that are temporary and not being used are deleted when no longer required.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -952,9 +953,9 @@ class iam(object):
 
         results = {
             "id" : "iam_21",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Cross-Account AssumeRole Policy Lacks External ID",
             "affected": [],
@@ -999,9 +1000,9 @@ class iam(object):
 
         results = {
             "id" : "iam_22",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Groups Granting Full Admin Access",
             "affected": [],
@@ -1010,8 +1011,8 @@ class iam(object):
             "remediation" : 'ensure only users that require admin access have it.',
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1073,9 +1074,9 @@ class iam(object):
 
         results = {
             "id" : "iam_23",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Group Name does not Indicate Admin Access",
             "affected": [],
@@ -1084,8 +1085,8 @@ class iam(object):
             "remediation" : 'Implement a simple naming convention for all custom groups, roles and policies which clearly indicates what permissions they grant and who they should apply to.',
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1140,6 +1141,52 @@ class iam(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Admin Groups Found."
+            results["pass_fail"] = "PASS"
+
+        return results
+
+    
+    def iam_24(self):
+        # Group with inline policies
+
+        results = {
+            "id" : "iam_24",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Group",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'Ensure that all your IAM principals (Users, Groups, Roles) are using managed policies (AWS and customer managed policies) instead of inline policies (embedded policies) to better control and manage the access permissions to your AWS account.\nDefining access permissions for your IAM groups using managed policies can offer multiple benefits such as reusability, versioning and rollback, automatic updates, larger policy size and fine-grained control over your policies assignment.\nAlthough not directly a security issue having a large number of inline policies increases complexity and could result in users, groups and roles being given more permissions than required and potentially resulting in privilege escalation vectors.',
+            "remediation" : '- Sign in to the AWS Management Console. \n- Navigate to IAM dashboard at https://console.aws.amazon.com/iam/. \n- In the left navigation panel, choose Groups/Roles. \n- Select the IAM group/role that has inline policies attached and click on the group name to access its configuration page. \n- On the IAM group configuration page, select the Permissions tab. \n- Inside Inline Policies section, click on each Show Policy link and copy each policy document displayed in a text file. Once all the available policies are copied, click the Remove Policy link for each inline policy to remove them from the group configuration. \n- In the left navigation panel, choose Policies and click Create Policy button from the IAM dashboard top menu. \n- On the Create Policy page, select Create Your Own Policy to create your own managed policies using the data taken from your inline policies. You can also select an AWS predefined policy or create a brand new one using the AWS Policy Generator. \n- On the Review Policy page, perform the following: \n- In the Policy Name box, enter a name for your new managed policy. Choose a unique name that will reflect the policy usage.\n- In the Description textbox, enter a short description for the policy (optional).\n- In the Policy Document textbox, paste the inline policy content copied at step no. 6.\n- Click Validate Policy button to validate the policy then click Create Policy to save it.\n- In the left navigation panel, choose Groups/Roles and click on the selected IAM group/role name to access its configuration page. \n- On the configuration page, select the Permissions tab and click Attach Policy button to attach the new managed policy created earlier. \n- Select Customer Managed Policies from the Filter dropdown menu and select your newly created policy. \n- Click Attach Policy to attach the selected policy to your IAM group. \n- Repeat steps no. 4-13 for each IAM group/role with inline policies attached, available in your AWS account.More Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html',
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        policies = {}
+
+        for group in self.groups:
+            group_name = group["Group"]["GroupName"]
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            policies[group_name] = []
+
+            if  inline_policies:
+                results["affected"].append(group_name)
+                
+                for policy_name in inline_policies:
+                    policies[group_name].append(policy_name)
+
+        if results["affected"]:
+            results["analysis"] = "The affected groups have inline policies attached.\nAffected Groups and Users:\n{}".format(json.dumps(policies))
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No Issues Found."
             results["pass_fail"] = "PASS"
 
         return results

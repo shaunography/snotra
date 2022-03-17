@@ -58,8 +58,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for unauthorized API calls in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -81,16 +81,20 @@ class cloudwatch(object):
                         # trail not integrated with cloudwatch logs
                         pass
                     else:
-
                         # check if trail is multi region
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
+                            
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -154,8 +158,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for Management Console sign-in without MFA in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -182,11 +186,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -251,8 +259,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for usage of root account in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -279,11 +287,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -347,8 +359,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for IAM policy changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -375,11 +387,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -442,8 +458,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for CloudTrail configuration changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -470,11 +486,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -537,8 +557,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for AWS Management Console authentication failures in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -565,11 +585,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -632,8 +656,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for disabling or scheduled deletion of customer created CMKs in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -660,11 +684,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -727,8 +755,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for S3 bucket policy changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -755,11 +783,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -823,8 +855,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for AWS Config configuration changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -851,11 +883,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -919,8 +955,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for security group changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -947,11 +983,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1015,8 +1055,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for changes to Network Access Control Lists (NACL) in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1043,11 +1083,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1110,8 +1154,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for changes to network gateways in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1138,11 +1182,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1205,8 +1253,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1233,11 +1281,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1300,8 +1352,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1328,11 +1380,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1395,8 +1451,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1423,11 +1479,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1479,9 +1539,9 @@ class cloudwatch(object):
 
         results = {
             "id" : "cloudwatch_16",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "cloudwatch",
             "name" : "CloudWatch Alarms with no actions",
             "affected": [],
@@ -1490,8 +1550,8 @@ class cloudwatch(object):
             "remediation" : "Ensure all CloudWatch alarms are configured with at least one action. More Information: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1501,18 +1561,22 @@ class cloudwatch(object):
      
         for region in self.regions:
             client = self.session.client('cloudwatch', region_name=region)
-            metric_alarms = client.describe_alarms()["MetricAlarms"]
-            composite_alarms = client.describe_alarms()["CompositeAlarms"]
-            
-            for alarm in metric_alarms:
-                alarm_name = alarm["AlarmName"]
-                if not alarm["AlarmActions"] and not alarm["OKActions"]:
-                    results["affected"].append("{}({})".format(alarm_name, region))
-                
-            for alarm in composite_alarms:
-                alarm_name = alarm["AlarmName"]
-                if not alarm["AlarmActions"] and not alarm["OKActions"]:
-                    results["affected"].append("{}({})".format(alarm_name, region))
+            try:
+                metric_alarms = client.describe_alarms()["MetricAlarms"]
+                composite_alarms = client.describe_alarms()["CompositeAlarms"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting alarms - %s" % e.response["Error"]["Code"])
+
+            else:
+                for alarm in metric_alarms:
+                    alarm_name = alarm["AlarmName"]
+                    if not alarm["AlarmActions"] and not alarm["OKActions"]:
+                        results["affected"].append("{}({})".format(alarm_name, region))
+                    
+                for alarm in composite_alarms:
+                    alarm_name = alarm["AlarmName"]
+                    if not alarm["AlarmActions"] and not alarm["OKActions"]:
+                        results["affected"].append("{}({})".format(alarm_name, region))
 
         if results["affected"]:
             results["analysis"] = "The affected CloudWatch Alarms have no actions configured."

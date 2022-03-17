@@ -48,9 +48,9 @@ class sns(object):
 
         results = {
             "id" : "sns_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "sns",
             "name" : "SNS Topic Allows Actions To All AWS Principals",
             "affected": [],
@@ -65,15 +65,16 @@ class sns(object):
         }
 
         logging.info(results["name"])
-        
-        for region in self.regions: 
-            for arn, attributes in self.attributes[region].items():
+
+        for region, data in self.attributes.items():
+            for arn, attributes in data.items():
                 statements = json.loads(attributes["Policy"])["Statement"]
                 for statement in statements:
                     if statement["Effect"] == "Allow":
                         if statement["Principal"] == {"AWS": "*"} or statement["Principal"] == {"CanonicalUser": "*"}:
                             if "Condition" not in statement:
                                 results["affected"].append(arn)
+        
 
         if results["affected"]:
             results["analysis"] = "The affected SNS Topics Allow all principals to perform actions."
@@ -90,9 +91,9 @@ class sns(object):
 
         results = {
             "id" : "sns_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "sns",
             "name" : "Unencrypted SNS Topics",
             "affected": [],
@@ -108,8 +109,8 @@ class sns(object):
 
         logging.info(results["name"])
         
-        for region in self.regions: 
-            for arn, attributes in self.attributes[region].items():
+        for region, data in self.attributes.items():
+            for arn, attributes in data.items():
                 try:
                     kms_master_key_id = attributes["KmsMasterKeyId"]
                 except KeyError:

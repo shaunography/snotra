@@ -27,9 +27,9 @@ class route53(object):
 
         results = {
             "id" : "route53_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "route53",
             "name" : "Domain Does Not Have Domain Transfer Lock Set",
             "affected": [],
@@ -38,18 +38,21 @@ class route53(object):
             "remediation" : "if locking is supported and you want to lock your domain, perform the following procedure. Sign in to the AWS Management Console and open the Route 53 console at https://console.aws.amazon.com/route53/. In the navigation pane, choose Registered Domains. Choose the name of the domain that you want to update. Choose Enable (to lock the domain) or Disable (to unlock the domain)., Choose Save.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
         logging.info(results["name"])
         
-        domains = self.client.list_domains()["Domains"]
-        
-        for domain in domains:
-            if domain["TransferLock"] == False:
-                results["affected"].append(domain["DomainName"])
+        try:
+            domains = self.client.list_domains()["Domains"]
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
+        else:
+            for domain in domains:
+                if domain["TransferLock"] == False:
+                    results["affected"].append(domain["DomainName"])
 
 
         if results["affected"]:

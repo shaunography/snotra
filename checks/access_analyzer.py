@@ -30,8 +30,8 @@ class access_analyzer(object):
             "remediation" : "Enable Access Analyzer in all regions",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -39,8 +39,11 @@ class access_analyzer(object):
 
         for region in self.regions:
             client = self.session.client('accessanalyzer', region_name=region)
-            if not client.list_analyzers()["analyzers"]:
-                results["affected"].append(region)
+            try:
+                if not client.list_analyzers()["analyzers"]:
+                    results["affected"].append(region)
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting analyzers - %s" % e.response["Error"]["Code"])
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"

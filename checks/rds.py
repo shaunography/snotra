@@ -40,12 +40,16 @@ class rds(object):
         
         for region in self.regions:
             client = self.session.client('rds', region_name=region)
-            instances = client.describe_db_instances()["DBInstances"]
-            for instance in instances:
-                db_instance_identifier = instance["DBInstanceIdentifier"]
-                instance_description = client.describe_db_instances(DBInstanceIdentifier=db_instance_identifier)["DBInstances"][0]
-                if instance_description["StorageEncrypted"] != True:
-                    results["affected"] += [db_instance_identifier]
+            try:
+                instances = client.describe_db_instances()["DBInstances"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting db instances - %s" % e.response["Error"]["Code"])
+            else:
+                for instance in instances:
+                    db_instance_identifier = instance["DBInstanceIdentifier"]
+                    instance_description = client.describe_db_instances(DBInstanceIdentifier=db_instance_identifier)["DBInstances"][0]
+                    if instance_description["StorageEncrypted"] != True:
+                        results["affected"] += [db_instance_identifier]
 
         if results["affected"]:
             results["analysis"] = "The affected RDS instances do not have encryption enabled."
@@ -62,9 +66,9 @@ class rds(object):
 
         results = {
             "id" : "rds_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "rds",
             "name" : "RDS Instances Do Not Have Deletion Protection Enabled",
             "affected": [],
@@ -73,8 +77,8 @@ class rds(object):
             "remediation" : "Enable Deletion Protection on all affected RDS instances.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -82,10 +86,14 @@ class rds(object):
         
         for region in self.regions:
             client = self.session.client('rds', region_name=region)
-            instances = client.describe_db_instances()["DBInstances"]
-            for instance in instances:
-                if instance["DeletionProtection"] == False:
-                    results["affected"].append(instance["DBInstanceIdentifier"])
+            try:
+                instances = client.describe_db_instances()["DBInstances"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting ebs snapshots - %s" % e.response["Error"]["Code"])
+            else:
+                for instance in instances:
+                    if instance["DeletionProtection"] == False:
+                        results["affected"].append(instance["DBInstanceIdentifier"])
 
         if results["affected"]:
             results["analysis"] = "The affected RDS Instances do not have deletion protection enabled."

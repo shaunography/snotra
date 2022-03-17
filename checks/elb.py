@@ -21,6 +21,8 @@ class elb(object):
         findings += [ self.elb_3() ]
         findings += [ self.elb_4() ]
         findings += [ self.elb_5() ]
+        findings += [ self.elb_6() ]
+        findings += [ self.elb_7() ]
         return findings
 
     def get_classic_load_balancers(self):
@@ -77,9 +79,9 @@ class elb(object):
 
         results = {
             "id" : "elb_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "elb",
             "name" : "Internet Facing Load Balancers",
             "affected": [],
@@ -88,8 +90,8 @@ class elb(object):
             "remediation" : "Apply Security Groups to your load balancers using the principle of least privilege by only allowing access to services from a white list of trusted IP addresses.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -123,9 +125,9 @@ class elb(object):
 
         results = {
             "id" : "elb_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "elb",
             "name" : "Internet Facing Load Balancers Using Unencrypted HTTP Listeners",
             "affected": [],
@@ -183,11 +185,11 @@ class elb(object):
 
         results = {
             "id" : "elb_3",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "elb",
-            "name" : "ELS Listeners with Weak TLS Configuration",
+            "name" : "ELB Listeners with Weak TLS Configuration",
             "affected": [],
             "analysis" : "",
             "description" : 'The affected ALBs have an SSL/TLS protected listeners which are insufficiently protected against known cryptographic attacks which could allow a Man in the Middle (MitM) attacker to recover plain text from an encrypted SSL/TLS connection.\nTo exploit this vulnerability, an attacker must be suitably positioned to intercept and modify the victims network traffic. This scenario typically occurs when a client communicates with the server over an insecure connection such as public Wi-Fi, or a corporate or home network that is shared with a compromised computer. Common defences such as switched networks are not sufficient to prevent this. An attacker situated in the users ISP or the applications hosting infrastructure could also perform this attack. Note that an advanced adversary could potentially target any connection made over the Internets core infrastructure.\nData submitted over an unencrypted connection is vulnerable to interception and can be tampered with. This could result in users sessions being compromised, credentials being captured, and sensitive and/or personal information being exposed.',
@@ -212,29 +214,29 @@ class elb(object):
                         descriptions = client.describe_load_balancer_policies(LoadBalancerName=load_balancer["LoadBalancerName"])["PolicyDescriptions"]
                     except boto3.exceptions.botocore.exceptions.ClientError as e:
                         logging.error("Error getting load balancer policies - %s" % e.response["Error"]["Code"])
-                    
-                    for description in descriptions:
-                        for attribute_description in description["PolicyAttributeDescriptions"]:
-                            #if attribute_description["AttributeName"] == "Reference-Security-Policy":
-                            if attribute_description["AttributeName"] == "Protocol-SSLv3":
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))   
-                            
-                            if attribute_description["AttributeName"] == "Protocol-TLSv1":
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                    else:
+                        for description in descriptions:
+                            for attribute_description in description["PolicyAttributeDescriptions"]:
+                                #if attribute_description["AttributeName"] == "Reference-Security-Policy":
+                                if attribute_description["AttributeName"] == "Protocol-SSLv3":
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                                
+                                if attribute_description["AttributeName"] == "Protocol-TLSv1":
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
-                            if attribute_description["AttributeName"] == "Protocol-TLSv1.1":
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
-                            
-                            if re.match(weak_cipher_regex, attribute_description["AttributeName"]):
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                                if attribute_description["AttributeName"] == "Protocol-TLSv1.1":
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                                
+                                if re.match(weak_cipher_regex, attribute_description["AttributeName"]):
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         for region, load_balancers in self.load_balancers.items():
             for load_balancer in load_balancers:
@@ -259,9 +261,9 @@ class elb(object):
 
         results = {
             "id" : "elb_4",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "elb",
             "name" : "ALBs Not Configured To Drop Invalid Headers",
             "affected": [],
@@ -270,8 +272,8 @@ class elb(object):
             "remediation" : 'To help protection against HTTP Request Smuggling attacks enable the “Drop Invalid Header Files” attribute for all affected ALBs.\nNote:\nIf your application is using nonstandard headers this may break your applications, It seems AWS considers standard headers to only include alphanumeric characters and hyphens, but it is hard to find exactly what AWS considers to be a standard header as documentation is lacking.',
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -285,10 +287,11 @@ class elb(object):
                         attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
                     except boto3.exceptions.botocore.exceptions.ClientError as e:
                         logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
-                    for attribute in attributes:
-                        if attribute["Key"] == "routing.http.drop_invalid_header_fields.enabled":
-                            if attribute["Value"] == "false":
-                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                    else:
+                        for attribute in attributes:
+                            if attribute["Key"] == "routing.http.drop_invalid_header_fields.enabled":
+                                if attribute["Value"] == "false":
+                                    results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         if results["affected"]:
             results["analysis"] = "The affected internet facing load balancers are not configured to drop invalid HTTP headers."
@@ -304,19 +307,19 @@ class elb(object):
 
         results = {
             "id" : "elb_5",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "elb",
             "name" : "ALB HTTP Desync Mitigation Mode Not Enabled",
             "affected": [],
             "analysis" : "",
             "description" : 'The account under review contains classic load balancers that do not have Desync Mitigation mode enabled. To help protect against HTTP Desync attacks it is recommended to enable Desync Mitigation mode and set it to “strictest”.\nDesync mitigation mode protects your application from issues due to HTTP Desync. The load balancer classifies each request based on its threat level, allows safe requests, and then mitigates risk as specified by the mitigation mode that you specify. The desync mitigation modes are monitor, defensive, and strictest. The default is the defensive mode, which provides durable mitigation against HTTP desync while maintaining the availability of your application. You can switch to strictest mode to ensure that your application receives only requests that comply with RFC 7230.',
-            "remediation" : 'Configured Desync Mitigation Mode to “Strictest” or "Defensive" for all affected ELBs. More Information\nhttps://docs.aws.amazon.com/elasticloadbalancing/latest/classic/config-desync-mitigation-mode.html',
+            "remediation" : 'Configured Desync Mitigation Mode to "Strictest" or "Defensive" for all affected ELBs.\nMore Information\nhttps://docs.aws.amazon.com/elasticloadbalancing/latest/classic/config-desync-mitigation-mode.html',
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -330,16 +333,125 @@ class elb(object):
                         attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
                     except boto3.exceptions.botocore.exceptions.ClientError as e:
                         logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
-                    for attribute in attributes:
-                        if attribute["Key"] == "routing.http.desync_mitigation_mode":
-                            if attribute["Value"] == "monitor":
-                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                    else:
+                        for attribute in attributes:
+                            if attribute["Key"] == "routing.http.desync_mitigation_mode":
+                                if attribute["Value"] == "monitor":
+                                    results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         if results["affected"]:
             results["analysis"] = "The affected internet facing load balancers do not have HTTP desync mitigation mode enabled."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "All Application Load Balancers have HTTP desync mitigation mode enabled."
+            results["pass_fail"] = "PASS"
+
+        return results
+
+    def elb_6(self):
+        # Lack of ELB Access Logging
+
+        results = {
+            "id" : "elb_6",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "elb",
+            "name" : "Lack of ELB Access Logging",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'A number of Elastic Load Balancers were identified which do not have access logging enabled.\nElastic Load Balancing provides access logs that capture detailed information about requests sent to your load balancer. Each log contains information such as the time the request was received, the clients IP address, latencies, request paths, and server responses. You can use these access logs to analyze traffic patterns and troubleshoot issues.\nIt is recommended that access logging is enabled on all public load balancers.',
+            "remediation" : 'Enable ELB access logs for all affected load balancers.\nThere is no additional cost to enable the creation of ELB access logs, however there is an additional S3 cost to store the logs.\nMore Information\nhttps://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html',
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        # ELBV2
+        for region, load_balancers in self.load_balancers.items():
+            client = self.session.client('elbv2', region_name=region)
+            for load_balancer in load_balancers:
+                
+                try:
+                    attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
+                else:
+                    for attribute in attributes:
+                        if attribute["Key"] == "access_logs.s3.enabled":
+                            if attribute["Value"] == "false":
+                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+
+        # ELB
+        for region, load_balancers in self.classic_load_balancers.items():
+            client = self.session.client('elb', region_name=region)
+            for load_balancer in load_balancers:
+
+                try:
+                    attributes = client.describe_load_balancer_attributes(LoadBalancerName=load_balancer["LoadBalancerName"])["LoadBalancerAttributes"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
+                else:
+                    if attributes["AccessLog"]["Enabled"] == False:
+                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+
+        if results["affected"]:
+            results["analysis"] = "The affected internet facing load balancers do not have Access Logging enabled."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All Application Load Balancers have Access Logging enabled."
+            results["pass_fail"] = "PASS"
+
+        return results
+
+
+    def elb_7(self):
+        # Load Balancer Deletion Protection not Configured
+
+        results = {
+            "id" : "elb_7",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "elb",
+            "name" : "Load Balancer Deletion Protection not Configured",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'The AWS account under review has Elastic Load Balancers (ELB) in use that do not have deletion protection enabled. For an extra layer of protection against human error by preventing your load balancers from being deleted accidentally, you can enable deletion protection. By default, deletion protection is disabled.',
+            "remediation" : 'To enable deletion protection using the console\n1.	Open the Amazon EC2 console at https://console.aws.amazon.com/ec2/. \n2.	On the navigation pane, under LOAD BALANCING, choose Load Balancers. \n3.	Select the load balancer.\n4.	On the Description tab, choose Edit attributes. \n5.	On the Edit load balancer attributes page, select Enable for Delete Protection, and then choose Save. \n6.	Choose Save. \nTo disable deletion protection using the console\n1.	Open the Amazon EC2 console at https://console.aws.amazon.com/ec2/. \n2.	On the navigation pane, under LOAD BALANCING, choose Load Balancers. \n3.	Select the load balancer.\n4.	On the Description tab, choose Edit attributes. \n5.	On the Edit load balancer attributes page, clear Enable for Delete Protection, and then choose Save. \n6.	Choose Save. \nNOTE: If you enable deletion protection for your load balancer, you must disable it before you can delete the load balancer.\nMore Information\nhttps://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html#deletion-protection',
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        # ELBV2
+        for region, load_balancers in self.load_balancers.items():
+            client = self.session.client('elbv2', region_name=region)
+            for load_balancer in load_balancers:
+                
+                try:
+                    attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
+                else:
+                    for attribute in attributes:
+                        if attribute["Key"] == "deletion_protection.enabled":
+                            if attribute["Value"] == "false":
+                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))           
+
+        if results["affected"]:
+            results["analysis"] = "The affected internet facing load balancers do not have Deletion Protection enabled."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All Application Load Balancers have Deletion Protection enabled."
             results["pass_fail"] = "PASS"
 
         return results

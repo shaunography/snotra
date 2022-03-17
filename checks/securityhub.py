@@ -32,10 +32,15 @@ class securityhub(object):
                     security_hubs[region]["AutoEnableControls"] = hub_description["AutoEnableControls"]
                 except KeyError: # if AutoEnableControls is not returned (sometimes happens), assume it is enabled
                     security_hubs[region]["AutoEnableControls"] = True
-            except boto3.exceptions.botocore.exceptions.ClientError:
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
                 pass # no active subscription
             else:
-                security_hubs[region]["StandardsSubscriptions"] = client.get_enabled_standards()["StandardsSubscriptions"]
+                try:
+                    security_hubs[region]["StandardsSubscriptions"] = client.get_enabled_standards()["StandardsSubscriptions"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting enabled standards - %s" % e.response["Error"]["Code"])
+
         return security_hubs
 
     def securityhub_1(self):
@@ -43,9 +48,9 @@ class securityhub(object):
 
         results = {
             "id" : "securityhub_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "securityhub",
             "name" : "Active Security Hub Subscription",
             "affected": [],
@@ -54,8 +59,8 @@ class securityhub(object):
             "remediation" : "Consider maintaining a Security Hub subscription to help identify security vulnerabilites within your acount,ensure AWS config is enabled in all regions to allow Security hub to audit account configuration.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -87,9 +92,9 @@ class securityhub(object):
 
         results = {
             "id" : "securityhub_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "securityhub",
             "name" : "Security Hub Auto Enable Controls",
             "affected": [],
@@ -98,8 +103,8 @@ class securityhub(object):
             "remediation" : "It is recomened to auto enable new Security Hub controls as they are added to compliance standards",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

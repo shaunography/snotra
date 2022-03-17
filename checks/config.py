@@ -30,8 +30,8 @@ class config(object):
             "remediation" : "It is recommended AWS Config be enabled in all regions.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -39,14 +39,18 @@ class config(object):
         
         for region in self.regions:
             client = self.session.client('config', region_name=region)
-            recorder_list = client.describe_configuration_recorders()["ConfigurationRecorders"]
-            if not recorder_list:
-                results["affected"].append(region)
+            try:
+                recorder_list = client.describe_configuration_recorders()["ConfigurationRecorders"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting configuration recorders - %s" % e.response["Error"]["Code"])
             else:
-                for recorder in recorder_list:
-                    if recorder["recordingGroup"]["allSupported"] != True:
-                        if recorder["recordingGroup"]["includeGlobalResourceTypes"] != True:
-                            results["affected"].append(region)
+                if not recorder_list:
+                    results["affected"].append(region)
+                else:
+                    for recorder in recorder_list:
+                        if recorder["recordingGroup"]["allSupported"] != True:
+                            if recorder["recordingGroup"]["includeGlobalResourceTypes"] != True:
+                                results["affected"].append(region)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
