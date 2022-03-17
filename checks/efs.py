@@ -19,9 +19,9 @@ class efs(object):
         
         results = {
             "id" : "efs_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "efs",
             "name" : "EFS Grants Access To All Clients",
             "affected": [],

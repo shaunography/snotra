@@ -48,9 +48,9 @@ class sns(object):
 
         results = {
             "id" : "sns_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "sns",
             "name" : "SNS Topic Allows Actions To All AWS Principals",
             "affected": [],
@@ -90,9 +90,9 @@ class sns(object):
 
         results = {
             "id" : "sns_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "sns",
             "name" : "Unencrypted SNS Topics",
             "affected": [],

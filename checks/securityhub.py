@@ -43,9 +43,9 @@ class securityhub(object):
 
         results = {
             "id" : "securityhub_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "securityhub",
             "name" : "Active Security Hub Subscription",
             "affected": [],
@@ -54,8 +54,8 @@ class securityhub(object):
             "remediation" : "Consider maintaining a Security Hub subscription to help identify security vulnerabilites within your acount,ensure AWS config is enabled in all regions to allow Security hub to audit account configuration.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -87,9 +87,9 @@ class securityhub(object):
 
         results = {
             "id" : "securityhub_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "securityhub",
             "name" : "Security Hub Auto Enable Controls",
             "affected": [],
@@ -98,8 +98,8 @@ class securityhub(object):
             "remediation" : "It is recomened to auto enable new Security Hub controls as they are added to compliance standards",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

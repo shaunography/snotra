@@ -62,9 +62,9 @@ class rds(object):
 
         results = {
             "id" : "rds_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "rds",
             "name" : "RDS Instances Do Not Have Deletion Protection Enabled",
             "affected": [],
@@ -73,8 +73,8 @@ class rds(object):
             "remediation" : "Enable Deletion Protection on all affected RDS instances.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

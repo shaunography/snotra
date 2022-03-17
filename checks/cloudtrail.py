@@ -52,8 +52,8 @@ class cloudtrail(object):
             "remediation" : "Enable CloudTrail in all regions",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -94,8 +94,8 @@ class cloudtrail(object):
             "remediation" : "Enabled log file validation on all your trails",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -218,8 +218,8 @@ class cloudtrail(object):
             "remediation" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
             "impact" : "low",
             "probability" : "low",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -261,8 +261,8 @@ class cloudtrail(object):
             "remediation" : "Ensure the CloudTrail S3 bucket has access logging is enabled",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -351,8 +351,8 @@ class cloudtrail(object):
             "remediation" : "Enable S3 bucket Object-level logging for write events in CloudTrail",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
         
@@ -405,8 +405,8 @@ class cloudtrail(object):
             "remediation" : "Enable S3 bucket Object-level logging for read events in CloudTrail",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

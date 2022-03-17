@@ -19,9 +19,9 @@ class guardduty(object):
         
         results = {
             "id" : "guardduty_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "guardduty",
             "name" : "GuardDuty Not Enabled In All Regions",
             "affected": [],
@@ -30,8 +30,8 @@ class guardduty(object):
             "remediation" : "Enable GuardDuty in all AWS regions",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

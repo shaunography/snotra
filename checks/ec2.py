@@ -225,8 +225,8 @@ class ec2(object):
             "remediation" : "Enable VPC Flow Logs on all VPCs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -462,9 +462,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_8",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no unused security groups",
             "affected": [],
@@ -473,8 +473,8 @@ class ec2(object):
             "remediation" : "Ensure all security groups that are temporary and not being used are deleted when no longer required.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -519,9 +519,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_9",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no unused elastic IPs",
             "affected": [],
@@ -530,8 +530,8 @@ class ec2(object):
             "remediation" : "To release an Elastic IP address using the console: 1. Open the Amazon EC2 console at https://console.aws.amazon.com/ec2/. 2. In the navigation pane, choose Elastic IPs. 3. Select the Elastic IP address, choose Actions, and then select Release addresses. Choose Release when prompted. More information: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -557,9 +557,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_10",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no Public EBS Snapshots",
             "affected": [],
@@ -605,9 +605,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_11",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure there are no Public EC2 AMIs",
             "affected": [],
@@ -644,9 +644,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_11",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure no security groups allow ingress from 0.0.0.0/0 to database ports",
             "affected": [],
@@ -709,9 +709,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_13",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to database ports",
             "affected": [],
@@ -768,9 +768,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_14",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure default Network ACLs are not default allow",
             "affected": [],
@@ -822,9 +822,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_15",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure custom Network ACLs do not allow all traffic",
             "affected": [],
@@ -883,9 +883,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_16",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Unused Network Interfaces",
             "affected": [],
@@ -894,8 +894,8 @@ class ec2(object):
             "remediation" : "remove network interfaces that are not in use and no longer required.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -921,9 +921,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_17",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure running instances are not more than 365 days old",
             "affected": [],
@@ -932,8 +932,8 @@ class ec2(object):
             "remediation" : "Review the list of instances and ensure they subject to a regular patching policy and lifecycle management.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -962,9 +962,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_18",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required",
             "affected": [],
@@ -1001,9 +1001,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_19",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "EC2 Instances Not Managed By AWS Systems Manager",
             "affected": [],
@@ -1012,8 +1012,8 @@ class ec2(object):
             "remediation" : "It is recommended to configure all EC2 instances to be monitored by Systems Manager by installing and registering the SSM agent on the affected hosts.\nMore Information\nhttps://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started.html",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1043,9 +1043,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_20",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Unencrypted EBS Volumes",
             "affected": [],
@@ -1079,9 +1079,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_21",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Unencrypted EBS Snapshots",
             "affected": [],
@@ -1114,9 +1114,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_22",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Snapshot older than 30 days",
             "affected": [],
@@ -1125,8 +1125,8 @@ class ec2(object):
             "remediation" : "Delete snapshots that are older than 30 days and consider implementing snapshot lifecycle management in AWS DLM",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1153,9 +1153,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_23",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "ec2",
             "name" : "Default VPCs in use",
             "affected": [],
@@ -1164,8 +1164,8 @@ class ec2(object):
             "remediation" : "Create you own VPCs as required applying the principle of least privilege to network access controls",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

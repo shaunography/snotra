@@ -38,9 +38,9 @@ class acm(object):
 
         results = {
             "id" : "acm_1",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "acm",
             "name" : "ACM Certificate with Transparency Logging Set to Disabled",
             "affected": [],
@@ -77,9 +77,9 @@ class acm(object):
 
         results = {
             "id" : "acm_2",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "acm",
             "name" : "Expired ACM Certificates",
             "affected": [],

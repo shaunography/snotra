@@ -30,8 +30,8 @@ class config(object):
             "remediation" : "It is recommended AWS Config be enabled in all regions.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

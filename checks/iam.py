@@ -168,8 +168,8 @@ class iam(object):
             "remediation" : "Ensure contact email and telephone details for AWS accounts are current",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -196,8 +196,8 @@ class iam(object):
             "remediation" : "Ensure security contact information is registered",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -223,8 +223,8 @@ class iam(object):
             "remediation" : "Ensure security questions are registered in the AWS account",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -281,8 +281,8 @@ class iam(object):
             "remediation" : "Enable MFA for the root user account",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : "PASS"
         }
 
@@ -312,8 +312,8 @@ class iam(object):
             "remediation" : "Ensure hardware MFA is enabled for the root user account",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : "PASS"
         }
 
@@ -713,8 +713,8 @@ class iam(object):
             "remediation" : "Ensure IAM Users Receive Permissions Only Through Groups",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -808,8 +808,8 @@ class iam(object):
             "remediation" : "Ensure a support role has been created",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -901,8 +901,8 @@ class iam(object):
             "remediation" : "manage IAM user centrally and have them assume roles, configured following the priniciple of least privilege, within target accounts when requiring access",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -918,9 +918,9 @@ class iam(object):
 
         results = {
             "id" : "iam_20",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Unused IAM Groups",
             "affected": [],
@@ -929,8 +929,8 @@ class iam(object):
             "remediation" : "Ensure all IAM groups that are temporary and not being used are deleted when no longer required.",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -952,9 +952,9 @@ class iam(object):
 
         results = {
             "id" : "iam_21",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Cross-Account AssumeRole Policy Lacks External ID",
             "affected": [],
@@ -999,9 +999,9 @@ class iam(object):
 
         results = {
             "id" : "iam_22",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Groups Granting Full Admin Access",
             "affected": [],
@@ -1010,8 +1010,8 @@ class iam(object):
             "remediation" : 'ensure only users that require admin access have it.',
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1073,9 +1073,9 @@ class iam(object):
 
         results = {
             "id" : "iam_23",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "iam",
             "name" : "Group Name does not Indicate Admin Access",
             "affected": [],
@@ -1084,8 +1084,8 @@ class iam(object):
             "remediation" : 'Implement a simple naming convention for all custom groups, roles and policies which clearly indicates what permissions they grant and who they should apply to.',
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

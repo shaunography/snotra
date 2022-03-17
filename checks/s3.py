@@ -196,8 +196,8 @@ class s3(object):
             "remediation" : "Enable AWS Macie",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -264,9 +264,9 @@ class s3(object):
 
         results = {
             "id" : "s3_6",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "s3",
             "name" : "S3 buckets without object versioning enabled",
             "affected": [],
@@ -275,8 +275,8 @@ class s3(object):
             "remediation" : "Consider enabling versioning for at least buckets that contain important and sensitive information, this is enabled at the bucket level and can be done via the AWS web console. Note: an additional cost will be incurred for the extra storage space versioning will inevitably use. More Information: https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

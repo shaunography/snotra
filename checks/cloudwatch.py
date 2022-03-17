@@ -58,8 +58,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for unauthorized API calls in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -154,8 +154,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for Management Console sign-in without MFA in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -251,8 +251,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for usage of root account in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -347,8 +347,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for IAM policy changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -442,8 +442,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for CloudTrail configuration changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -537,8 +537,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for AWS Management Console authentication failures in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -632,8 +632,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for disabling or scheduled deletion of customer created CMKs in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -727,8 +727,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for S3 bucket policy changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -823,8 +823,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for AWS Config configuration changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -919,8 +919,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for security group changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1015,8 +1015,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for changes to Network Access Control Lists (NACL) in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1110,8 +1110,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for changes to network gateways in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1205,8 +1205,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1300,8 +1300,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1395,8 +1395,8 @@ class cloudwatch(object):
             "remediation" : "Create a log metric filter and alarm for route table changes in CloudWatch Logs",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
@@ -1479,9 +1479,9 @@ class cloudwatch(object):
 
         results = {
             "id" : "cloudwatch_16",
-            "ref" : "n/a",
-            "compliance" : "n/a",
-            "level" : "n/a",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "cloudwatch",
             "name" : "CloudWatch Alarms with no actions",
             "affected": [],
@@ -1490,8 +1490,8 @@ class cloudwatch(object):
             "remediation" : "Ensure all CloudWatch alarms are configured with at least one action. More Information: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 

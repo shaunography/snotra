@@ -30,8 +30,8 @@ class access_analyzer(object):
             "remediation" : "Enable Access Analyzer in all regions",
             "impact" : "info",
             "probability" : "info",
-            "cvss_vector" : "n/a",
-            "cvss_score" : "n/a",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
             "pass_fail" : ""
         }
 
