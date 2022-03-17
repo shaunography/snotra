@@ -383,7 +383,6 @@ class elb(object):
                         if attribute["Value"] == "false":
                             results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
-
         # ELB
         for region, load_balancers in self.classic_load_balancers.items():
             client = self.session.client('elb', region_name=region)
@@ -398,10 +397,10 @@ class elb(object):
                         results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         if results["affected"]:
-            results["analysis"] = "The affected internet facing load balancers do not have HTTP desync mitigation mode enabled."
+            results["analysis"] = "The affected internet facing load balancers do not have Access Logging enabled."
             results["pass_fail"] = "FAIL"
         else:
-            results["analysis"] = "All Application Load Balancers have HTTP desync mitigation mode enabled."
+            results["analysis"] = "All Application Load Balancers have Access Logging enabled."
             results["pass_fail"] = "PASS"
 
         return results
@@ -445,10 +444,10 @@ class elb(object):
                             results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))           
 
         if results["affected"]:
-            results["analysis"] = "The affected internet facing load balancers do not have HTTP desync mitigation mode enabled."
+            results["analysis"] = "The affected internet facing load balancers do not have Deletion Protection enabled."
             results["pass_fail"] = "FAIL"
         else:
-            results["analysis"] = "All Application Load Balancers have HTTP desync mitigation mode enabled."
+            results["analysis"] = "All Application Load Balancers have Deletion Protection enabled."
             results["pass_fail"] = "PASS"
 
         return results
