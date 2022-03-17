@@ -32,10 +32,15 @@ class securityhub(object):
                     security_hubs[region]["AutoEnableControls"] = hub_description["AutoEnableControls"]
                 except KeyError: # if AutoEnableControls is not returned (sometimes happens), assume it is enabled
                     security_hubs[region]["AutoEnableControls"] = True
-            except boto3.exceptions.botocore.exceptions.ClientError:
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
                 pass # no active subscription
             else:
-                security_hubs[region]["StandardsSubscriptions"] = client.get_enabled_standards()["StandardsSubscriptions"]
+                try:
+                    security_hubs[region]["StandardsSubscriptions"] = client.get_enabled_standards()["StandardsSubscriptions"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting enabled standards - %s" % e.response["Error"]["Code"])
+
         return security_hubs
 
     def securityhub_1(self):

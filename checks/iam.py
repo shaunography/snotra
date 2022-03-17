@@ -829,10 +829,10 @@ class iam(object):
                     results["affected"].append(self.account_id)
                     results["pass_fail"] = "FAIL"
                 
-                policy_roles = self.client.list_entities_for_policy(PolicyArn=policy["Arn"])["PolicyRoles"]
+                policy_roles = [ i["RoleName"] for i in self.client.list_entities_for_policy(PolicyArn=policy["Arn"])["PolicyRoles"]]
                 
                 if policy_roles:
-                    results["analysis"] = "AWSSupportAccess Policy is attached to role: {}".format(" ".join(policy_roles["RoleName"]))
+                    results["analysis"] = "AWSSupportAccess Policy is attached to roles: {}".format(" ".join(policy_roles))
                     results["affected"].append(self.account_id)
                     results["pass_fail"] = "PASS"
 

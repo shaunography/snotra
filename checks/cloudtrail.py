@@ -65,8 +65,11 @@ class cloudtrail(object):
                 trail_name = trail["Name"]
                 if trail["IsMultiRegionTrail"] == True:
                     if trail["HomeRegion"] == region:
-                        if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                            results["affected"].append(trail_name)
+                        try:
+                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                results["affected"].append(trail_name)
+                        except boto3.exceptions.botocore.exceptions.ClientError as e:
+                            logging.error("Error getting trail status - %s" % e.response["Error"]["Code"])
 
         if results["affected"]:
             results["analysis"] = "The affected trails are multi region enabled."

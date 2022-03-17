@@ -214,29 +214,29 @@ class elb(object):
                         descriptions = client.describe_load_balancer_policies(LoadBalancerName=load_balancer["LoadBalancerName"])["PolicyDescriptions"]
                     except boto3.exceptions.botocore.exceptions.ClientError as e:
                         logging.error("Error getting load balancer policies - %s" % e.response["Error"]["Code"])
-                    
-                    for description in descriptions:
-                        for attribute_description in description["PolicyAttributeDescriptions"]:
-                            #if attribute_description["AttributeName"] == "Reference-Security-Policy":
-                            if attribute_description["AttributeName"] == "Protocol-SSLv3":
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
-                            
-                            if attribute_description["AttributeName"] == "Protocol-TLSv1":
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                    else:
+                        for description in descriptions:
+                            for attribute_description in description["PolicyAttributeDescriptions"]:
+                                #if attribute_description["AttributeName"] == "Reference-Security-Policy":
+                                if attribute_description["AttributeName"] == "Protocol-SSLv3":
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                                
+                                if attribute_description["AttributeName"] == "Protocol-TLSv1":
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
-                            if attribute_description["AttributeName"] == "Protocol-TLSv1.1":
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
-                            
-                            if re.match(weak_cipher_regex, attribute_description["AttributeName"]):
-                                if attribute_description["AttributeValue"] == "true":
-                                    if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
-                                        results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                                if attribute_description["AttributeName"] == "Protocol-TLSv1.1":
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                                
+                                if re.match(weak_cipher_regex, attribute_description["AttributeName"]):
+                                    if attribute_description["AttributeValue"] == "true":
+                                        if "{}({})".format(load_balancer["LoadBalancerName"], region) not in results["affected"]:
+                                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         for region, load_balancers in self.load_balancers.items():
             for load_balancer in load_balancers:
@@ -287,10 +287,11 @@ class elb(object):
                         attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
                     except boto3.exceptions.botocore.exceptions.ClientError as e:
                         logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
-                    for attribute in attributes:
-                        if attribute["Key"] == "routing.http.drop_invalid_header_fields.enabled":
-                            if attribute["Value"] == "false":
-                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                    else:
+                        for attribute in attributes:
+                            if attribute["Key"] == "routing.http.drop_invalid_header_fields.enabled":
+                                if attribute["Value"] == "false":
+                                    results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         if results["affected"]:
             results["analysis"] = "The affected internet facing load balancers are not configured to drop invalid HTTP headers."
@@ -332,10 +333,11 @@ class elb(object):
                         attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
                     except boto3.exceptions.botocore.exceptions.ClientError as e:
                         logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
-                    for attribute in attributes:
-                        if attribute["Key"] == "routing.http.desync_mitigation_mode":
-                            if attribute["Value"] == "monitor":
-                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                    else:
+                        for attribute in attributes:
+                            if attribute["Key"] == "routing.http.desync_mitigation_mode":
+                                if attribute["Value"] == "monitor":
+                                    results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         if results["affected"]:
             results["analysis"] = "The affected internet facing load balancers do not have HTTP desync mitigation mode enabled."
@@ -378,10 +380,11 @@ class elb(object):
                     attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
-                for attribute in attributes:
-                    if attribute["Key"] == "access_logs.s3.enabled":
-                        if attribute["Value"] == "false":
-                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
+                else:
+                    for attribute in attributes:
+                        if attribute["Key"] == "access_logs.s3.enabled":
+                            if attribute["Value"] == "false":
+                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))
 
         # ELB
         for region, load_balancers in self.classic_load_balancers.items():
@@ -415,7 +418,7 @@ class elb(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "elb",
-            "name" : "",
+            "name" : "Load Balancer Deletion Protection not Configured",
             "affected": [],
             "analysis" : "",
             "description" : 'The AWS account under review has Elastic Load Balancers (ELB) in use that do not have deletion protection enabled. For an extra layer of protection against human error by preventing your load balancers from being deleted accidentally, you can enable deletion protection. By default, deletion protection is disabled.',
@@ -438,10 +441,11 @@ class elb(object):
                     attributes = client.describe_load_balancer_attributes(LoadBalancerArn=load_balancer["LoadBalancerArn"])["Attributes"]
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting load balancer attributes - %s" % e.response["Error"]["Code"])
-                for attribute in attributes:
-                    if attribute["Key"] == "deletion_protection.enabled":
-                        if attribute["Value"] == "false":
-                            results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))           
+                else:
+                    for attribute in attributes:
+                        if attribute["Key"] == "deletion_protection.enabled":
+                            if attribute["Value"] == "false":
+                                results["affected"].append("{}({})".format(load_balancer["LoadBalancerName"], region))           
 
         if results["affected"]:
             results["analysis"] = "The affected internet facing load balancers do not have Deletion Protection enabled."

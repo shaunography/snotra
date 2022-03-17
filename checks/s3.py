@@ -30,6 +30,7 @@ class s3(object):
             return [ bucket["Name"] for bucket in self.client.list_buckets()["Buckets"] ]
         except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting bucket list - %s" % e.response["Error"]["Code"])
+
     
     def get_client(self):
         # returns boto3 s3 client
@@ -58,20 +59,21 @@ class s3(object):
 
         logging.info(results["name"])
 
-        for bucket in self.buckets:
-            try:
-                encryption = self.client.get_bucket_encryption(Bucket=bucket)    
-            except boto3.exceptions.botocore.exceptions.ClientError:
-                results["affected"].append(bucket)
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    encryption = self.client.get_bucket_encryption(Bucket=bucket)    
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    results["affected"].append(bucket)
 
-        if results["affected"]:
-            results["analysis"] = "The affected buckets do not have server side encryption enabled."
-            results["pass_fail"] = "FAIL"
-        else:
-            results["analysis"] = "All buckets have server side encryption enabled."
-            results["pass_fail"] = "PASS"
+            if results["affected"]:
+                results["analysis"] = "The affected buckets do not have server side encryption enabled."
+                results["pass_fail"] = "FAIL"
+            else:
+                results["analysis"] = "All buckets have server side encryption enabled."
+                results["pass_fail"] = "PASS"
 
-        return results
+            return results
     
     def s3_2(self):
         # Ensure S3 Bucket Policy is set to deny HTTP requests (Manual)
@@ -97,33 +99,33 @@ class s3(object):
         logging.info(results["name"])
 
         passing_buckets = []
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    policy = json.loads(self.client.get_bucket_policy(Bucket=bucket)["Policy"])
+                # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    # no bucket policy exists
+                    pass
+                else:
+                    statements = policy["Statement"]
+                    for statement in statements:
+                        try:
+                            bool_secure_transport = statement["Condition"]["Bool"]["aws:SecureTransport"]
+                        except KeyError:
+                            pass
+                        else:
+                            effect = statement["Effect"]
+                            action = statement["Action"]
+                            resources = statement["Resource"]
+                            if bool_secure_transport == "false":
+                                if effect == "Deny":
+                                    if action == "s3:GetObject" or action == "s3:*":
+                                        for resource in resources:
+                                            if re.match("arn:aws:s3*|\*", resource):
+                                                passing_buckets.append(bucket)
 
-        for bucket in self.buckets:
-            try:
-                policy = json.loads(self.client.get_bucket_policy(Bucket=bucket)["Policy"])
-            # botocore.exceptions.ClientError: An error occurred (NoSuchBucketPolicy) when calling the GetBucketPolicy operation: The bucket policy does not exist
-            except boto3.exceptions.botocore.exceptions.ClientError:
-                # no bucket policy exists
-                pass
-            else:
-                statements = policy["Statement"]
-                for statement in statements:
-                    try:
-                        bool_secure_transport = statement["Condition"]["Bool"]["aws:SecureTransport"]
-                    except KeyError:
-                        pass
-                    else:
-                        effect = statement["Effect"]
-                        action = statement["Action"]
-                        resources = statement["Resource"]
-                        if bool_secure_transport == "false":
-                            if effect == "Deny":
-                                if action == "s3:GetObject" or action == "s3:*":
-                                    for resource in resources:
-                                        if re.match("arn:aws:s3*|\*", resource):
-                                            passing_buckets.append(bucket)
-
-        results["affected"] = [ i for i in self.buckets if i not in passing_buckets ]
+            results["affected"] = [ i for i in self.buckets if i not in passing_buckets ]
         
         if results["affected"]:
             results["analysis"] = "The affected buckets do enforce HTTPS only."
@@ -158,25 +160,25 @@ class s3(object):
         logging.info(results["name"])
 
         passing_buckets = []
-
-        for bucket in self.buckets:
-            try:
-                bucket_versioning = self.client.get_bucket_versioning(Bucket=bucket)
-                if bucket_versioning["Status"] == "Enabled":
-                    if bucket_versioning["MfaDelete"] == "Enabled": # need testing with mfadelete enabled bucket
-                        passing_buckets.append(bucket)
-            except KeyError:
-                pass
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    bucket_versioning = self.client.get_bucket_versioning(Bucket=bucket)
+                    if bucket_versioning["Status"] == "Enabled":
+                        if bucket_versioning["MfaDelete"] == "Enabled": # need testing with mfadelete enabled bucket
+                            passing_buckets.append(bucket)
+                except KeyError:
+                    pass
+                
+            results["affected"] = [i for i in self.buckets if i not in passing_buckets]
             
-        results["affected"] = [i for i in self.buckets if i not in passing_buckets]
-        
         if results["affected"]:
             results["analysis"] = "The affected buckets do not have MFA Delete enabled."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "All buckets have MFA Delete Enabled."
             results["pass_fail"] = "PASS"
-        
+    
         return results
 
 
@@ -233,22 +235,23 @@ class s3(object):
         logging.info(results["name"])
 
         passing_buckets = []      
+        
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    public_access_block_configuration = self.client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
+                #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    # no public access block configuration exists
+                    pass
+                else:
+                    if public_access_block_configuration["BlockPublicAcls"] == True:
+                        if public_access_block_configuration["IgnorePublicAcls"] == True:
+                            if public_access_block_configuration["BlockPublicPolicy"] == True:
+                                if public_access_block_configuration["RestrictPublicBuckets"] == True:
+                                    passing_buckets.append(bucket)
 
-        for bucket in self.buckets:
-            try:
-                public_access_block_configuration = self.client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
-            #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
-            except boto3.exceptions.botocore.exceptions.ClientError:
-                # no public access block configuration exists
-                pass
-            else:
-                if public_access_block_configuration["BlockPublicAcls"] == True:
-                    if public_access_block_configuration["IgnorePublicAcls"] == True:
-                        if public_access_block_configuration["BlockPublicPolicy"] == True:
-                            if public_access_block_configuration["RestrictPublicBuckets"] == True:
-                                passing_buckets.append(bucket)
-
-        results["affected"] = [i for i in self.buckets if i not in passing_buckets]
+            results["affected"] = [i for i in self.buckets if i not in passing_buckets]
         
         if results["affected"]:
             results["analysis"] = "The affected buckets do not block public access."
@@ -281,18 +284,18 @@ class s3(object):
         }
 
         logging.info(results["name"])
-
-        for bucket in self.buckets:
-            try:
-                bucket_versioning_status = self.client.get_bucket_versioning(Bucket=bucket)["Status"]
-            #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
-            except KeyError:
-                # no public access block configuration exists
-                results["affected"].append(bucket)
-                pass
-            else:
-                if bucket_versioning_status == "Suspended":
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    bucket_versioning_status = self.client.get_bucket_versioning(Bucket=bucket)["Status"]
+                #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+                except KeyError:
+                    # no public access block configuration exists
                     results["affected"].append(bucket)
+                    pass
+                else:
+                    if bucket_versioning_status == "Suspended":
+                        results["affected"].append(bucket)
         
         if results["affected"]:
             results["analysis"] = "The affected buckets do not have Object Versioning enabled."

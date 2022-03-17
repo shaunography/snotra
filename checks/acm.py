@@ -59,9 +59,13 @@ class acm(object):
         for region, certificates in self.certificates.items():
             client = self.session.client('acm', region_name=region)
             for certificate in certificates:
-                description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
-                if description["Options"]["CertificateTransparencyLoggingPreference"] != "ENABLED":
-                    results["affected"].append(certificate["CertificateArn"])
+                try:
+                    description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
+                else:
+                    if description["Options"]["CertificateTransparencyLoggingPreference"] != "ENABLED":
+                        results["affected"].append(certificate["CertificateArn"])
 
         if results["affected"]:
             results["analysis"] = "The affected Certificates do not have transparancy logging enabled."
@@ -98,9 +102,13 @@ class acm(object):
         for region, certificates in self.certificates.items():
             client = self.session.client('acm', region_name=region)
             for certificate in certificates:
-                description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
-                if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
-                    results["affected"].append(certificate["CertificateArn"])
+                try:
+                    description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
+                else:
+                    if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
+                        results["affected"].append(certificate["CertificateArn"])
 
         if results["affected"]:
             results["analysis"] = "The affected Certificates have expired."

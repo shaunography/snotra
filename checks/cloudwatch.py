@@ -81,16 +81,20 @@ class cloudwatch(object):
                         # trail not integrated with cloudwatch logs
                         pass
                     else:
-
                         # check if trail is multi region
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
+                            
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -182,11 +186,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -279,11 +287,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -375,11 +387,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -470,11 +486,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -565,11 +585,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -660,11 +684,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -755,11 +783,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -851,11 +883,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -947,11 +983,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1043,11 +1083,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1138,11 +1182,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1233,11 +1281,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1328,11 +1380,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1423,11 +1479,15 @@ class cloudwatch(object):
                         if trail["IsMultiRegionTrail"] == True:
                             trail_name = trail["Name"]
 
-                            # check trail is enabled
-                            if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
-                                
-                                # check logging of all events
-                                event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            try:
+                                # check trail is enabled
+                                if client.get_trail_status(Name=trail_name)["IsLogging"] == True:
+                                    # check logging of all events
+                                    event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"][0]
+                            
+                            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                                logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            else:
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -1501,18 +1561,22 @@ class cloudwatch(object):
      
         for region in self.regions:
             client = self.session.client('cloudwatch', region_name=region)
-            metric_alarms = client.describe_alarms()["MetricAlarms"]
-            composite_alarms = client.describe_alarms()["CompositeAlarms"]
-            
-            for alarm in metric_alarms:
-                alarm_name = alarm["AlarmName"]
-                if not alarm["AlarmActions"] and not alarm["OKActions"]:
-                    results["affected"].append("{}({})".format(alarm_name, region))
-                
-            for alarm in composite_alarms:
-                alarm_name = alarm["AlarmName"]
-                if not alarm["AlarmActions"] and not alarm["OKActions"]:
-                    results["affected"].append("{}({})".format(alarm_name, region))
+            try:
+                metric_alarms = client.describe_alarms()["MetricAlarms"]
+                composite_alarms = client.describe_alarms()["CompositeAlarms"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting alarms - %s" % e.response["Error"]["Code"])
+
+            else:
+                for alarm in metric_alarms:
+                    alarm_name = alarm["AlarmName"]
+                    if not alarm["AlarmActions"] and not alarm["OKActions"]:
+                        results["affected"].append("{}({})".format(alarm_name, region))
+                    
+                for alarm in composite_alarms:
+                    alarm_name = alarm["AlarmName"]
+                    if not alarm["AlarmActions"] and not alarm["OKActions"]:
+                        results["affected"].append("{}({})".format(alarm_name, region))
 
         if results["affected"]:
             results["analysis"] = "The affected CloudWatch Alarms have no actions configured."

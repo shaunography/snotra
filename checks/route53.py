@@ -45,11 +45,14 @@ class route53(object):
 
         logging.info(results["name"])
         
-        domains = self.client.list_domains()["Domains"]
-        
-        for domain in domains:
-            if domain["TransferLock"] == False:
-                results["affected"].append(domain["DomainName"])
+        try:
+            domains = self.client.list_domains()["Domains"]
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
+        else:
+            for domain in domains:
+                if domain["TransferLock"] == False:
+                    results["affected"].append(domain["DomainName"])
 
 
         if results["affected"]:

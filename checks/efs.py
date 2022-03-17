@@ -41,14 +41,18 @@ class efs(object):
 
         for region in self.regions:
             client = self.session.client('efs', region_name=region)
-            file_systems = client.describe_file_systems()["FileSystems"]
-            for file_system in file_systems:
-                file_system_id = file_system["FileSystemId"]
-                all_file_systems += [file_system["Name"]]
-                try:
-                    file_system_policy = client.describe_file_system_policy(FileSystemId=file_system_id)
-                except boto3.exceptions.botocore.errorfactory.ClientError:
-                    results["affected"].append("{}({})".format(file_system_id, region))
+            try:
+                file_systems = client.describe_file_systems()["FileSystems"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting file systems - %s" % e.response["Error"]["Code"])
+            else:
+                for file_system in file_systems:
+                    file_system_id = file_system["FileSystemId"]
+                    all_file_systems += [file_system["Name"]]
+                    try:
+                        file_system_policy = client.describe_file_system_policy(FileSystemId=file_system_id)
+                    except boto3.exceptions.botocore.errorfactory.ClientError:
+                        results["affected"].append("{}({})".format(file_system_id, region))
         
         if not all_file_systems:
             results["analysis"] = "No File Systems in use"

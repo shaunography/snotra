@@ -39,8 +39,11 @@ class access_analyzer(object):
 
         for region in self.regions:
             client = self.session.client('accessanalyzer', region_name=region)
-            if not client.list_analyzers()["analyzers"]:
-                results["affected"].append(region)
+            try:
+                if not client.list_analyzers()["analyzers"]:
+                    results["affected"].append(region)
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting analyzers - %s" % e.response["Error"]["Code"])
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"

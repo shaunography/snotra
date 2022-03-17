@@ -44,10 +44,14 @@ class ecr(object):
 
         for region in self.regions:
             client = self.session.client('ecr', region_name=region)
-            repositories = client.describe_repositories()["repositories"]
-            for repository in repositories:
-                if repository["imageScanningConfiguration"]["scanOnPush"] == False:
-                    results["affected"].append(repository["repositoryName"])
+            try:
+                repositories = client.describe_repositories()["repositories"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting repositories - %s" % e.response["Error"]["Code"])
+            else:
+                for repository in repositories:
+                    if repository["imageScanningConfiguration"]["scanOnPush"] == False:
+                        results["affected"].append(repository["repositoryName"])
 
 
         if results["affected"]:

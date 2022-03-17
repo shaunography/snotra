@@ -41,8 +41,11 @@ class guardduty(object):
 
         for region in self.regions:
             client = self.session.client('guardduty', region_name=region)
-            if not client.list_detectors()["DetectorIds"]:
-                results["affected"] += [region]
+            try:
+                if not client.list_detectors()["DetectorIds"]:
+                    results["affected"] += [region]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting detectors - %s" % e.response["Error"]["Code"])
                 
                 
         if results["affected"]:
@@ -84,18 +87,25 @@ class guardduty(object):
         
         for region in self.regions:
             client = self.session.client('guardduty', region_name=region)
-            for detector_id in client.list_detectors()["DetectorIds"]:
-
-                high_findings[detector_id] = []
-
-                findings_ids = client.list_findings(DetectorId=detector_id)["FindingIds"]
-                findings = client.get_findings(DetectorId=detector_id, FindingIds=findings_ids)["Findings"]
-                for finding in findings:
-                    if finding["Severity"] == 8: # Severity LOW=2, MED=4, HIGH=8
-                        if finding["Service"]["Archived"] == False:
-                            if detector_id not in results["affected"]:
-                                results["affected"].append(detector_id)
-                            high_findings[detector_id].append(finding["Title"])
+            try:
+                detector_ids = client.list_detectors()["DetectorIds"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting detectors - %s" % e.response["Error"]["Code"])
+            else:
+                for detector_id in detector_ids:
+                    high_findings[detector_id] = []
+                    try:
+                        findings_ids = client.list_findings(DetectorId=detector_id)["FindingIds"]
+                        findings = client.get_findings(DetectorId=detector_id, FindingIds=findings_ids)["Findings"]
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting keys - %s" % e.response["Error"]["Code"])
+                    else:
+                        for finding in findings:
+                            if finding["Severity"] == 8: # Severity LOW=2, MED=4, HIGH=8
+                                if finding["Service"]["Archived"] == False:
+                                    if detector_id not in results["affected"]:
+                                        results["affected"].append(detector_id)
+                                    high_findings[detector_id].append(finding["Title"])
                 
                 
         if results["affected"]:

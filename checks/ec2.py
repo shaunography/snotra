@@ -193,8 +193,11 @@ class ec2(object):
         
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            if client.get_ebs_encryption_by_default()["EbsEncryptionByDefault"] == False:
-                results["affected"].append(region)
+            try:
+                if client.get_ebs_encryption_by_default()["EbsEncryptionByDefault"] == False:
+                    results["affected"].append(region)
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting encryption informaiton - %s" % e.response["Error"]["Code"])
         
         if results["affected"]:
             results["pass_fail"] = "FAIL"
@@ -234,9 +237,13 @@ class ec2(object):
         
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            flow_logs = client.describe_flow_logs()["FlowLogs"]
-            if not flow_logs:
-                results["affected"].append(region)
+            try:
+                flow_logs = client.describe_flow_logs()["FlowLogs"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting flow logs - %s" % e.response["Error"]["Code"])
+            else:
+                if not flow_logs:
+                    results["affected"].append(region)
             
         if results["affected"]:
             results["pass_fail"] = "FAIL"
@@ -440,11 +447,15 @@ class ec2(object):
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            route_tables = client.describe_route_tables()["RouteTables"]
-            for route_table in route_tables:
-                for route in route_table["Routes"]:
-                    if "VpcPeeringConnectionId" in route:
-                        results["affected"].append("{}({})".format(route["VpcPeeringConnectionId"], region))
+            try:
+                route_tables = client.describe_route_tables()["RouteTables"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting route tables - %s" % e.response["Error"]["Code"])
+            else:
+                for route_table in route_tables:
+                    for route in route_table["Routes"]:
+                        if "VpcPeeringConnectionId" in route:
+                            results["affected"].append("{}({})".format(route["VpcPeeringConnectionId"], region))
                     
         if results["affected"]:
             results["analysis"] = "VPC peering in use - check affected routing tables for least access"
@@ -539,8 +550,12 @@ class ec2(object):
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            addresses = client.describe_addresses()["Addresses"]
-            results["affected"] += ["{}({})".format(address["PublicIp"], region) for address in addresses if "AssociationId" not in address]             
+            try:
+                addresses = client.describe_addresses()["Addresses"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting public ips - %s" % e.response["Error"]["Code"])
+            else:
+                results["affected"] += ["{}({})".format(address["PublicIp"], region) for address in addresses if "AssociationId" not in address]             
             
         if results["affected"]:
             results["analysis"] = "the affected elastic IPs are not associated with any network interfaces and are therefore not being used"
@@ -625,8 +640,12 @@ class ec2(object):
             
         for region in self.regions:
             client = self.session.client('ec2', region_name=region)
-            images = client.describe_images(Owners=["self"])["Images"]
-            results["affected"] += [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
+            try:
+                images = client.describe_images(Owners=["self"])["Images"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting images - %s" % e.response["Error"]["Code"])
+            else:
+                results["affected"] += [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
 
         if results["affected"]:
             results["analysis"] = "the affected EC2 AMIs are public."
@@ -1021,12 +1040,15 @@ class ec2(object):
        
         for region, reservations in self.instance_reservations.items():
             client = self.session.client('ssm', region_name=region)
-            managed_instances = [ instance["InstanceId"] for instance in client.describe_instance_information()["InstanceInformationList"] ]
-            
-            for reservation in reservations:
-                for instance in reservation["Instances"]:
-                    if instance["InstanceId"] not in managed_instances:
-                        results["affected"].append("{}({})".format(instance["InstanceId"], region))
+            try:
+                managed_instances = [ instance["InstanceId"] for instance in client.describe_instance_information()["InstanceInformationList"] ]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting instance information - %s" % e.response["Error"]["Code"])
+            else:
+                for reservation in reservations:
+                    for instance in reservation["Instances"]:
+                        if instance["InstanceId"] not in managed_instances:
+                            results["affected"].append("{}({})".format(instance["InstanceId"], region))
 
         if results["affected"]:
             results["analysis"] = "The affected instances are running and not managed by Systems Manager."
