@@ -8,12 +8,24 @@ class rds(object):
     def __init__(self, session):
         self.session = session
         self.regions = describe_regions(session)
+        self.instances = self.describe_db_instances()
 
     def run(self):
         findings = []
         findings += [ self.rds_1() ]
         findings += [ self.rds_2() ]
         return findings
+
+    def describe_db_instances(self):
+        instances = {}
+        logging.info("getting instance reservations")
+        for region in self.regions:
+            client = self.session.client('rds', region_name=region)
+            try:
+                instances[region] = client.describe_db_instances()["DBInstances"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting db instances - %s" % e.response["Error"]["Code"])
+        return instances
         
     def rds_1(self):
         # Ensure that encryption is enabled for RDS Instances (Automated)
@@ -38,17 +50,11 @@ class rds(object):
 
         logging.info(results["name"])
         
-        for region in self.regions:
+        for region, instances in self.instances.items():
             client = self.session.client('rds', region_name=region)
-            try:
-                instances = client.describe_db_instances()["DBInstances"]
-            except boto3.exceptions.botocore.exceptions.ClientError as e:
-                logging.error("Error getting db instances - %s" % e.response["Error"]["Code"])
-            else:
-                for instance in instances:
-                    db_instance_identifier = instance["DBInstanceIdentifier"]
-                    instance_description = client.describe_db_instances(DBInstanceIdentifier=db_instance_identifier)["DBInstances"][0]
-                    if instance_description["StorageEncrypted"] != True:
+            for instance in instances:
+                db_instance_identifier = instance["DBInstanceIdentifier"]
+                if instance["StorageEncrypted"] != True:
                         results["affected"] += [db_instance_identifier]
 
         if results["affected"]:
@@ -84,16 +90,11 @@ class rds(object):
 
         logging.info(results["name"])
         
-        for region in self.regions:
+        for region, instances in self.instances.items():
             client = self.session.client('rds', region_name=region)
-            try:
-                instances = client.describe_db_instances()["DBInstances"]
-            except boto3.exceptions.botocore.exceptions.ClientError as e:
-                logging.error("Error getting ebs snapshots - %s" % e.response["Error"]["Code"])
-            else:
-                for instance in instances:
-                    if instance["DeletionProtection"] == False:
-                        results["affected"].append(instance["DBInstanceIdentifier"])
+            for instance in instances:
+                if instance["DeletionProtection"] == False:
+                    results["affected"].append(instance["DBInstanceIdentifier"])
 
         if results["affected"]:
             results["analysis"] = "The affected RDS Instances do not have deletion protection enabled."
