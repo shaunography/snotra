@@ -93,7 +93,7 @@ class guardduty(object):
                 logging.error("Error getting detectors - %s" % e.response["Error"]["Code"])
             else:
                 for detector_id in detector_ids:
-                    high_findings[detector_id] = []
+                    high_findings["{}({})".format(detector_id, region)] = []
                     try:
                         findings_ids = client.list_findings(DetectorId=detector_id)["FindingIds"]
                         findings = client.get_findings(DetectorId=detector_id, FindingIds=findings_ids)["Findings"]
@@ -103,9 +103,9 @@ class guardduty(object):
                         for finding in findings:
                             if finding["Severity"] == 8: # Severity LOW=2, MED=4, HIGH=8
                                 if finding["Service"]["Archived"] == False:
-                                    if detector_id not in results["affected"]:
-                                        results["affected"].append(detector_id)
-                                    high_findings[detector_id].append(finding["Title"])
+                                    if "{}({})".format(detector_id, region) not in results["affected"]:
+                                        results["affected"].append("{}({})".format(detector_id, region))
+                                    high_findings["{}({})".format(detector_id, region)].append(finding["Title"])
                 
                 
         if results["affected"]:

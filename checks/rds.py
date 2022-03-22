@@ -18,7 +18,7 @@ class rds(object):
 
     def describe_db_instances(self):
         instances = {}
-        logging.info("getting instance reservations")
+        logging.info("getting db instances")
         for region in self.regions:
             client = self.session.client('rds', region_name=region)
             try:
