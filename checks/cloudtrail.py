@@ -75,6 +75,7 @@ class cloudtrail(object):
             results["analysis"] = "The affected trails are multi region enabled."
             results["pass_fail"] = "PASS"
         else:
+            results["affected"].append(self.account_id)
             results["analysis"] = "No multi region enabled trails were found."
             results["pass_fail"] = "FAIL"
 
@@ -120,6 +121,7 @@ class cloudtrail(object):
         else:
             results["analysis"] = "Log file validation is enabled on all trails."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
