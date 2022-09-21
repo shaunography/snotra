@@ -93,8 +93,9 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
-                            
                                 if event_selectors["ReadWriteType"] == "All":
 
                                     # check management event logging
@@ -194,6 +195,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -295,6 +298,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -395,6 +400,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -494,6 +501,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -593,6 +602,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -696,6 +707,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -795,6 +808,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -895,6 +910,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -995,6 +1012,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -1095,6 +1114,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -1194,6 +1215,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -1293,6 +1316,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -1392,6 +1417,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
@@ -1491,6 +1518,8 @@ class cloudwatch(object):
                             
                             except boto3.exceptions.botocore.exceptions.ClientError as e:
                                 logging.error("Error getting trail status or event selectors - %s" % e.response["Error"]["Code"])
+                            except KeyError:
+                                logging.error("Error no event selectors")
                             else:
                                 if event_selectors["ReadWriteType"] == "All":
 
