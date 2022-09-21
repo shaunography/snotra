@@ -373,6 +373,8 @@ class cloudtrail(object):
                             event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
                         except boto3.exceptions.botocore.exceptions.ClientError as e:
                             logging.error("Error getting event selectors - %s" % e.response["Error"]["Code"])
+                        except KeyError:
+                            logging.error("Error no event selectors")
                         else:
                             for selector in event_selectors:
                                 if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "WriteOnly":
@@ -427,6 +429,8 @@ class cloudtrail(object):
                             event_selectors = client.get_event_selectors(TrailName=trail_name)["EventSelectors"]
                         except boto3.exceptions.botocore.exceptions.ClientError as e:
                             logging.error("Error getting event selectors - %s" % e.response["Error"]["Code"])
+                        except KeyError:
+                            logging.error("Error no event selectors")
                         else:                        
                             for selector in event_selectors:
                                 if selector["ReadWriteType"] == "All" or selector["ReadWriteType"] == "ReadOnly":
