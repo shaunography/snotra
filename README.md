@@ -32,6 +32,8 @@ run audit with named profile
 Snotra currently completes all checks included in the latest CIS Benchmark. Although Snotra reports on them, a few of the checks can not be completed programatically - these are marked accordingly.
 
 ### other
+Additional checks beyond the CIS benchmark
+
 * unused security groups (ec2)
 * guardduty not enabled in all regions (guardduty)
 * unused elastic IPs (ec2)
@@ -74,6 +76,7 @@ Snotra currently completes all checks included in the latest CIS Benchmark. Alth
 * Load Balancer Deletion Protection not Configured (elb)
 * Group with inline policies (iam)
 * High Risk Guard Duty Findings (guardduty)
+* Overly Permisions Cross Account Assume Role (IAM)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
