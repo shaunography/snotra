@@ -51,6 +51,7 @@ class iam(object):
         findings += [ self.iam_22() ]
         findings += [ self.iam_23() ]
         findings += [ self.iam_24() ]
+        findings += [ self.iam_25() ]
         return findings
 
     def get_client(self):
@@ -1187,6 +1188,48 @@ class iam(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Issues Found."
+            results["pass_fail"] = "PASS"
+
+        return results
+
+    def iam_25(self):
+        # Overly Permissions Cross Account Assume Role
+
+        results = {
+            "id" : "iam_25",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Overly Permissions Cross Account Assume Role",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'The affected AWS role held a trust policy which was overly permissive and trusted all IAM principals within another account to assume the role and access the privileges it held. The overly permissive role trust policy could be abused by malicious users to escalate privileges and access resources in other accounts within the AWS Organization.\nWhen creating IAM policies, administrators should follow the standard security advice of implementing least privilege assignments, by granting principals only the permissions required to perform their tasks. It is recommended that administrators determine what users (and roles) need to do and then starting with a default deny,  policies should add the individual permissions that allow them to perform only those tasks. Additional privileges that may be required in future should be implemented through a request system.',
+            "remediation" : 'It is recommended that you review the role trust policy to determine which entities in external accounts should legitimately be allowed to assume the Terraform automation role. The role trust should then be updated to trust only those principals, which would prevent unauthorised individuals from access the highly-privilege policies attached the role.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html ',
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:L/UI:R/S:C/C:L/I:L/A:L",
+            "cvss_score" : "5.5",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        affected_statements = {}
+
+        for role in self.roles:
+            for statement in role["AssumeRolePolicyDocument"]["Statement"]:
+                if statement["Effect"] == "Allow":
+                    if "AWS" in statement["Principal"]:
+                        if statement["Action"] == "sts:AssumeRole":
+                            if re.match("arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
+                                results["affected"].append(role["RoleName"])
+                                affected_statements[role["RoleName"]] = statement
+
+        if results["affected"]:
+            results["analysis"] = "The affected role grants cross account administrative access to this account by trusting all principals in the specified account. As shown in the following code block the role trust policy includes the ARN: “arn:aws:iam::<accountid>:root”. The use of 'root' in this statement indicates all users in that account, not the root user.\nAlthough restrictions may apply in the originating account any users with the prerequisite STS permissions, or ability to modify STS privileges, could grant themselves access to assume the role and gain access to this account. Having restrictions in both accounts provides greater defence in depth\n{}".format(json.dumps(affected_statements))
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing roles found."
             results["pass_fail"] = "PASS"
 
         return results
