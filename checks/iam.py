@@ -21,7 +21,9 @@ class iam(object):
         self.password_policy = self.get_password_policy()
         self.users = self.list_users()
         self.aws_policies = self.get_aws_policies()
+        self.aws_attached_policies = self.get_aws_attached_policies()
         self.customer_policies = self.get_customer_policies()
+        self.customer_attached_policies = self.get_customer_attached_policies()
         self.groups = self.list_groups()
         self.roles = self.list_roles()
 
@@ -52,6 +54,7 @@ class iam(object):
         findings += [ self.iam_23() ]
         findings += [ self.iam_24() ]
         findings += [ self.iam_25() ]
+        findings += [ self.iam_26() ]
         return findings
 
     def get_client(self):
@@ -104,11 +107,26 @@ class iam(object):
             logging.error("Error getting managed policies - %s" % e.response["Error"]["Code"])
         policies += current_policies["Policies"]
         is_truncated = current_policies["IsTruncated"]
-        if is_truncated == True:
-            while is_truncated == True:
-                current_policies = self.client.list_policies(Scope="AWS", Marker=current_policies["Marker"])
-                policies += current_policies["Policies"]
-                is_truncated = current_policies["IsTruncated"]
+        while is_truncated == True:
+            current_policies = self.client.list_policies(Scope="AWS", Marker=current_policies["Marker"])
+            policies += current_policies["Policies"]
+            is_truncated = current_policies["IsTruncated"]
+        return policies
+    
+    def get_aws_attached_policies(self):
+        logging.info("Getting AWS Managed Policies")
+        #return self.client.list_policies(OnlyAttached=True)["Policies"]
+        policies = []
+        try:
+            current_policies = self.client.list_policies(OnlyAttached=True,Scope="AWS")
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            logging.error("Error getting managed policies - %s" % e.response["Error"]["Code"])
+        policies += current_policies["Policies"]
+        is_truncated = current_policies["IsTruncated"]        
+        while is_truncated == True:
+            current_policies = self.client.list_policies(OnlyAttached=True, Scope="AWS", Marker=current_policies["Marker"])
+            policies += current_policies["Policies"]
+            is_truncated = current_policies["IsTruncated"]
         return policies
     
     def get_customer_policies(self):
@@ -120,15 +138,33 @@ class iam(object):
         except boto3.exceptions.botocore.exceptions.ClientError as e:
             logging.error("Error getting customer managed policies - %s" % e.response["Error"]["Code"])
         policies += current_policies["Policies"]
+        is_truncated = current_policies["IsTruncated"]        
+        while is_truncated == True:
+            try:
+                current_policies = self.client.list_policies(Scope="Local", Marker=current_policies["Marker"])
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting customer managed polcies - %s" % e.response["Error"]["Code"]) 
+            policies += current_policies["Policies"]
+            is_truncated = current_policies["IsTruncated"]
+        return policies
+    
+    def get_customer_attached_policies(self):
+        logging.info("Getting Customer Managed Policies")
+        #return self.client.list_policies(OnlyAttached=True)["Policies"]
+        policies = []
+        try:
+            current_policies = self.client.list_policies(OnlyAttached=True, Scope="Local")
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            logging.error("Error getting customer managed policies - %s" % e.response["Error"]["Code"])
+        policies += current_policies["Policies"]
         is_truncated = current_policies["IsTruncated"]
-        if is_truncated == True:
-            while is_truncated == True:
-                try:
-                    current_policies = self.client.list_policies(Scope="Local", Marker=current_policies["Marker"])
-                except boto3.exceptions.botocore.exceptions.ClientError as e:
-                    logging.error("Error getting customer managed polcies - %s" % e.response["Error"]["Code"]) 
-                policies += current_policies["Policies"]
-                is_truncated = current_policies["IsTruncated"]
+        while is_truncated == True:
+            try:
+                current_policies = self.client.list_policies(OnlyAttached=True, Scope="Local", Marker=current_policies["Marker"])
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting customer managed polcies - %s" % e.response["Error"]["Code"]) 
+            policies += current_policies["Policies"]
+            is_truncated = current_policies["IsTruncated"]
         return policies
     
     def list_groups(self):
@@ -764,7 +800,7 @@ class iam(object):
 
         logging.info(results["name"])
 
-        for policy in self.customer_policies:
+        for policy in self.customer_attached_policies:
 
             arn = policy["Arn"]
             policy_name = policy["PolicyName"]
@@ -977,7 +1013,7 @@ class iam(object):
             for statement in role["AssumeRolePolicyDocument"]["Statement"]:
                 if statement["Effect"] == "Allow":
                     if "AWS" in statement["Principal"]:
-                        if statement["Action"] == "sts:AssumeRole":
+                        if "sts:AssumeRole" in statement["Action"]:
                             try:
                                 if not re.match(".*ExternalId.*", str(statement["Condition"])):
                                     results["affected"].append(role["RoleName"])
@@ -1156,7 +1192,7 @@ class iam(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "iam",
-            "name" : "Group",
+            "name" : "Group With Inline Policies",
             "affected": [],
             "analysis" : "",
             "description" : 'Ensure that all your IAM principals (Users, Groups, Roles) are using managed policies (AWS and customer managed policies) instead of inline policies (embedded policies) to better control and manage the access permissions to your AWS account.\nDefining access permissions for your IAM groups using managed policies can offer multiple benefits such as reusability, versioning and rollback, automatic updates, larger policy size and fine-grained control over your policies assignment.\nAlthough not directly a security issue having a large number of inline policies increases complexity and could result in users, groups and roles being given more permissions than required and potentially resulting in privilege escalation vectors.',
@@ -1220,7 +1256,7 @@ class iam(object):
             for statement in role["AssumeRolePolicyDocument"]["Statement"]:
                 if statement["Effect"] == "Allow":
                     if "AWS" in statement["Principal"]:
-                        if statement["Action"] == "sts:AssumeRole":
+                        if "sts:AssumeRole" in statement["Action"]:
                             if re.match("arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
                                 results["affected"].append(role["RoleName"])
                                 affected_statements[role["RoleName"]] = statement
@@ -1230,6 +1266,65 @@ class iam(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing roles found."
+            results["pass_fail"] = "PASS"
+
+        return results
+
+    def iam_26(self):
+        # Incorrect policy used to attempt to enforce MFA
+
+        # https://web.archive.org/web/20170602002425/https://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_users-self-manage-mfa-and-creds.html
+        # https://github.com/awsdocs/iam-user-guide/blob/cfe14c674c494d07ba0ab952fe546fdd587da65d/doc_source/id_credentials_mfa_enable_virtual.md#permissions-required
+
+        results = {
+            "id" : "iam_26",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Incorrect policy used to attempt to enforce MFA",
+            "affected": [],
+            "analysis" : "",
+            "description" : "AWS had advised incorrect policies for enforcing MFA which allowed an attacker, if they compromised keys that were protected by this policy, to remove the MFA policy from themselves, or remove the existing MFA device and add their own.",
+            "remediation" : "TBC",
+            "impact" : "high",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_score" : "8.1",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for policy in [*self.customer_attached_policies, *self.aws_attached_policies]:
+
+            arn = policy["Arn"]
+            policy_name = policy["PolicyName"]
+            #policy_id = policy["PolicyId"]
+            version_id = policy["DefaultVersionId"]        
+
+            statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            
+            if type(statements) is not list:
+                statements = [ statements ]
+
+            for statement in statements:
+                try:
+                    if statement["Sid"] == "AllowIndividualUserToManageTheirOwnMFA" or statement["Sid"] == "AllowIndividualUserToViewAndManageTheirOwnMFA":
+                        if "iam:DeactivateMFADevice" in statement["Action"]:
+                            results["affected"].append(policy_name)
+                    if statement["Sid"] == "BlockAnyAccessOtherThanAboveUnlessSignedInWithMFA":
+                        if "iam:*" in statement["NotAction"]:
+                            results["affected"].append(policy_name)
+                except KeyError: # catch action and non-action statements as required by check
+                    pass
+
+
+        if results["affected"]:
+            results["analysis"] = "Vulnerable MFA Policy Found"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No Issues Found"
             results["pass_fail"] = "PASS"
 
         return results
