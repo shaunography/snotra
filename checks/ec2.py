@@ -1,5 +1,6 @@
 import boto3
 import logging
+import json
 
 from utils.utils import describe_regions
 from utils.utils import get_account_id
@@ -20,6 +21,7 @@ class ec2(object):
         self.volumes = self.get_volumes()
         self.snapshots = self.get_snapshots()
         self.vpcs = self.get_vpcs()
+        self.vpc_endpoints = self.get_vpc_endpoints()
 
     def run(self):
         findings = []
@@ -46,6 +48,7 @@ class ec2(object):
         findings += [ self.ec2_21() ]
         findings += [ self.ec2_22() ]
         findings += [ self.ec2_23() ]
+        findings += [ self.ec2_24() ]
         return findings
 
     def get_security_groups(self):
@@ -124,6 +127,17 @@ class ec2(object):
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting vpcs - %s" % e.response["Error"]["Code"])
         return vpcs
+    
+    def get_vpc_endpoints(self):
+        vpc_endpoints = {}
+        logging.info("getting vpc endpoints")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            try:
+                vpc_endpoints[region] = client.describe_vpc_endpoints()["VpcEndpoints"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting vpc endpoints - %s" % e.response["Error"]["Code"])
+        return vpc_endpoints
     
     def ec2_1(self):
         # Ensure IAM instance roles are used for AWS resource access from instances (Manual)
@@ -1212,3 +1226,55 @@ class ec2(object):
             results["pass_fail"] = "PASS"
         
         return results
+
+    def ec2_24(self):
+        # Overly permissive VPC endpoint policy
+
+        results = {
+            "id" : "ec2_24",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "Overly Permissive VPC Endpoint Policy",
+            "affected": [],
+            "analysis" : "",
+            "description" : "VPC endpoint policies within the AWS accounts were configured with permissive default policies which could be exploited by a malicious user to exfiltrate data from the AWS environment.\nVPC endpoint policies are an AWS networking feature which provide private connections between resources within a VPC to supported AWS services using the backbone network and private APIs of each service. This configuration ensures that resources within a VPC do not require an Internet connection or VPN to communicate with other AWS services, directly supporting the implementation of secure isolated networks which do not require the use of potentially insecure public infrastructure. As an example, using a VPC endpoint, a service on an EC2 instance can make a request to the private API endpoint of an S3 bucket to download required objects, if a VPC endpoint has not been created for the S3 service, traffic will instead require a route via an internet gateway or similar device to the public, internet facing S3 API endpoint.\nSeveral VPC endpoint service types include the ability to configure endpoint policies to restrict the communications of resources with the associated AWS services. If no endpoint policy is defined when the endpoint is created, AWS will automatically attach a default policy which provides full, unrestricted access to the associated service. However as the default policy provides full access to the service, a malicious actor with access to the VPC could leverage the configuration to extract data from the AWS environment to write data to an attacker controlled service.\nFor example, an S3 VPC endpoint with the default full access policy would provide full access to the private S3 APIs which could be used to extract sensitive information to an S3 bucket within an attacker controlled AWS account. This could be achieved several ways but a common method would be If a malicious user had access to an EC2 instance within the VPC, they could upload AWS access keys with write permission to an S3 bucket within their own account and use these permissions to exfiltrate data to their S3 bucket via the endpoint. Similar methods could be achieved via other endpoints and services, such as by exfiltrating secrets from AWS Secrets Manager to an attacker controlled resource.",
+            "remediation" : 'It is recommended that VPC endpoints are created for each supported service within each VPC to limit the requirement for internet connectivity. However a custom policy should be created in line with the principal of least privilege for all supported VPC endpoints in use within the AWS environment. These policies should ensure that network connections to AWS services is only accessible to those resources within the internal AWS environment. Care should be taken to restrict resources by name or ARN and minimise the use of wildcards which may provide unintended access to services.\nAdditionally there are several types of VPC endpoints available including Interface endpoints which are a type of network interface providing access to the PrivateLink network for access to services. These Interface endpoints also support the use of security groups to restrict traffic, however it is recommended that these security groups are used in tandem with VPC endpoint policies as a defence-in-depth approach to implementing fine grained access controls. Other VPC endpoint types such as Gateway endpoints which act as route tables do not support the use of security groups and as such a restrictive endpoint policy should be implemented to restrict traffic to external resources.\nAn example policy for the S3 service is provided below:\n{\n    "Statement": [\n        {\n            "Action": "S3:*",\n            "Effect": "Allow",\n            "Resource": [\n                "*:*:*:*:xxxxxxxxxxxx:*",\n                "*:*:*:*:yyyyyyyyyyyy:*"\n            ],\n            "Principal": "*",\n            "Condition": {\n                "StringEquals": {\n                    "aws:PrincipalOrgID": "o-zzzzzzzzzz"\n                }\n            }       \n}   \n]\,}\nThis example policy ensures that resources in the isolated network can only use the VPC endpoint for S3 if they try to interact with S3 buckets controlled by specific accounts (xxxxxxxxxxxx and yyyyyyyyyyyy) and only if the principal is from your Org (o-zzzzzzzzzz) so an attacker wouldn\'t be able to use their own access keys.\n',
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N",
+            "cvss_score" : "4.9",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        affected_statements = {}
+
+        for region, endpoints in self.vpc_endpoints.items():
+            for endpoint in endpoints:
+
+                # Policy document is returned as a string and not a dict for some unknown reason.
+                statements = json.loads(endpoint["PolicyDocument"])["Statement"]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    if statement["Principal"] == "*":
+                                        results["affected"].append("{}({})".format(endpoint["VpcEndpointId"], region))
+                                        affected_statements[endpoint["VpcEndpointId"]] = statement
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        if results["affected"]:
+            results["analysis"] = "The affected VPC endpoints have a policy which is overly permissive.\nAffected endpoints and Statements:\n{}".format(json.dumps(affected_statements))
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+        
+        return results
+        
