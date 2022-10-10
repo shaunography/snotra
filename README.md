@@ -78,6 +78,7 @@ Additional checks beyond the CIS benchmark
 * High Risk Guard Duty Findings (guardduty)
 * Overly Permisions Cross Account Assume Role (IAM)
 * Incorrect policy used to attempt to enforce MFA (IAM)
+* Overly permissive VPC Endpoint (EC2)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
