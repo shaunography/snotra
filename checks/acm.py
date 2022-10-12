@@ -62,10 +62,14 @@ class acm(object):
                 try:
                     description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
-                    logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
+                    logging.error("Error getting certificates - %s" % e.response["Error"]["Code"])
                 else:
-                    if description["Options"]["CertificateTransparencyLoggingPreference"] != "ENABLED":
-                        results["affected"].append(certificate["CertificateArn"])
+                    try:
+                        if description["Options"]["CertificateTransparencyLoggingPreference"] != "ENABLED":
+                            results["affected"].append(certificate["CertificateArn"])
+                    except KeyError:
+                        logging.error("Error getting transparency logging preference")
+
 
         if results["affected"]:
             results["analysis"] = "The affected Certificates do not have transparancy logging enabled."
@@ -105,10 +109,13 @@ class acm(object):
                 try:
                     description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
-                    logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
+                    logging.error("Error getting certificates - %s" % e.response["Error"]["Code"])
                 else:
-                    if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
-                        results["affected"].append(certificate["CertificateArn"])
+                    try:
+                        if datetime.today() > datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute):
+                            results["affected"].append(certificate["CertificateArn"])
+                    except KeyError:
+                        logging.error("Error getting certificate expiration date")
 
         if results["affected"]:
             results["analysis"] = "The affected Certificates have expired."
