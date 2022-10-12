@@ -65,7 +65,7 @@ class iam(object):
         try:
             return self.client.get_account_summary()["SummaryMap"]
         except boto3.exceptions.botocore.exceptions.ClientError as e:
-            logging.error("Error getting certificate list - %s" % e.response["Error"]["Code"])
+            logging.error("Error getting account summary - %s" % e.response["Error"]["Code"])
             if e.response["Error"]["Code"] == "AccessDenied":
                 logging.error("Access Denied! - Check your credentials have the required policies applied before running Snotra")
                 sys.exit(0)
