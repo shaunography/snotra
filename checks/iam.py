@@ -1007,6 +1007,7 @@ class iam(object):
         }
 
         logging.info(results["name"])
+        
         affected_statements = {}
 
         for role in self.roles:
@@ -1241,7 +1242,7 @@ class iam(object):
             "affected": [],
             "analysis" : "",
             "description" : 'The affected AWS role held a trust policy which was overly permissive and trusted all IAM principals within another account to assume the role and access the privileges it held. The overly permissive role trust policy could be abused by malicious users to escalate privileges and access resources in other accounts within the AWS Organization.\nWhen creating IAM policies, administrators should follow the standard security advice of implementing least privilege assignments, by granting principals only the permissions required to perform their tasks. It is recommended that administrators determine what users (and roles) need to do and then starting with a default deny,  policies should add the individual permissions that allow them to perform only those tasks. Additional privileges that may be required in future should be implemented through a request system.',
-            "remediation" : 'It is recommended that you review the role trust policy to determine which entities in external accounts should legitimately be allowed to assume the Terraform automation role. The role trust should then be updated to trust only those principals, which would prevent unauthorised individuals from access the highly-privilege policies attached the role.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html ',
+            "remediation" : 'It is recommended that you review the role trust policy to determine which entities in external accounts should legitimately be allowed to assume the affected role. The role trust should then be updated to trust only those principals, which would prevent unauthorised individuals from access the highly-privilege policies attached the role.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html ',
             "impact" : "medium",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:L/UI:R/S:C/C:L/I:L/A:L",
