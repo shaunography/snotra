@@ -55,6 +55,7 @@ class iam(object):
         findings += [ self.iam_24() ]
         findings += [ self.iam_25() ]
         findings += [ self.iam_26() ]
+        findings += [ self.iam_27() ]
         return findings
 
     def get_client(self):
@@ -1329,3 +1330,69 @@ class iam(object):
             results["pass_fail"] = "PASS"
 
         return results
+
+    def iam_27(self):
+        # AmazonEC2RoleforSSM Managed Policy In Use
+
+        results = {
+            "id" : "iam_27",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "AmazonEC2RoleforSSM Managed Policy In Use",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The AWS managed policy AmazonEC2RoleforSSM is considered overly permissive.",
+            "remediation" : "Use AmazonSSMManagedInstanceCore instead and add privs as needed.\nMore Information:\nhttps://www.tripwire.com/state-of-security/security-data-protection/cloud/aws-system-manager-default-permissions/",
+            "impact" : "Medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_score" : "7.1",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        analysis = {}
+
+        #bad_policies = {
+        #    "AmazonEC2RoleforSSM": "Use AmazonSSMManagedInstanceCore instead and add privs as needed"
+        #}
+            #"AmazonMachineLearningRoleforRedshiftDataSource": "Use AmazonMachineLearningRoleforRedshiftDataSourceV3 instead",
+            #"AmazonEC2SpotFleetRole": "Use AmazonEC2SpotFleetTaggingRole instead",
+            #"AWSLambdaReadOnlyAccess": "Use AWSLambda_ReadOnlyAccess instead",
+            #"AWSLambdaFullAccess": "Use AWSLambda_FullAccess instead",
+
+        entities = self.client.list_entities_for_policy(PolicyArn="arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM")
+        groups = entities["PolicyGroups"]
+        users = entities["PolicyUsers"]
+        roles = entities["PolicyRoles"]
+
+        if users:
+            for i in users:
+                results["affected"].append(i["UserName"])
+            analysis["Users"] = users
+        
+        if groups:
+            for i in groups:
+                results["affected"].append(i["GroupName"])
+            analysis["Groups"] = groups
+
+        if roles:
+            for i in roles:
+                results["affected"].append(i["RoleName"])
+            analysis["Roles"] = roles
+
+        if results["affected"]:
+            results["analysis"] = json.dumps(analysis)
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No Issues Found"
+            results["pass_fail"] = "PASS"
+
+        return results
+
+
+
+

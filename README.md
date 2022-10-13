@@ -80,6 +80,7 @@ Additional checks beyond the CIS benchmark
 * Incorrect policy used to attempt to enforce MFA (IAM)
 * Overly permissive VPC Endpoint (EC2)
 * Domain without auto renew enabled (route53)
+* AmazonEC2RoleforSSM Managed Policy In Use (iam)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
