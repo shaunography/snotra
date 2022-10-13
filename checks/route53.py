@@ -10,17 +10,25 @@ class route53(object):
 
     def __init__(self, session):
         self.session = session
-        self.client = self.get_client()
         self.account_id = get_account_id(session)
+        self.domains = self.get_domains()
+        
 
     def run(self):
         findings = []
         findings += [ self.route53_1() ]
+        findings += [ self.route53_2() ]
         return findings
-    
-    def get_client(self):
-        # returns boto3 route53domains client
-        return self.session.client('route53domains', region_name="us-east-1")
+
+    def get_domains(self):
+        domains = {}
+        logging.info("getting domains")
+        client = self.session.client('route53domains', region_name="us-east-1")
+        try:
+            domains = client.list_domains()["Domains"]
+        except boto3.exceptions.botocore.exceptions.ClientError as e:
+            logging.error("Error getting domains - %s" % e.response["Error"]["Code"])
+        return domains
     
     def route53_1(self):
         # Domain Does Not Have Domain Transfer Lock Set
@@ -45,18 +53,50 @@ class route53(object):
 
         logging.info(results["name"])
         
-        try:
-            domains = self.client.list_domains()["Domains"]
-        except boto3.exceptions.botocore.exceptions.ClientError as e:
-                logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
-        else:
-            for domain in domains:
-                if domain["TransferLock"] == False:
-                    results["affected"].append(domain["DomainName"])
+        for domain in self.domains:
+            if domain["TransferLock"] == False:
+                results["affected"].append(domain["DomainName"])
 
 
         if results["affected"]:
             results["analysis"] = "The affected domains do not have transfer lock enabled."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing domains found"
+            results["pass_fail"] = "PASS"
+
+        return results
+    
+    def route53_2(self):
+        # domain without auto renew enabled
+
+        results = {
+            "id" : "route53_2",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "route53",
+            "name" : "Domain Does Not Have Auto Renew Enabled",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The AWS account under review contains Route53 domains that do not have Auto Renew enabled. To ensure you retain control of your domains and associated services including email is recommended that auto renew is enabled for all critical domains.",
+            "remediation" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        
+        for domain in self.domains:
+            if domain["AutoRenew"] == False:
+                results["affected"].append(domain["DomainName"])
+
+
+        if results["affected"]:
+            results["analysis"] = "The affected domains do not have auto renew enabled."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing domains found"
