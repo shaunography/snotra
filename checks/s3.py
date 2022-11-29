@@ -169,7 +169,7 @@ class s3(object):
                             passing_buckets.append(bucket)
                 except KeyError:
                     pass
-                except boto3.exceptions.botocore.exceptions.ClientError:
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting bucket versioning - %s" % e.response["Error"]["Code"])
                 
             results["affected"] = [i for i in self.buckets if i not in passing_buckets]
@@ -295,7 +295,7 @@ class s3(object):
                     # no public access block configuration exists
                     results["affected"].append(bucket)
                     pass
-                except boto3.exceptions.botocore.exceptions.ClientError:
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting bucket versioning - %s" % e.response["Error"]["Code"])
                 else:
                     if bucket_versioning_status == "Suspended":
