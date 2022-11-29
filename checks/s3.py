@@ -295,6 +295,8 @@ class s3(object):
                     # no public access block configuration exists
                     results["affected"].append(bucket)
                     pass
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    logging.error("Error getting bucket versioning - %s" % e.response["Error"]["Code"])
                 else:
                     if bucket_versioning_status == "Suspended":
                         results["affected"].append(bucket)
