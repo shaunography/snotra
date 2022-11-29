@@ -169,6 +169,8 @@ class s3(object):
                             passing_buckets.append(bucket)
                 except KeyError:
                     pass
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    logging.error("Error getting bucket versioning - %s" % e.response["Error"]["Code"])
                 
             results["affected"] = [i for i in self.buckets if i not in passing_buckets]
             
