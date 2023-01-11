@@ -48,7 +48,7 @@ class efs(object):
             else:
                 for file_system in file_systems:
                     file_system_id = file_system["FileSystemId"]
-                    all_file_systems += [file_system["Name"]]
+                    all_file_systems += [file_system_id]
                     try:
                         file_system_policy = client.describe_file_system_policy(FileSystemId=file_system_id)
                     except boto3.exceptions.botocore.errorfactory.ClientError:
