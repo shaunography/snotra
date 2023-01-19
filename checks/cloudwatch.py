@@ -46,7 +46,7 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for unauthorized API calls (Automated)
 
         results = {
-            "id" : "cloudwatch_",
+            "id" : "cloudwatch_1",
             "ref" : "4.1",
             "compliance" : "cis",
             "level" : 1,
@@ -862,10 +862,10 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for AWS Config configuration changes (Automated)
 
         results = {
-            "id" : "cis48",
+            "id" : "cloudwatch_9",
             "ref" : "4.9",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for AWS Config configuration changes",
             "affected": [],
@@ -964,10 +964,10 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for security group changes (Automated)
 
         results = {
-            "id" : "cis49",
+            "id" : "cloudwatch_10",
             "ref" : "4.10",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for security group changes",
             "affected": [],
@@ -1069,7 +1069,7 @@ class cloudwatch(object):
             "id" : "cloudwatch_11",
             "ref" : "4.11",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL)",
             "affected": [],
@@ -1167,7 +1167,7 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for changes to network gateways (Automated)
 
         results = {
-            "id" : "cis51",
+            "id" : "cloudwatch_12",
             "ref" : "4.12",
             "compliance" : "cis",
             "level" : 1,

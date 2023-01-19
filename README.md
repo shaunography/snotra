@@ -28,7 +28,7 @@ run audit with named profile
 
 
 ## checks
-### CIS Benchmark v1.4.0
+### CIS Benchmark v1.5.0
 Snotra currently completes all checks included in the latest CIS Benchmark. Although Snotra reports on them, a few of the checks can not be completed programatically - these are marked accordingly.
 
 ### other

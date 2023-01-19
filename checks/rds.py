@@ -14,6 +14,8 @@ class rds(object):
         findings = []
         findings += [ self.rds_1() ]
         findings += [ self.rds_2() ]
+        findings += [ self.rds_3() ]
+        findings += [ self.rds_4() ]
         return findings
 
     def describe_db_instances(self):
@@ -100,7 +102,85 @@ class rds(object):
             results["analysis"] = "The affected RDS Instances do not have deletion protection enabled."
             results["pass_fail"] = "FAIL"
         else:
-            results["analysis"] = "All RDS instances have encryption enabled."
+            results["analysis"] = "All RDS instances have deletion protection enabled."
+            results["pass_fail"] = "PASS"
+        
+        return results
+
+    def rds_3(self):
+        # Ensure Auto Minor Version Upgrade feature is Enabled for RDS Instances (Automated)
+
+        results = {
+            "id" : "rds_3",
+            "ref" : "2.3.2",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "rds",
+            "name" : "Ensure Auto Minor Version Upgrade feature is Enabled for RDS Instances",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Ensure that RDS database instances have the Auto Minor Version Upgrade flag enabled in order to receive automatically minor engine upgrades during the specified maintenance window. So, RDS instances can get the new features, bug fixes, and security patches for their database engines. AWS RDS will occasionally deprecate minor engine versions and provide new ones for an upgrade. When the last version number within the release is replaced, the version changed is considered minor. With Auto Minor Version Upgrade feature enabled, the version upgrades will occur automatically during the specified maintenance window so your RDS instances can get the new features, bug fixes, and security patches for their database engines.",
+            "remediation" : "Ensure that Auto Minor Version Upgrade feature is enabled for all RDS Instances",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        
+        for region, instances in self.instances.items():
+            client = self.session.client('rds', region_name=region)
+            for instance in instances:
+                db_instance_identifier = instance["DBInstanceIdentifier"]
+                if instance["AutoMinorVersionUpgrade"] != True:
+                        results["affected"] += [db_instance_identifier]
+
+        if results["affected"]:
+            results["analysis"] = "The affected RDS instances do not have Auto Minor Version Upgrade enabled."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All RDS instances have Auto Minor Version Upgrade enabled."
+            results["pass_fail"] = "PASS"
+        
+        return results
+
+    def rds_4(self):
+        # Ensure that public access is not given to RDS Instance (Automated)
+
+        results = {
+            "id" : "rds_4",
+            "ref" : "2.3.3",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "rds",
+            "name" : "Ensure that public access is not given to RDS Instance",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Ensure and verify that RDS database instances provisioned in your AWS account do restrict unauthorized access in order to minimize security risks. To restrict access to any publicly accessible RDS database instance, you must disable the database Publicly Accessible flag and update the VPC security group associated with the instance. Ensure that no public-facing RDS database instances are provisioned in your AWS account and restrict unauthorized access in order to minimize security risks. When the RDS instance allows unrestricted access (0.0.0.0/0), everyone and everything on the Internet can establish a connection to your database and this can increase the opportunity for malicious activities such as brute force attacks, PostgreSQL injections, or DoS/DDoS attacks.",
+            "remediation" : "Ensure that no public-facing RDS database instances are provisioned in your AWS account and restrict unauthorized access in order to minimize security risks",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "6.5",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        
+        for region, instances in self.instances.items():
+            client = self.session.client('rds', region_name=region)
+            for instance in instances:
+                db_instance_identifier = instance["DBInstanceIdentifier"]
+                if instance["PubliclyAccessible"] != False:
+                        results["affected"] += [db_instance_identifier]
+
+        if results["affected"]:
+            results["analysis"] = "The affected RDS instances are public."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "All RDS instances are private."
             results["pass_fail"] = "PASS"
         
         return results
