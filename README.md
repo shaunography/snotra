@@ -18,7 +18,7 @@ from the cloned repo directory, run:
 `docker run --rm -ti -v ~/.aws:/root/.aws/ snotra`
 
 ## usage
-run audit using default aws profile
+run full audit using default aws profile
 
 `$ python3 snotra.py --results-dir ./snotra/`
 
@@ -26,6 +26,9 @@ run audit with named profile
 
 `$ python3 snotra.py --results-dir ./snotra/ --profile prod_web`
 
+run CIS only audit with named profile
+
+`$ python3 snotra.py --results-dir ./snotra/ --profile prod_web --cis`
 
 ## checks
 ### CIS Benchmark v1.5.0
