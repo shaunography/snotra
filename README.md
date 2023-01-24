@@ -22,7 +22,7 @@ run full audit using default aws profile
 
 `$ python3 snotra.py --results-dir ./snotra/`
 
-run audit with named profile
+run full audit with named profile
 
 `$ python3 snotra.py --results-dir ./snotra/ --profile prod_web`
 
