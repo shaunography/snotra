@@ -18,6 +18,13 @@ class rds(object):
         findings += [ self.rds_4() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.rds_1() ]
+        findings += [ self.rds_3() ]
+        findings += [ self.rds_4() ]
+        return findings
+
     def describe_db_instances(self):
         instances = {}
         logging.info("getting db instances")

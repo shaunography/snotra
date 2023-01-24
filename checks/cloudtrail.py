@@ -24,6 +24,18 @@ class cloudtrail(object):
         findings += [ self.cloudtrail_7() ]
         findings += [ self.cloudtrail_8() ]
         return findings
+
+    def cis(self):
+        findings = []
+        findings += [ self.cloudtrail_1() ]
+        findings += [ self.cloudtrail_2() ]
+        findings += [ self.cloudtrail_3() ]
+        findings += [ self.cloudtrail_4() ]
+        findings += [ self.cloudtrail_5() ]
+        findings += [ self.cloudtrail_6() ]
+        findings += [ self.cloudtrail_7() ]
+        findings += [ self.cloudtrail_8() ]
+        return findings
     
     def get_trails(self):
         trails = {}

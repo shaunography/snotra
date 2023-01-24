@@ -18,6 +18,11 @@ class securityhub(object):
         findings += [ self.securityhub_2() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.securityhub_1() ]
+        return findings
+
     def get_security_hubs(self):
         security_hubs = {}
         logging.info("getting security hubs and enabled standards")

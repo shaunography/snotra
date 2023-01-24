@@ -14,6 +14,11 @@ class access_analyzer(object):
         findings += [ self.access_analyzer_1() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.access_analyzer_1() ]
+        return findings
+
     def access_analyzer_1(self):
         # Ensure that IAM Access analyzer is enabled for all regions (Automated)
 

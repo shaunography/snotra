@@ -16,6 +16,10 @@ class efs(object):
         findings += [ self.efs_2() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.efs_2() ]
+        return findings
 
     def describe_file_systems(self):
         file_systems = {}

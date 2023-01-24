@@ -30,6 +30,25 @@ class cloudwatch(object):
         findings += [ self.cloudwatch_15() ]
         findings += [ self.cloudwatch_16() ]
         return findings
+
+    def cis(self):
+        findings = []
+        findings += [ self.cloudwatch_1() ]
+        findings += [ self.cloudwatch_2() ]
+        findings += [ self.cloudwatch_3() ]
+        findings += [ self.cloudwatch_4() ]
+        findings += [ self.cloudwatch_5() ]
+        findings += [ self.cloudwatch_6() ]
+        findings += [ self.cloudwatch_7() ]
+        findings += [ self.cloudwatch_8() ]
+        findings += [ self.cloudwatch_9() ]
+        findings += [ self.cloudwatch_10() ]
+        findings += [ self.cloudwatch_11() ]
+        findings += [ self.cloudwatch_12() ]
+        findings += [ self.cloudwatch_13() ]
+        findings += [ self.cloudwatch_14() ]
+        findings += [ self.cloudwatch_15() ]
+        return findings
         
     def get_trail_list(self):
         trail_list = {}

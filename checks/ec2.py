@@ -52,6 +52,18 @@ class ec2(object):
         findings += [ self.ec2_25() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.ec2_1() ]
+        findings += [ self.ec2_2() ]
+        findings += [ self.ec2_3() ]
+        findings += [ self.ec2_4() ]
+        findings += [ self.ec2_5() ]
+        findings += [ self.ec2_6() ]
+        findings += [ self.ec2_7() ]
+        findings += [ self.ec2_25() ]
+        return findings
+
     def get_security_groups(self):
         security_groups = {}
         logging.info("getting security groups")

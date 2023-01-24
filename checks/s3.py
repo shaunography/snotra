@@ -23,6 +23,15 @@ class s3(object):
         findings += [ self.s3_6() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.s3_1() ]
+        findings += [ self.s3_2() ]
+        findings += [ self.s3_3() ]
+        findings += [ self.s3_4() ]
+        findings += [ self.s3_5() ]
+        return findings
+
     def list_buckets(self):
         # returns list of s3 buckets names
         logging.info("Getting Bucket List")
