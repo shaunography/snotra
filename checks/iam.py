@@ -247,8 +247,8 @@ class iam(object):
         # Ensure security contact information is registered (Manual)
         results = {
             "id" : "iam_2",
-            "ref" : "1.2",
-            "compliance" : "cis",
+            "ref" : [1.2, 1],
+            "compliance" : ["cis", "foundational"],
             "level" : 1,
             "service" : "iam",
             "name" : "Ensure security contact information is registered",

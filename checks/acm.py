@@ -16,8 +16,9 @@ class acm(object):
 
     def run(self):
         findings = []
-        findings += [ self.acm_1() ]
-        findings += [ self.acm_2() ]
+        #findings += [ self.acm_1() ]
+        #findings += [ self.acm_2() ]
+        findings += [ self.acm_3() ]
         return findings
     
     def get_certificates(self):
@@ -126,3 +127,49 @@ class acm(object):
         
         return results
     
+    def acm_3(self):
+        # Imported and ACM-issued certificates should be renewed after a specified time period
+
+        results = {
+            "id" : "acm_3",
+            "ref" : ["acm.1"],
+            "compliance" : ["foundational"],
+            "level" : "",
+            "service" : "acm",
+            "name" : "Imported and ACM-issued certificates should be renewed after a specified time period",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether ACM certificates in your account are marked for expiration within 30 days. It checks both imported certificates and certificates provided by AWS Certificate Manager.\nACM can automatically renew certificates that use DNS validation. For certificates that use email validation, you must respond to a domain validation email. ACM does not automatically renew certificates that you import. You must renew imported certificates manually.",
+            "remediation" : "ACM provides managed renewal for your SSL/TLS certificates issued by Amazon. This means that ACM either renews your certificates automatically (if you use DNS validation), or it sends you email notices when the certificate expiration approaches. These services are provided for both public and private ACM certificates.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        
+        for region, certificates in self.certificates.items():
+            client = self.session.client('acm', region_name=region)
+            for certificate in certificates:
+                try:
+                    description = client.describe_certificate(CertificateArn=certificate["CertificateArn"])["Certificate"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting certificates - %s" % e.response["Error"]["Code"])
+                else:
+                    try:
+                        not_after_date = datetime(description["NotAfter"].year, description["NotAfter"].month, description["NotAfter"].day, description["NotAfter"].hour, description["NotAfter"].minute)
+                        if datetime.today() + timedelta(days=30) >= not_after_date >= datetime.today():
+                            results["affected"].append(certificate["CertificateArn"])
+                    except KeyError:
+                        logging.error("Error getting certificate expiration date")
+
+        if results["affected"]:
+            results["analysis"] = "The affected Certificates expire in the next 30 days."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No certificates found that expire in the next 30 days."
+            results["pass_fail"] = "PASS"
+        
+        return results
