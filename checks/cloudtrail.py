@@ -133,7 +133,6 @@ class cloudtrail(object):
         else:
             results["analysis"] = "Log file validation is enabled on all trails."
             results["pass_fail"] = "PASS"
-            results["affected"].append(self.account_id)
         
         return results
 
