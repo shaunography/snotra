@@ -1254,20 +1254,22 @@ class ec2(object):
 
         for region, endpoints in self.vpc_endpoints.items():
             for endpoint in endpoints:
-
                 # Policy document is returned as a string and not a dict for some unknown reason.
-                statements = json.loads(endpoint["PolicyDocument"])["Statement"]
-
-                for statement in statements:
-                    try:
-                        if statement["Effect"] == "Allow":
-                            if statement["Action"] == "*":
-                                if statement["Resource"] == "*":
-                                    if statement["Principal"] == "*":
-                                        results["affected"].append("{}({})".format(endpoint["VpcEndpointId"], region))
-                                        affected_statements[endpoint["VpcEndpointId"]] = statement
-                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                        pass
+                try:
+                    statements = json.loads(endpoint["PolicyDocument"])["Statement"]
+                except KeyError:
+                    logging.error("Error getting vpc endpoint policies")
+                else:
+                    for statement in statements:
+                        try:
+                            if statement["Effect"] == "Allow":
+                                if statement["Action"] == "*":
+                                    if statement["Resource"] == "*":
+                                        if statement["Principal"] == "*":
+                                            results["affected"].append("{}({})".format(endpoint["VpcEndpointId"], region))
+                                            affected_statements[endpoint["VpcEndpointId"]] = statement
+                        except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                            pass
 
         if results["affected"]:
             results["analysis"] = "The affected VPC endpoints have a policy which is overly permissive.\nAffected endpoints and Statements:\n{}".format(json.dumps(affected_statements))
