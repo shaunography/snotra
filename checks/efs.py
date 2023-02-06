@@ -58,6 +58,8 @@ class efs(object):
         all_file_systems = []
 
         for region, file_systems in self.file_systems.items():
+            client = self.session.client('efs', region_name=region)
+            
             for file_system in file_systems:
                 file_system_id = file_system["FileSystemId"]
                 all_file_systems += [file_system_id]
