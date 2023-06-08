@@ -33,7 +33,7 @@ from utils.utils import get_account_id
 
 
 
-def assume_role(role_arn=None, session_name='my_session'):
+def assume_role(role_arn=None, session_name='default'):
     """
     If role_arn is given assumes a role and returns boto3 session
     otherwise return a regular session with the current IAM user/role
@@ -57,10 +57,17 @@ def lambda_handler(event, context):
         format="%(asctime)s : %(levelname)s : %(funcName)s - %(message)s"
     )
 
-    role_arn = event["role_arn"]
-    session_name = event["session_name"]
-
-    session = assume_role(role_arn, session_name)
+    try:
+        role_arn = event["role_arn"]
+        session_name = event["session_name"]
+    except KeyError:
+        logging.error("Event Error")
+        sys.exit(0)
+    else:
+        if role_arn:
+            session = assume_role(role_arn, session_name)
+        else:
+            session = assume_role()
     
     # init results dictionary
     results = {}
