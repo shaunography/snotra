@@ -8,6 +8,7 @@ Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it
 ## permissions
 The following AWS Managed Policies can be attached to the principal in order to grant the access keys the necessary permissions:
 * ReadOnlyAccess
+* ViewOnlyAccess
 * SecurityAudit
 
 ## docker
@@ -29,6 +30,12 @@ run full audit with named profile
 run CIS only audit with named profile
 
 `$ python3 snotra.py --results-dir ./snotra/ --profile prod_web --cis`
+
+## Lambda
+It is also possible to deploy Snotra as a Lambda Function, see the following blog post for more info.
+
+https://www.shaunography.com/snotra-lambda.html
+
 
 ## checks
 ### CIS Benchmark v1.5.0
