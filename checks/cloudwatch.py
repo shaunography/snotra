@@ -30,6 +30,25 @@ class cloudwatch(object):
         findings += [ self.cloudwatch_15() ]
         findings += [ self.cloudwatch_16() ]
         return findings
+
+    def cis(self):
+        findings = []
+        findings += [ self.cloudwatch_1() ]
+        findings += [ self.cloudwatch_2() ]
+        findings += [ self.cloudwatch_3() ]
+        findings += [ self.cloudwatch_4() ]
+        findings += [ self.cloudwatch_5() ]
+        findings += [ self.cloudwatch_6() ]
+        findings += [ self.cloudwatch_7() ]
+        findings += [ self.cloudwatch_8() ]
+        findings += [ self.cloudwatch_9() ]
+        findings += [ self.cloudwatch_10() ]
+        findings += [ self.cloudwatch_11() ]
+        findings += [ self.cloudwatch_12() ]
+        findings += [ self.cloudwatch_13() ]
+        findings += [ self.cloudwatch_14() ]
+        findings += [ self.cloudwatch_15() ]
+        return findings
         
     def get_trail_list(self):
         trail_list = {}
@@ -46,7 +65,7 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for unauthorized API calls (Automated)
 
         results = {
-            "id" : "cloudwatch_",
+            "id" : "cloudwatch_1",
             "ref" : "4.1",
             "compliance" : "cis",
             "level" : 1,
@@ -862,10 +881,10 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for AWS Config configuration changes (Automated)
 
         results = {
-            "id" : "cis48",
+            "id" : "cloudwatch_9",
             "ref" : "4.9",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for AWS Config configuration changes",
             "affected": [],
@@ -964,10 +983,10 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for security group changes (Automated)
 
         results = {
-            "id" : "cis49",
+            "id" : "cloudwatch_10",
             "ref" : "4.10",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for security group changes",
             "affected": [],
@@ -1069,7 +1088,7 @@ class cloudwatch(object):
             "id" : "cloudwatch_11",
             "ref" : "4.11",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "cloudwatch",
             "name" : "Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL)",
             "affected": [],
@@ -1167,7 +1186,7 @@ class cloudwatch(object):
         # Ensure a log metric filter and alarm exist for changes to network gateways (Automated)
 
         results = {
-            "id" : "cis51",
+            "id" : "cloudwatch_12",
             "ref" : "4.12",
             "compliance" : "cis",
             "level" : 1,

@@ -14,6 +14,11 @@ class kms(object):
         findings = []
         findings += [ self.kms_1() ]
         return findings
+
+    def cis(self):
+        findings = []
+        findings += [ self.kms_1() ]
+        return findings
         
     def get_keys(self):
         keys = {}

@@ -51,6 +51,12 @@ def main():
         dest="p",
         required=False,
         metavar="<profile>"
+    ),
+    parser.add_argument(
+        "--cis",
+        help="do cis only scan",
+        action="store_true",
+        required=False
     )
     args = parser.parse_args()
 
@@ -78,25 +84,40 @@ def main():
     results["account"] = get_account_id(session)
     results["user"] = get_user(session)
     results["datetime"] = str(datetime.today())
-    
     results["findings"] = []
-    results["findings"] += iam(session).run()
-    results["findings"] += s3(session).run()
-    results["findings"] += ec2(session).run()
-    results["findings"] += access_analyzer(session).run()
-    results["findings"] += rds(session).run()
-    results["findings"] += cloudtrail(session).run()
-    results["findings"] += config(session).run()
-    results["findings"] += kms(session).run()
-    results["findings"] += cloudwatch(session).run()
-    results["findings"] += guardduty(session).run()
-    results["findings"] += efs(session).run()
-    results["findings"] += sns(session).run()
-    results["findings"] += securityhub(session).run()
-    results["findings"] += elb(session).run()
-    results["findings"] += ecr(session).run()
-    results["findings"] += route53(session).run()
-    results["findings"] += acm(session).run()
+    
+    if args.cis:
+        logging.info("performing CIS scan")
+        results["findings"] += iam(session).cis()
+        results["findings"] += s3(session).cis()
+        results["findings"] += ec2(session).cis()
+        results["findings"] += access_analyzer(session).cis()
+        results["findings"] += rds(session).cis()
+        results["findings"] += cloudtrail(session).cis()
+        results["findings"] += config(session).cis()
+        results["findings"] += kms(session).cis()
+        results["findings"] += cloudwatch(session).cis()
+        results["findings"] += efs(session).cis()
+        results["findings"] += securityhub(session).cis()
+    else:
+        logging.info("performing full scan")
+        results["findings"] += iam(session).run()
+        results["findings"] += s3(session).run()
+        results["findings"] += ec2(session).run()
+        results["findings"] += access_analyzer(session).run()
+        results["findings"] += rds(session).run()
+        results["findings"] += cloudtrail(session).run()
+        results["findings"] += config(session).run()
+        results["findings"] += kms(session).run()
+        results["findings"] += cloudwatch(session).run()
+        results["findings"] += guardduty(session).run()
+        results["findings"] += efs(session).run()
+        results["findings"] += sns(session).run()
+        results["findings"] += securityhub(session).run()
+        results["findings"] += elb(session).run()
+        results["findings"] += ecr(session).run()
+        results["findings"] += route53(session).run()
+        results["findings"] += acm(session).run()
 
     if not os.path.exists(args.o):
         logging.info("results dir does not exist, creating it for you")

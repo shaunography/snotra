@@ -18,6 +18,11 @@ class securityhub(object):
         findings += [ self.securityhub_2() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.securityhub_1() ]
+        return findings
+
     def get_security_hubs(self):
         security_hubs = {}
         logging.info("getting security hubs and enabled standards")
@@ -35,28 +40,31 @@ class securityhub(object):
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting security hub - %s" % e.response["Error"]["Code"])
                 pass # no active subscription
+            except boto3.exceptions.botocore.exceptions.SSLError as e:
+                logging.error("SSL Error getting security hub - %s" % e)
             else:
                 try:
                     security_hubs[region]["StandardsSubscriptions"] = client.get_enabled_standards()["StandardsSubscriptions"]
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting enabled standards - %s" % e.response["Error"]["Code"])
+                
 
         return security_hubs
 
     def securityhub_1(self):
-        # check for Security Hub subscription
+        # Ensure AWS Security Hub is enabled (Automated)
 
         results = {
             "id" : "securityhub_1",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "4.16",
+            "compliance" : "cis",
+            "level" : 2,
             "service" : "securityhub",
-            "name" : "Active Security Hub Subscription",
+            "name" : "Ensure AWS Security Hub is enabled",
             "affected": [],
             "analysis" : "",
-            "description" : "AWS Security Hub provides you with a comprehensive view of your security state in AWS and helps you check your environment against security industry standards and best practices. Security Hub collects security data from across AWS accounts, services, and supported third-party partner products and helps you analyse your security trends and identify the highest priority security issues.",
-            "remediation" : "Consider maintaining a Security Hub subscription to help identify security vulnerabilites within your acount,ensure AWS config is enabled in all regions to allow Security hub to audit account configuration.",
+            "description" : "Security Hub collects security data from across AWS accounts, services, and supported third-party partner products and helps you analyze your security trends and identify the highest priority security issues. When you enable Security Hub, it begins to consume, aggregate, organize, and prioritize findings from AWS services that you have enabled, such as Amazon GuardDuty, Amazon Inspector, and Amazon Macie. You can also enable integrations with AWS partner security products. AWS Security Hub provides you with a comprehensive view of your security state in AWS and helps you check your environment against security industry standards and best practices - enabling you to quickly assess the security posture across your AWS accounts.",
+            "remediation" : "Consider maintaining a Security Hub subscription to help identify security vulnerabilites within your acount, ensure AWS config is enabled in all regions to allow Security hub to audit account configuration.",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "N/A",

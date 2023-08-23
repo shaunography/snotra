@@ -13,6 +13,11 @@ class config(object):
         findings = []
         findings += [ self.config_1() ]
         return findings
+
+    def cis(self):
+        findings = []
+        findings += [ self.config_1() ]
+        return findings
         
     def config_1(self):
         # Ensure AWS Config is enabled in all regions (Automated)

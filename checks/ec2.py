@@ -49,6 +49,19 @@ class ec2(object):
         findings += [ self.ec2_22() ]
         findings += [ self.ec2_23() ]
         findings += [ self.ec2_24() ]
+        findings += [ self.ec2_25() ]
+        return findings
+
+    def cis(self):
+        findings = []
+        findings += [ self.ec2_1() ]
+        findings += [ self.ec2_2() ]
+        findings += [ self.ec2_3() ]
+        findings += [ self.ec2_4() ]
+        findings += [ self.ec2_5() ]
+        findings += [ self.ec2_6() ]
+        findings += [ self.ec2_7() ]
+        findings += [ self.ec2_25() ]
         return findings
 
     def get_security_groups(self):
@@ -373,19 +386,6 @@ class ec2(object):
                                 else:
                                     if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
                                         results["affected"].append("{}({})".format(group_id, region))
-                    # ipv6
-                    if "Ipv6Ranges" in ip_permission:
-                        for ip_range in ip_permission["Ipv6Ranges"]:
-                            if ip_range["CidrIpv6"] == "::/0":
-                                try:
-                                    from_port = ip_permission["FromPort"]
-                                    to_port = ip_permission["ToPort"]
-                                except KeyError:
-                                    # if no port range is defined, all ports are allowed
-                                    results["affected"].append("{}({})".format(group_id, region))
-                                else:
-                                    if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
-                                        results["affected"] += ["{}({})".format(group_id, region)]
 
         if results["affected"]:
             results["analysis"] = "the affected security groups allow admin ingress traffic from 0.0.0.0/0."
@@ -402,7 +402,7 @@ class ec2(object):
 
         results = {
             "id" : "ec2_6",
-            "ref" : "5.3",
+            "ref" : "5.4",
             "compliance" : "cis",
             "level" : 2,
             "service" : "ec2",
@@ -441,7 +441,7 @@ class ec2(object):
 
         results = {
             "id" : "ec2_7",
-            "ref" : "5.4",
+            "ref" : "5.5",
             "compliance" : "cis",
             "level" : 2,
             "service" : "ec2",
@@ -1254,20 +1254,22 @@ class ec2(object):
 
         for region, endpoints in self.vpc_endpoints.items():
             for endpoint in endpoints:
-
                 # Policy document is returned as a string and not a dict for some unknown reason.
-                statements = json.loads(endpoint["PolicyDocument"])["Statement"]
-
-                for statement in statements:
-                    try:
-                        if statement["Effect"] == "Allow":
-                            if statement["Action"] == "*":
-                                if statement["Resource"] == "*":
-                                    if statement["Principal"] == "*":
-                                        results["affected"].append("{}({})".format(endpoint["VpcEndpointId"], region))
-                                        affected_statements[endpoint["VpcEndpointId"]] = statement
-                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                        pass
+                try:
+                    statements = json.loads(endpoint["PolicyDocument"])["Statement"]
+                except KeyError:
+                    logging.error("Error getting vpc endpoint policies")
+                else:
+                    for statement in statements:
+                        try:
+                            if statement["Effect"] == "Allow":
+                                if statement["Action"] == "*":
+                                    if statement["Resource"] == "*":
+                                        if statement["Principal"] == "*":
+                                            results["affected"].append("{}({})".format(endpoint["VpcEndpointId"], region))
+                                            affected_statements[endpoint["VpcEndpointId"]] = statement
+                        except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                            pass
 
         if results["affected"]:
             results["analysis"] = "The affected VPC endpoints have a policy which is overly permissive.\nAffected endpoints and Statements:\n{}".format(json.dumps(affected_statements))
@@ -1278,3 +1280,55 @@ class ec2(object):
         
         return results
         
+
+    def ec2_25(self):
+        # Ensure no security groups allow ingress from ::/0 to remote server administration ports (Automated)
+
+        results = {
+            "id" : "ec2_25",
+            "ref" : "5.3",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "ec2",
+            "name" : "Ensure no security groups allow ingress from ::/0 to remote server administration ports",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Security groups provide stateful filtering of ingress and egress network traffic to AWS resources. It is recommended that no security group allows unrestricted ingress access to remote server administration ports, such as SSH to port 22 and RDP to port 3389 . Public access to remote server administration ports, such as 22 and 3389, increases resource attack surface and unnecessarily raises the risk of resource compromise.",
+            "remediation" : "Apply the principle of least privilege and only allow RDP and SSH traffic from a whitelist of trusted IPv6 addresses",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, groups in self.security_groups.items():
+            for group in groups:
+                group_id = group["GroupId"]
+                ip_permissions = group["IpPermissions"]
+                for ip_permission in ip_permissions:
+                    # ipv6
+                    if "Ipv6Ranges" in ip_permission:
+                        for ip_range in ip_permission["Ipv6Ranges"]:
+                            if ip_range["CidrIpv6"] == "::/0":
+                                try:
+                                    from_port = ip_permission["FromPort"]
+                                    to_port = ip_permission["ToPort"]
+                                except KeyError:
+                                    # if no port range is defined, all ports are allowed
+                                    results["affected"].append("{}({})".format(group_id, region))
+                                else:
+                                    if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
+                                        results["affected"] += ["{}({})".format(group_id, region)]
+
+        if results["affected"]:
+            results["analysis"] = "the affected security groups allow admin ingress traffic from 0.0.0.0/0."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No security groups that allow remote server administration ingress traffic from 0.0.0.0/0 found"
+            results["pass_fail"] = "PASS"
+
+        return results
+    

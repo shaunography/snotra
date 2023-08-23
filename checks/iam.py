@@ -57,6 +57,29 @@ class iam(object):
         findings += [ self.iam_26() ]
         findings += [ self.iam_27() ]
         return findings
+    
+    def cis(self):
+        findings = []
+        findings += [ self.iam_1() ]
+        findings += [ self.iam_2() ]
+        findings += [ self.iam_3() ]
+        findings += [ self.iam_4() ]
+        findings += [ self.iam_5() ]
+        findings += [ self.iam_6() ]
+        findings += [ self.iam_7() ]
+        findings += [ self.iam_8() ]
+        findings += [ self.iam_9() ]
+        findings += [ self.iam_10() ]
+        findings += [ self.iam_11() ]
+        findings += [ self.iam_12() ]
+        findings += [ self.iam_13() ]
+        findings += [ self.iam_14() ]
+        findings += [ self.iam_15() ]
+        findings += [ self.iam_16() ]
+        findings += [ self.iam_17() ]
+        findings += [ self.iam_18() ]
+        findings += [ self.iam_19() ]
+        return findings
 
     def get_client(self):
         return self.session.client('iam')

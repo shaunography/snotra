@@ -23,6 +23,15 @@ class s3(object):
         findings += [ self.s3_6() ]
         return findings
 
+    def cis(self):
+        findings = []
+        findings += [ self.s3_1() ]
+        findings += [ self.s3_2() ]
+        findings += [ self.s3_3() ]
+        findings += [ self.s3_4() ]
+        findings += [ self.s3_5() ]
+        return findings
+
     def list_buckets(self):
         # returns list of s3 buckets names
         logging.info("Getting Bucket List")
@@ -169,6 +178,8 @@ class s3(object):
                             passing_buckets.append(bucket)
                 except KeyError:
                     pass
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting bucket versioning - %s" % e.response["Error"]["Code"])
                 
             results["affected"] = [i for i in self.buckets if i not in passing_buckets]
             
@@ -293,6 +304,8 @@ class s3(object):
                     # no public access block configuration exists
                     results["affected"].append(bucket)
                     pass
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting bucket versioning - %s" % e.response["Error"]["Code"])
                 else:
                     if bucket_versioning_status == "Suspended":
                         results["affected"].append(bucket)
