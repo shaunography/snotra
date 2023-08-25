@@ -25,31 +25,32 @@ class ec2(object):
 
     def run(self):
         findings = []
-        findings += [ self.ec2_1() ]
-        findings += [ self.ec2_2() ]
-        findings += [ self.ec2_3() ]
-        findings += [ self.ec2_4() ]
-        findings += [ self.ec2_5() ]
-        findings += [ self.ec2_6() ]
-        findings += [ self.ec2_7() ]
-        findings += [ self.ec2_8() ]
-        findings += [ self.ec2_9() ]
-        findings += [ self.ec2_10() ]
-        findings += [ self.ec2_11() ]
-        findings += [ self.ec2_12() ]
-        findings += [ self.ec2_13() ]
-        findings += [ self.ec2_14() ]
-        findings += [ self.ec2_15() ]
-        findings += [ self.ec2_16() ]
-        findings += [ self.ec2_17() ]
-        findings += [ self.ec2_18() ]
-        findings += [ self.ec2_19() ]
-        findings += [ self.ec2_20() ]
-        findings += [ self.ec2_21() ]
-        findings += [ self.ec2_22() ]
-        findings += [ self.ec2_23() ]
-        findings += [ self.ec2_24() ]
-        findings += [ self.ec2_25() ]
+#        findings += [ self.ec2_1() ]
+#        findings += [ self.ec2_2() ]
+#        findings += [ self.ec2_3() ]
+#        findings += [ self.ec2_4() ]
+#        findings += [ self.ec2_5() ]
+#        findings += [ self.ec2_6() ]
+#        findings += [ self.ec2_7() ]
+#        findings += [ self.ec2_8() ]
+#        findings += [ self.ec2_9() ]
+#        findings += [ self.ec2_10() ]
+#        findings += [ self.ec2_11() ]
+#        findings += [ self.ec2_12() ]
+#        findings += [ self.ec2_13() ]
+#        findings += [ self.ec2_14() ]
+#        findings += [ self.ec2_15() ]
+#        findings += [ self.ec2_16() ]
+#        findings += [ self.ec2_17() ]
+#        findings += [ self.ec2_18() ]
+#        findings += [ self.ec2_19() ]
+#        findings += [ self.ec2_20() ]
+#        findings += [ self.ec2_21() ]
+#        findings += [ self.ec2_22() ]
+#        findings += [ self.ec2_23() ]
+#        findings += [ self.ec2_24() ]
+#        findings += [ self.ec2_25() ]
+        findings += [ self.ec2_26() ]
         return findings
 
     def cis(self):
@@ -1332,3 +1333,49 @@ class ec2(object):
 
         return results
     
+    def ec2_26(self):
+        # EC2 instance user data
+
+        results = {
+            "id" : "ec2_26",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "EC2 Instance User Data (Check For Secrets)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        user_data = {}
+
+        for region, reservations in self.instance_reservations.items():
+
+            client = self.session.client('ec2', region_name=region)
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    instance_id = instance["InstanceId"]
+                    try:
+                        user_data[instance_id] = client.describe_instance_attribute(Attribute="userData", InstanceId=instance_id)["UserData"]
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting instance metadata - %s" % e.response["Error"]["Code"])
+                    else:
+                        if user_data[instance_id]:
+                            findings["affected"].append(instance_id)
+
+        if results["affected"]:
+            results["analysis"] = json.dumps(user_data)
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No user data found"
+            results["pass_fail"] = "PASS"
+
+        return results   

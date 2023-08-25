@@ -26,6 +26,11 @@ from checks.elb import elb
 from checks.ecr import ecr
 from checks.route53 import route53
 from checks.acm import acm
+from checks.resource_explorer import resource_explorer
+from checks.aws_lambda import aws_lambda
+from checks.code_build import code_build
+from checks.cloud_formation import cloud_formation
+from checks.ssm import ssm
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -101,23 +106,28 @@ def main():
         results["findings"] += securityhub(session).cis()
     else:
         logging.info("performing full scan")
-        results["findings"] += iam(session).run()
-        results["findings"] += s3(session).run()
-        results["findings"] += ec2(session).run()
-        results["findings"] += access_analyzer(session).run()
-        results["findings"] += rds(session).run()
-        results["findings"] += cloudtrail(session).run()
-        results["findings"] += config(session).run()
-        results["findings"] += kms(session).run()
-        results["findings"] += cloudwatch(session).run()
-        results["findings"] += guardduty(session).run()
-        results["findings"] += efs(session).run()
-        results["findings"] += sns(session).run()
-        results["findings"] += securityhub(session).run()
-        results["findings"] += elb(session).run()
+#        results["findings"] += iam(session).run()
+#        results["findings"] += s3(session).run()
+#        results["findings"] += ec2(session).run()
+#        results["findings"] += access_analyzer(session).run()
+#        results["findings"] += rds(session).run()
+#        results["findings"] += cloudtrail(session).run()
+#        results["findings"] += config(session).run()
+#        results["findings"] += kms(session).run()
+#        results["findings"] += cloudwatch(session).run()
+#        results["findings"] += guardduty(session).run()
+#        results["findings"] += efs(session).run()
+#        results["findings"] += sns(session).run()
+#        results["findings"] += securityhub(session).run()
+#        results["findings"] += elb(session).run()
         results["findings"] += ecr(session).run()
-        results["findings"] += route53(session).run()
-        results["findings"] += acm(session).run()
+#        results["findings"] += route53(session).run()
+#        results["findings"] += acm(session).run()
+#        results["findings"] += resource_explorer(session).run()
+#        results["findings"] += aws_lambda(session).run()
+#        results["findings"] += code_build(session).run()
+        #results["findings"] += cloud_formation(session).run()
+        #results["findings"] += ssm(session).run()
 
     if not os.path.exists(args.o):
         logging.info("results dir does not exist, creating it for you")

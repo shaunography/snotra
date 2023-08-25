@@ -13,12 +13,25 @@ class ecr(object):
         self.session = session
         self.regions = describe_regions(session)
         self.account_id = get_account_id(session)
+        self.repositories = self.get_repositories()
 
     def run(self):
         findings = []
         findings += [ self.ecr_1() ]
+        findings += [ self.ecr_2() ]
         return findings
-    
+
+    def get_repositories(self):
+        repositories = {}
+        logging.info("getting repositories")
+        for region in self.regions:
+            client = self.session.client('ecr', region_name=region)
+            try:
+                repositories[region] = client.describe_repositories()["repositories"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting repositories - %s" % e.response["Error"]["Code"])
+        return repositories
+
     def ecr_1(self):
         # ECR Image Scan on Push is not Enabled
 
@@ -42,16 +55,10 @@ class ecr(object):
 
         logging.info(results["name"])
 
-        for region in self.regions:
-            client = self.session.client('ecr', region_name=region)
-            try:
-                repositories = client.describe_repositories()["repositories"]
-            except boto3.exceptions.botocore.exceptions.ClientError as e:
-                logging.error("Error getting repositories - %s" % e.response["Error"]["Code"])
-            else:
+        for region, repositories in self.repositories.items():
                 for repository in repositories:
                     if repository["imageScanningConfiguration"]["scanOnPush"] == False:
-                        results["affected"].append(repository["repositoryName"])
+                        results["affected"].append("{} ({})".format(repository["repositoryName"], region))
 
 
         if results["affected"]:
@@ -63,3 +70,47 @@ class ecr(object):
 
         return results
 
+    def ecr_2(self):
+        # ECR repositories without a lifecycle policy
+
+        results = {
+            "id" : "ecr_2",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ecr",
+            "name" : "ECR Image Repositories Do Not Have a LifeCycle Policy Applied",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected Repositories do not have a Lifecycle policy, Amazon ECR repositories run the risk of retaining a larfe number of container images, resulting in unnecessary cost.",
+            "remediation" : "It is recomended to review the affected repositories and apply a suitable lifecycle policy to minimise storage requirements and costs\nMore Information\nhttps://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for region, repositories in self.repositories.items():
+            client = self.session.client('ecr', region_name=region)
+            for repository in repositories:
+                try:
+                    lifecycle_policy = client.get_lifecycle_policy(repositoryName=repository["repositoryName"])["lifecyclePolicyText"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    if e.response["Error"]["Code"] == "LifecyclePolicyNotFoundException":
+                        results["affected"].append("{} ({})".format(repository["repositoryName"], region))
+                    else:
+                        logging.error("Error getting lifecycle policy- %s" % e.response["Error"]["Code"])
+
+
+
+        if results["affected"]:
+            results["analysis"] = "The affected repositories do not have a life cycle policy"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing repositories found"
+            results["pass_fail"] = "PASS"
+
+        return results
