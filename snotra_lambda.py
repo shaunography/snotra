@@ -27,6 +27,7 @@ from checks.elb import elb
 from checks.ecr import ecr
 from checks.route53 import route53
 from checks.acm import acm
+from checks.dynamo_db import dynamo_db
 
 from utils.utils import get_user
 from utils.utils import get_account_id

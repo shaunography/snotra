@@ -25,32 +25,33 @@ class ec2(object):
 
     def run(self):
         findings = []
-#        findings += [ self.ec2_1() ]
-#        findings += [ self.ec2_2() ]
-#        findings += [ self.ec2_3() ]
-#        findings += [ self.ec2_4() ]
-#        findings += [ self.ec2_5() ]
-#        findings += [ self.ec2_6() ]
-#        findings += [ self.ec2_7() ]
-#        findings += [ self.ec2_8() ]
-#        findings += [ self.ec2_9() ]
-#        findings += [ self.ec2_10() ]
-#        findings += [ self.ec2_11() ]
-#        findings += [ self.ec2_12() ]
-#        findings += [ self.ec2_13() ]
-#        findings += [ self.ec2_14() ]
-#        findings += [ self.ec2_15() ]
-#        findings += [ self.ec2_16() ]
-#        findings += [ self.ec2_17() ]
-#        findings += [ self.ec2_18() ]
-#        findings += [ self.ec2_19() ]
-#        findings += [ self.ec2_20() ]
-#        findings += [ self.ec2_21() ]
-#        findings += [ self.ec2_22() ]
-#        findings += [ self.ec2_23() ]
-#        findings += [ self.ec2_24() ]
-#        findings += [ self.ec2_25() ]
+        findings += [ self.ec2_1() ]
+        findings += [ self.ec2_2() ]
+        findings += [ self.ec2_3() ]
+        findings += [ self.ec2_4() ]
+        findings += [ self.ec2_5() ]
+        findings += [ self.ec2_6() ]
+        findings += [ self.ec2_7() ]
+        findings += [ self.ec2_8() ]
+        findings += [ self.ec2_9() ]
+        findings += [ self.ec2_10() ]
+        findings += [ self.ec2_11() ]
+        findings += [ self.ec2_12() ]
+        findings += [ self.ec2_13() ]
+        findings += [ self.ec2_14() ]
+        findings += [ self.ec2_15() ]
+        findings += [ self.ec2_16() ]
+        findings += [ self.ec2_17() ]
+        findings += [ self.ec2_18() ]
+        findings += [ self.ec2_19() ]
+        findings += [ self.ec2_20() ]
+        findings += [ self.ec2_21() ]
+        findings += [ self.ec2_22() ]
+        findings += [ self.ec2_23() ]
+        findings += [ self.ec2_24() ]
+        findings += [ self.ec2_25() ]
         findings += [ self.ec2_26() ]
+        findings += [ self.ec2_27() ]
         return findings
 
     def cis(self):
@@ -1379,3 +1380,60 @@ class ec2(object):
             results["pass_fail"] = "PASS"
 
         return results   
+
+    def ec2_27(self):
+        # Ensure all security groups rules have a description
+
+        results = {
+            "id" : "ec2_6",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "Ensure All Security Group Rules Have A Description",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected Security Groups contain rules which do not have a corresponding description. Setting a description on all rules improves readbility, helps ensure maintainability of the account and will help minimise mistakes when configuring or updating rules. ",
+            "remediation" : "Ensure all rules have a suitable description.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        affected_groups = []
+            
+        for region, groups in self.security_groups.items():
+            for group in groups:
+                group_id = group["GroupId"]
+                for permissions in group["IpPermissions"]:
+                    for ip_range in permissions["IpRanges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+                    for ipv6_range in permissions["Ipv6Ranges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+                for permissions in group["IpPermissionsEgress"]:
+                    for ip_range in permissions["IpRanges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+                    for ipv6_range in permissions["Ipv6Ranges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+        results["affected"] = list(set(affected_groups))
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected security groups contains rules without a description"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Default security groups restrict all traffic"
+            results["pass_fail"] = "PASS"
+
+        return results
