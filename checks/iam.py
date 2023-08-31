@@ -56,6 +56,7 @@ class iam(object):
         findings += [ self.iam_25() ]
         findings += [ self.iam_26() ]
         findings += [ self.iam_27() ]
+        findings += [ self.iam_28() ]
         return findings
     
     def cis(self):
@@ -1254,7 +1255,7 @@ class iam(object):
         return results
 
     def iam_25(self):
-        # Overly Permissions Cross Account Assume Role
+        # Overly Permissions Cross Account Assume Role Trust Policy
 
         results = {
             "id" : "iam_25",
@@ -1262,7 +1263,7 @@ class iam(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "iam",
-            "name" : "Overly Permissions Cross Account Assume Role",
+            "name" : "Overly permissive Cross Account Assume Role Trust Policy",
             "affected": [],
             "analysis" : "",
             "description" : 'The affected AWS role held a trust policy which was overly permissive and trusted all IAM principals within another account to assume the role and access the privileges it held. The overly permissive role trust policy could be abused by malicious users to escalate privileges and access resources in other accounts within the AWS Organization.\nWhen creating IAM policies, administrators should follow the standard security advice of implementing least privilege assignments, by granting principals only the permissions required to perform their tasks. It is recommended that administrators determine what users (and roles) need to do and then starting with a default deny,  policies should add the individual permissions that allow them to perform only those tasks. Additional privileges that may be required in future should be implemented through a request system.',
@@ -1419,3 +1420,45 @@ class iam(object):
 
 
 
+    def iam_28(self):
+        # Overly Permissions Cross Account Assume Role Trusts GitHub OIDC
+
+        results = {
+            "id" : "iam_28",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Overly permissive Cross Account Assume Role Trust Policy GitHub OIDC",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'The affected role is configured to trust the GitHub OIDC Identity Provider but does not enorce any subject conditions, This means an external attacker with knowledge of the role ARN can create a GitHub action that can assume this role and access the affected account.',
+            "remediation" : 'Configure the role trust policy to include aditional subject conditons which only allows the role be assume by trusted gitHub repositores and branches.\nmore information\nhttps://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/',
+            "impact" : "high",
+            "probability" : "high",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_score" : "8.1",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        affected_statements = {}
+
+        for role in self.roles:
+            for statement in role["AssumeRolePolicyDocument"]["Statement"]:
+                if statement["Effect"] == "Allow":
+                    if "Federated" in statement["Principal"]:
+                        if re.match("^.*oidc-provider/token.actions.githubusercontent.com", statement["Principal"]["Federated"]):
+                            if "sts:AssumeRoleWithWebIdentity" in statement["Action"]:
+                                if "token.actions.githubusercontent.com:sub" not in statement["Condition"]["StringEquals"]:
+                                    results["affected"].append(role["RoleName"])
+                                    affected_statements[role["RoleName"]] = statement
+
+        if results["affected"]:
+            results["analysis"] = "The affected role grants cross account administrative access to this account by trusting the GitHub OIDC Identity Provider but does not include any subject conditions\n{}".format(json.dumps(affected_statements))
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing roles found."
+            results["pass_fail"] = "PASS"
+
+        return results
