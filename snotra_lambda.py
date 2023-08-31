@@ -102,6 +102,12 @@ def lambda_handler(event, context):
     results["findings"] += ecr(session).run()
     results["findings"] += route53(session).run()
     results["findings"] += acm(session).run()
+    results["findings"] += resource_explorer(session).run()
+    results["findings"] += aws_lambda(session).run()
+    results["findings"] += code_build(session).run()
+    results["findings"] += cloud_formation(session).run()
+    results["findings"] += ssm(session).run()
+    results["findings"] += dynamo_db(session).run()
     
     logging.info("writing results json S3")
 
