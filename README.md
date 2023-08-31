@@ -97,6 +97,7 @@ Additional checks beyond the CIS benchmark
 * CloudFormation stack output (Check for secrets) (cloudformation)
 * SSM parameter store parameters (check for secrets) (ssm)
 * ecr repositories with no lifecycle policy (ecr)
+* Overly Privileged Cross Account Assume Role Trust Policy GitHub OIDC
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
