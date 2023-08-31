@@ -50,6 +50,8 @@ class ec2(object):
         findings += [ self.ec2_23() ]
         findings += [ self.ec2_24() ]
         findings += [ self.ec2_25() ]
+        findings += [ self.ec2_26() ]
+        findings += [ self.ec2_27() ]
         return findings
 
     def cis(self):
@@ -1332,3 +1334,106 @@ class ec2(object):
 
         return results
     
+    def ec2_26(self):
+        # EC2 instance user data
+
+        results = {
+            "id" : "ec2_26",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "EC2 Instance User Data (Check For Secrets)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        user_data = {}
+
+        for region, reservations in self.instance_reservations.items():
+
+            client = self.session.client('ec2', region_name=region)
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    instance_id = instance["InstanceId"]
+                    try:
+                        user_data[instance_id] = client.describe_instance_attribute(Attribute="userData", InstanceId=instance_id)["UserData"]
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting instance metadata - %s" % e.response["Error"]["Code"])
+                    else:
+                        if user_data[instance_id]:
+                            findings["affected"].append(instance_id)
+
+        if results["affected"]:
+            results["analysis"] = json.dumps(user_data)
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No user data found"
+            results["pass_fail"] = "PASS"
+
+        return results   
+
+    def ec2_27(self):
+        # Ensure all security groups rules have a description
+
+        results = {
+            "id" : "ec2_6",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "Ensure All Security Group Rules Have A Description",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected Security Groups contain rules which do not have a corresponding description. Setting a description on all rules improves readbility, helps ensure maintainability of the account and will help minimise mistakes when configuring or updating rules. ",
+            "remediation" : "Ensure all rules have a suitable description.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        affected_groups = []
+            
+        for region, groups in self.security_groups.items():
+            for group in groups:
+                group_id = group["GroupId"]
+                for permissions in group["IpPermissions"]:
+                    for ip_range in permissions["IpRanges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+                    for ipv6_range in permissions["Ipv6Ranges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+                for permissions in group["IpPermissionsEgress"]:
+                    for ip_range in permissions["IpRanges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+                    for ipv6_range in permissions["Ipv6Ranges"]:
+                        if "Description" not in ip_range: 
+                            affected_groups.append("{}({})".format(group_id, region))
+
+        results["affected"] = list(set(affected_groups))
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected security groups contains rules without a description"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Default security groups restrict all traffic"
+            results["pass_fail"] = "PASS"
+
+        return results
