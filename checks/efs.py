@@ -89,7 +89,7 @@ class efs(object):
             "compliance" : "cis",
             "level" : "N/A",
             "service" : "efs",
-            "name" : "Ensure that encryption is enabled for EFS file systems",
+            "name" : "Ensure that encryption is enabled for EFS file systems (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "EFS data should be encrypted at rest using AWS KMS (Key Management Service). Data should be encrypted at rest to reduce the risk of a data breach via direct access to the storage device.",
