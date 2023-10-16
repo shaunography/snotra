@@ -143,14 +143,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for unauthorized API calls."
@@ -246,14 +256,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for Management Console sign-in without MFA."
@@ -349,14 +369,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for usage of 'root' account."
@@ -450,14 +480,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for for IAM policy changes."
@@ -551,14 +591,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for CloudTrail configuration changes."
@@ -652,14 +702,20 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
+                                                        sns_topic_arn = False
                                                         try:
-                                                            metric_name = alarm["MetricName"]
-                                                        except KeyError:
-                                                            logging.info("KeyError getting MetricName")
-                                                        else:
-                                                            if metric_name == metric_filter_name:
+                                                            if alarm["MetricName"] == metric_filter_name:
                                                                 sns_topic_arn =  alarm["AlarmActions"][0]
-                                                                # check SNS topic has a subcriber
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
+                                                            # check SNS topic has a subcriber
+                                                            if sns_topic_arn:
                                                                 sns_client = self.session.client('sns', region_name=region)
                                                                 subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
                                                                 if subscriptions:
@@ -757,14 +813,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for disabling or scheduled deletion of customer created CMKs."
@@ -858,14 +924,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for S3 bucket policy changes."
@@ -960,14 +1036,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for AWS Config configuration changes."
@@ -1062,14 +1148,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for security group changes."
@@ -1164,14 +1260,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for changes to Network Access Control Lists (NACL)."
@@ -1265,14 +1371,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for changes to network gateways."
@@ -1366,14 +1482,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for route table changes."
@@ -1467,14 +1593,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for VPC changes."
@@ -1568,14 +1704,24 @@ class cloudwatch(object):
                                                     cloudwatch_client = self.session.client('cloudwatch', region_name=region)
                                                     metric_alarms = cloudwatch_client.describe_alarms()["MetricAlarms"]
                                                     for alarm in metric_alarms:
-                                                        if alarm["MetricName"] == metric_filter_name:
-                                                            sns_topic_arn =  alarm["AlarmActions"][0]
-                                                            
+                                                        sns_topic_arn = False
+                                                        try:
+                                                            if alarm["MetricName"] == metric_filter_name:
+                                                                sns_topic_arn =  alarm["AlarmActions"][0]
+                                                        except KeyError:
+                                                            for metric in alarm["Metrics"]:
+                                                                try:
+                                                                    if metric["MetricStat"]["Metric"]["MetricName"] == metric_filter_name:
+                                                                        sns_topic_arn =  alarm["AlarmActions"][0]
+                                                                except KeyError:
+                                                                    pass
+
                                                             # check SNS topic has a subcriber
-                                                            sns_client = self.session.client('sns', region_name=region)
-                                                            subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
-                                                            if subscriptions:
-                                                                results["affected"].append(metric_filter_name)
+                                                            if sns_topic_arn:
+                                                                sns_client = self.session.client('sns', region_name=region)
+                                                                subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=sns_topic_arn)["Subscriptions"]
+                                                                if subscriptions:
+                                                                    results["affected"].append(metric_filter_name)
 
         if results["affected"]:
             results["analysis"] = "The affected metric filters were found for AWS Organizations changes."
