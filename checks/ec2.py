@@ -1370,7 +1370,7 @@ class ec2(object):
                         logging.error("Error getting instance metadata - %s" % e.response["Error"]["Code"])
                     else:
                         if user_data[instance_id]:
-                            findings["affected"].append(instance_id)
+                            results["affected"].append(instance_id)
 
         if results["affected"]:
             results["analysis"] = json.dumps(user_data)
