@@ -27,6 +27,11 @@ from checks.elb import elb
 from checks.ecr import ecr
 from checks.route53 import route53
 from checks.acm import acm
+from checks.resource_explorer import resource_explorer
+from checks.aws_lambda import aws_lambda
+from checks.code_build import code_build
+from checks.cloud_formation import cloud_formation
+from checks.ssm import ssm
 from checks.dynamo_db import dynamo_db
 
 from utils.utils import get_user
