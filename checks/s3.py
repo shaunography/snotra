@@ -81,6 +81,7 @@ class s3(object):
             else:
                 results["analysis"] = "All buckets have server side encryption enabled."
                 results["pass_fail"] = "PASS"
+                results["affected"].append(self.account_id)
 
             return results
     
@@ -142,6 +143,7 @@ class s3(object):
         else:
             results["analysis"] = "All buckets enforce HTTPS requests."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -189,6 +191,7 @@ class s3(object):
         else:
             results["analysis"] = "All buckets have MFA Delete Enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
     
         return results
 
@@ -219,6 +222,7 @@ class s3(object):
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
+        results["affected"].append(self.account_id)
 
         return results
 
@@ -270,6 +274,7 @@ class s3(object):
         else:
             results["analysis"] = "All Buckets block public access."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -316,5 +321,6 @@ class s3(object):
         else:
             results["analysis"] = "All Buckets have Object Versioning enabled.."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results

@@ -131,5 +131,6 @@ class securityhub(object):
             else:
                 results["analysis"] = "All Security Hubs have AutoEnableControls enabled."
                 results["pass_fail"] = "PASS"
+                results["affected"].append(self.account_id)
 
         return results

@@ -3,12 +3,14 @@ import logging
 import json
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class guardduty(object):
 
     def __init__(self, session):
         self.session = session
         self.regions = describe_regions(session)
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -57,6 +59,7 @@ class guardduty(object):
         else:
             results["analysis"] = "GuardDuty is enabled in all regions"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -114,6 +117,7 @@ class guardduty(object):
         else:
             results["analysis"] = "No issues found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         
         return results

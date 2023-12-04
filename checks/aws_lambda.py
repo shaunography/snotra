@@ -76,6 +76,7 @@ class aws_lambda(object):
         else:
             results["analysis"] = "No environment vars in use"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 

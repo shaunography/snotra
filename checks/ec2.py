@@ -193,6 +193,7 @@ class ec2(object):
         else:
             results["analysis"] = "No failing instances found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -237,6 +238,7 @@ class ec2(object):
         else:
             results["analysis"] = "Default EBS Volume encryption is enabled in all regions"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -284,6 +286,8 @@ class ec2(object):
         else:
             results["analysis"] = "Flow Logs are enabled on all VPCs"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
         return results
 
     def ec2_4(self):
@@ -342,6 +346,7 @@ class ec2(object):
         else:
             results["analysis"] = "No NACLs that allow remote server administration ingress traffic from 0.0.0.0/0 found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -395,6 +400,7 @@ class ec2(object):
         else:
             results["analysis"] = "No security groups that allow remote server administration ingress traffic from 0.0.0.0/0 found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -435,6 +441,7 @@ class ec2(object):
         else:
             results["analysis"] = "Default security groups restrict all traffic"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -479,6 +486,7 @@ class ec2(object):
         else:
             results["analysis"] = "VPC Peering not in use"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -538,6 +546,7 @@ class ec2(object):
         else:
             results["analysis"] = "No unused security groups found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
     
@@ -579,6 +588,7 @@ class ec2(object):
         else:
             results["analysis"] = "No unused elastic IPs found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
     
@@ -628,6 +638,7 @@ class ec2(object):
         else:
             results["analysis"] = "No Public EBS Snapshots found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -669,6 +680,7 @@ class ec2(object):
         else:
             results["analysis"] = "No Public AMIs found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -736,6 +748,7 @@ class ec2(object):
         else:
             results["analysis"] = "No security groups that allow database ingress traffic from 0.0.0.0/0 found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -795,6 +808,7 @@ class ec2(object):
         else:
             results["analysis"] = "No NACLs that allow remote database ingress traffic from 0.0.0.0/0 found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -849,6 +863,7 @@ class ec2(object):
         else:
             results["analysis"] = "No default Network ACLs that allow all traffic where found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -900,16 +915,18 @@ class ec2(object):
                                         # no ports defined = allow all ports
                                         results["affected"].append("{}({})".format(network_acl_id, region))
 
-        if not custom_nacls:
-            results["analysis"] = "No Custom Network ACLs found."
-            results["pass_fail"] = "PASS"        
         
         if results["affected"]:
             results["analysis"] = "The affected custom Network ACLs allow all traffic."
             results["pass_fail"] = "FAIL"
         else:
-            results["analysis"] = "No custom Network ACLs that allow all traffic where found."
-            results["pass_fail"] = "PASS"
+            results["pass_fail"] = "PASS"        
+            results["affected"].append(self.account_id)
+            if not custom_nacls:
+                results["analysis"] = "No Custom Network ACLs found."
+            else:
+                results["analysis"] = "No custom Network ACLs that allow all traffic where found."
+
 
         return results
     
@@ -947,6 +964,7 @@ class ec2(object):
         else:
             results["analysis"] = "No unused Network Interfaces found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -989,6 +1007,7 @@ class ec2(object):
         else:
             results["analysis"] = "No instances older than 365 days found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1028,6 +1047,7 @@ class ec2(object):
         else:
             results["analysis"] = "No failing instances found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1072,6 +1092,7 @@ class ec2(object):
         else:
             results["analysis"] = "No failing instances found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1108,6 +1129,7 @@ class ec2(object):
         else:
             results["analysis"] = "All EBS Volumes are encrypted."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         
         return results
@@ -1144,6 +1166,7 @@ class ec2(object):
         else:
             results["analysis"] = "All EBS Snapshots are encrypted."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
     
@@ -1183,6 +1206,7 @@ class ec2(object):
         else:
             results["analysis"] = "No EBS snapshots older than 30 days found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
     
@@ -1226,6 +1250,7 @@ class ec2(object):
         else:
             results["analysis"] = "No Default VPCs in use"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -1279,6 +1304,7 @@ class ec2(object):
         else:
             results["analysis"] = "No issues found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
         
@@ -1331,6 +1357,7 @@ class ec2(object):
         else:
             results["analysis"] = "No security groups that allow remote server administration ingress traffic from 0.0.0.0/0 found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1378,6 +1405,7 @@ class ec2(object):
         else:
             results["analysis"] = "No user data found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results   
 
@@ -1435,5 +1463,6 @@ class ec2(object):
         else:
             results["analysis"] = "Default security groups restrict all traffic"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

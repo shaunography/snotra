@@ -69,6 +69,7 @@ class resource_explorer(object):
         else:
             results["analysis"] = "Indexes are enabled in all regions"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     

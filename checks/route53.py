@@ -64,6 +64,7 @@ class route53(object):
         else:
             results["analysis"] = "No failing domains found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -101,5 +102,6 @@ class route53(object):
         else:
             results["analysis"] = "No failing domains found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

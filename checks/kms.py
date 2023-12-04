@@ -2,6 +2,7 @@ import boto3
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class kms(object):
 
@@ -9,6 +10,7 @@ class kms(object):
         self.session = session
         self.regions = describe_regions(session)
         self.keys = self.get_keys()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -74,5 +76,6 @@ class kms(object):
         else:
             results["analysis"] = "Rotation is enabled on all CMKs."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results

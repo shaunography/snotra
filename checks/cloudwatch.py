@@ -3,6 +3,7 @@ import re
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class cloudwatch(object):
 
@@ -10,6 +11,7 @@ class cloudwatch(object):
         self.session = session
         self.regions = describe_regions(session)
         self.trail_list = self.get_trail_list()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -168,6 +170,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for unauthorized API calls could be found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -281,6 +284,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for Management Console sign-in without MFA could be found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
         
@@ -394,6 +398,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for usage of 'root' account could be found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -505,6 +510,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for IAM policy changes could be found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -616,6 +622,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for CloudTrail configuration changes could be found"
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -727,6 +734,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for AWS Management Console authentication failures could be found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -838,6 +846,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for disabling or scheduled deletion of customer created CMKs could be found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -949,6 +958,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for S3 bucket policy changes could be found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1061,6 +1071,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for AWS Config configuration changes."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1173,6 +1184,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for security group changes."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1285,6 +1297,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for changes to Network Access Control Lists (NACL)."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1396,6 +1409,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for changes to network gateways."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1507,6 +1521,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for route table changes."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1618,6 +1633,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for VPC changes."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1729,6 +1745,7 @@ class cloudwatch(object):
         else:
             results["analysis"] = "No log metric filter and alarm for AWS Organizations changes."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1782,5 +1799,6 @@ class cloudwatch(object):
         else:
             results["analysis"] = "All CloudWatch alarms have actions configured."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

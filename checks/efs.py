@@ -2,6 +2,7 @@ import boto3
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class efs(object):
 
@@ -9,6 +10,7 @@ class efs(object):
         self.session = session
         self.regions = describe_regions(session)
         self.file_systems = self.describe_file_systems()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -70,6 +72,7 @@ class efs(object):
         
         if not all_file_systems:
             results["analysis"] = "No File Systems in use"
+            results["affected"].append(self.account_id)
         else:
             if results["affected"]:
                 results["analysis"] = "The affected file systems do not have an access policy configured and therefore allow access from all clients."
@@ -77,6 +80,7 @@ class efs(object):
             else:
                 results["analysis"] = "All file systems have an access policy configured."
                 results["pass_fail"] = "PASS"
+                results["affected"].append(self.account_id)
         
         return results
 
@@ -117,6 +121,7 @@ class efs(object):
 
         if not all_file_systems:
             results["analysis"] = "No File Systems in use"
+            results["affected"].append(self.account_id)
         else:
             if results["affected"]:
                 results["analysis"] = "The affected file systems are not encrypted."
@@ -124,5 +129,6 @@ class efs(object):
             else:
                 results["analysis"] = "All file are encrypted."
                 results["pass_fail"] = "PASS"
+                results["affected"].append(self.account_id)
             
         return results

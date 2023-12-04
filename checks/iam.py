@@ -241,6 +241,7 @@ class iam(object):
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
+        results["affected"].append(self.account_id)
 
         return results
 
@@ -269,6 +270,7 @@ class iam(object):
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
+        results["affected"].append(self.account_id)
 
         return results
 
@@ -296,6 +298,7 @@ class iam(object):
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
+        results["affected"].append(self.account_id)
 
         return results
 
@@ -326,6 +329,10 @@ class iam(object):
             results["analysis"] = "Root Access Keys Found"
             results["affected"].append(self.account_id)
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No Root Access Keys Found"
+            results["affected"].append(self.account_id)
+            results["pass_fail"] = "PASS"
         
         return results
 
@@ -357,6 +364,10 @@ class iam(object):
             results["analysis"] = "Root MFA Not Enabled"
             results["affected"].append(self.account_id)
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Root MFA Enabled"
+            results["affected"].append(self.account_id)
+            results["pass_fail"] = "PASS"
         
         return results
 
@@ -388,6 +399,10 @@ class iam(object):
             results["analysis"] = "Root MFA Not Enabled"
             results["affected"].append(self.account_id)
             results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Root MFA Enabled"
+            results["affected"].append(self.account_id)
+            results["pass_fail"] = "PASS"
         
         return results
 
@@ -422,6 +437,7 @@ class iam(object):
         accesskey2_last_used = root.split(",")[15]
         results["analysis"] = "password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
         results["affected"].append(self.account_id)
+        results["pass_fail"] = "INFO"
 
         return results
 
@@ -502,10 +518,12 @@ class iam(object):
                     results["pass_fail"] = "FAIL"
                 else:
                     results["pass_fail"] = "PASS"
+                    results["affected"].append(self.account_id)
 
         else:
             results["analysis"] = "No password policy configured"
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -547,6 +565,7 @@ class iam(object):
         else:
             results["analysis"] = "All users have MFA enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -595,6 +614,7 @@ class iam(object):
         else:
             results["analysis"] = "No unused Access Keys found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -658,6 +678,7 @@ class iam(object):
         else:
             results["analysis"] = "No unused credentials found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -702,6 +723,7 @@ class iam(object):
         else:
             results["analysis"] = "No used with more than one access key found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -758,6 +780,7 @@ class iam(object):
         else:
             results["analysis"] = "No keys that have not been rotated found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -800,6 +823,7 @@ class iam(object):
         else:
             results["analysis"] = "No directly attached policies found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -853,6 +877,7 @@ class iam(object):
         else:
             results["analysis"] = "No custom policies that allow full *:* privileges found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -944,6 +969,7 @@ class iam(object):
         else:
             results["analysis"] = "No expired server certificates found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -974,6 +1000,7 @@ class iam(object):
 
         results["analysis"] = "Manual Check"
         results["pass_fail"] = "INFO"
+        results["affected"].append(self.account_id)
 
         return results
     
@@ -1008,6 +1035,7 @@ class iam(object):
         else:
             results["analysis"] = "No unused IAM Groups found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1056,6 +1084,7 @@ class iam(object):
         else:
             results["analysis"] = "No failing roles found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1130,6 +1159,7 @@ class iam(object):
         else:
             results["analysis"] = "No Admin Groups Found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1206,6 +1236,7 @@ class iam(object):
         else:
             results["analysis"] = "No Admin Groups Found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1252,6 +1283,7 @@ class iam(object):
         else:
             results["analysis"] = "No Issues Found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1294,6 +1326,7 @@ class iam(object):
         else:
             results["analysis"] = "No failing roles found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1353,6 +1386,7 @@ class iam(object):
         else:
             results["analysis"] = "No Issues Found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1415,6 +1449,7 @@ class iam(object):
         else:
             results["analysis"] = "No Issues Found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -1461,6 +1496,7 @@ class iam(object):
         else:
             results["analysis"] = "No failing roles found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -1506,5 +1542,6 @@ class iam(object):
         else:
             results["analysis"] = "No failing roles found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
