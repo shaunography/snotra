@@ -99,6 +99,9 @@ Additional checks beyond the CIS benchmark
 * ecr repositories with no lifecycle policy (ecr)
 * Overly Privileged Cross Account Assume Role Trust Policy GitHub OIDC (IAM)
 * Overly permissions cross service trust role (IAM)
+* athena work groups not using encryption (athena)
+* EC2 instances with pubic IPs (ec2)
+* EC2 instances without detailed monitoring enabled (ec2)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
