@@ -52,6 +52,8 @@ class ec2(object):
         findings += [ self.ec2_25() ]
         findings += [ self.ec2_26() ]
         findings += [ self.ec2_27() ]
+        findings += [ self.ec2_28() ]
+        findings += [ self.ec2_29() ]
         return findings
 
     def cis(self):
@@ -109,7 +111,7 @@ class ec2(object):
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting instance reservations - %s" % e.response["Error"]["Code"])
         return reservations
-    
+
     def get_volumes(self):
         volumes = {}
         logging.info("getting ebs volumes")
@@ -1462,6 +1464,84 @@ class ec2(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "Default security groups restrict all traffic"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_28(self):
+        # EC2 Instances without detailed monitoring enabled
+
+        results = {
+            "id" : "ec2_28",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "EC2 Instances Without Detailed Monitoring Enabled",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Enabling detailed monitoring provides enhanced monitoring and granular insights into EC2 instance metrics. Not having detailed monitoring enabled may limit the ability to troubleshoot performance and security related issues effectively.",
+            "remediation" : "Enable detailed monitoring for appropriate instances.\nNOTE: Additional costs are incurred when detailed monitoring is enabled.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    if instance["Monitoring"]["State"] != "enabled":
+                        results["affected"].append("{}({})".format(instance["ImageId"], region))
+
+        if results["affected"]:
+            results["analysis"] = "The affected instances do not have detailed monitoring enabled"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing instances found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_29(self):
+        # EC2 Instances with a public IP address
+
+        results = {
+            "id" : "ec2_29",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "EC2 Instances with a Public IP Address",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Affected Instances have a Public IP Address Attached",
+            "remediation" : "Review Public IPs to ensure an appropriate Security Group has been applied applying the principle of least privilege.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    if instance["PublicIpAddress"]:
+                        results["affected"].append("{}({})({})".format(instance["ImageId"], region, instance["PublicIpAddress"]))
+
+        if results["affected"]:
+            results["analysis"] = "The affected instances have a public IP Address attached"
+            results["pass_fail"] = "INFO"
+        else:
+            results["analysis"] = "No Public IPs found"
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 

@@ -32,6 +32,7 @@ from checks.code_build import code_build
 from checks.cloud_formation import cloud_formation
 from checks.ssm import ssm
 from checks.dynamo_db import dynamo_db
+from checks.athena import athena
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -130,6 +131,7 @@ def main():
         results["findings"] += cloud_formation(session).run()
         results["findings"] += ssm(session).run()
         results["findings"] += dynamo_db(session).run()
+        results["findings"] += athena(session).run()
 
     if not os.path.exists(args.o):
         logging.info("results dir does not exist, creating it for you")
