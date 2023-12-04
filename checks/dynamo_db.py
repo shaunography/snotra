@@ -86,6 +86,7 @@ class dynamo_db(object):
         else:
             results["analysis"] = "All Tables have Deletion Protection Enabled"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -123,6 +124,7 @@ class dynamo_db(object):
         else:
             results["analysis"] = "No unused dynamo DB tables found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -162,5 +164,6 @@ class dynamo_db(object):
         else:
             results["analysis"] = "No unused dynamo DB tables found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

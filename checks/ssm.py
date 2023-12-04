@@ -83,6 +83,7 @@ class ssm(object):
         else:
             results["analysis"] = "No parameters found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     

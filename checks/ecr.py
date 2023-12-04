@@ -67,6 +67,7 @@ class ecr(object):
         else:
             results["analysis"] = "No failing repositories found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -112,5 +113,6 @@ class ecr(object):
         else:
             results["analysis"] = "No failing repositories found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

@@ -2,12 +2,14 @@ import boto3
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class config(object):
 
     def __init__(self, session):
         self.session = session
         self.regions = describe_regions(session)
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -66,5 +68,6 @@ class config(object):
         else:
             results["analysis"] = "AWS Config is enabled in all regions."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

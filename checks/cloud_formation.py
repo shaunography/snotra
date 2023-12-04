@@ -77,6 +77,7 @@ class cloud_formation(object):
         else:
             results["analysis"] = "Indexes are enabled in all regions"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -120,6 +121,7 @@ class cloud_formation(object):
         else:
             results["analysis"] = "All Stacks have termination protection enabled"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -164,5 +166,6 @@ class cloud_formation(object):
         else:
             results["analysis"] = "All Stacks have termination protection enabled"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

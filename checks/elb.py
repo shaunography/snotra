@@ -3,6 +3,7 @@ import logging
 import re
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class elb(object):
 
@@ -13,6 +14,7 @@ class elb(object):
         self.load_balancers = self.get_load_balancers()
         self.listeners = self.get_listerners()
         self.rules = self.get_rules()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -117,6 +119,7 @@ class elb(object):
         else:
             results["analysis"] = "No internet facing load balancers found"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -176,6 +179,7 @@ class elb(object):
         else:
             results["analysis"] = "No HTTP listeners found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -253,6 +257,7 @@ class elb(object):
         else:
             results["analysis"] = "No TLS issues found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -299,6 +304,7 @@ class elb(object):
         else:
             results["analysis"] = "All Application Load Balancers are configured to drop invalid HTTP headers."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -345,6 +351,7 @@ class elb(object):
         else:
             results["analysis"] = "All Application Load Balancers have HTTP desync mitigation mode enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -405,6 +412,7 @@ class elb(object):
         else:
             results["analysis"] = "All Application Load Balancers have Access Logging enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -453,5 +461,6 @@ class elb(object):
         else:
             results["analysis"] = "All Application Load Balancers have Deletion Protection enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results

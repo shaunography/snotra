@@ -3,6 +3,7 @@ import json
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class sns(object):
 
@@ -11,6 +12,7 @@ class sns(object):
         self.regions = describe_regions(session)
         self.topics = self.get_topics()
         self.attributes = self.get_topic_attributes()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -82,6 +84,7 @@ class sns(object):
         else:
             results["analysis"] = "No public SNS Topics found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
     
@@ -122,5 +125,6 @@ class sns(object):
         else:
             results["analysis"] = "No unencrypted SNS Topics found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results

@@ -2,6 +2,7 @@ import boto3
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class rds(object):
 
@@ -9,6 +10,7 @@ class rds(object):
         self.session = session
         self.regions = describe_regions(session)
         self.instances = self.describe_db_instances()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -72,6 +74,7 @@ class rds(object):
         else:
             results["analysis"] = "All RDS instances have encryption enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -111,6 +114,7 @@ class rds(object):
         else:
             results["analysis"] = "All RDS instances have deletion protection enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -150,6 +154,7 @@ class rds(object):
         else:
             results["analysis"] = "All RDS instances have Auto Minor Version Upgrade enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -189,5 +194,6 @@ class rds(object):
         else:
             results["analysis"] = "All RDS instances are private."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results

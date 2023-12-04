@@ -3,6 +3,7 @@ import json
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 from datetime import datetime
 from datetime import timedelta
@@ -13,6 +14,7 @@ class acm(object):
         self.session = session
         self.regions = describe_regions(session)
         self.certificates = self.get_certificates()
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -77,6 +79,7 @@ class acm(object):
         else:
             results["analysis"] = "No issues found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
     
@@ -123,6 +126,7 @@ class acm(object):
         else:
             results["analysis"] = "No expired certificates found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         return results
     

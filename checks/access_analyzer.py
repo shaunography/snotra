@@ -2,12 +2,14 @@ import boto3
 import logging
 
 from utils.utils import describe_regions
+from utils.utils import get_account_id
 
 class access_analyzer(object):
 
     def __init__(self, session):
         self.regions = describe_regions(session)
         self.session = session
+        self.account_id = get_account_id(session)
 
     def run(self):
         findings = []
@@ -60,5 +62,6 @@ class access_analyzer(object):
         else:
             results["analysis"] = "Access Analyzer is enabled in all regions"
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
