@@ -102,6 +102,9 @@ Additional checks beyond the CIS benchmark
 * athena work groups not using encryption (athena)
 * EC2 instances with pubic IPs (ec2)
 * EC2 instances without detailed monitoring enabled (ec2)
+* S3 buckets grant public access via ACL (s3)
+* S3 buckets grant public access via policy (s3)
+* S3 buckets with bucket policy attacched (s3)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:

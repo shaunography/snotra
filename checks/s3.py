@@ -21,6 +21,9 @@ class s3(object):
         findings += [ self.s3_4() ]
         findings += [ self.s3_5() ]
         findings += [ self.s3_6() ]
+        findings += [ self.s3_7() ]
+        findings += [ self.s3_8() ]
+        findings += [ self.s3_9() ]
         return findings
 
     def cis(self):
@@ -320,6 +323,269 @@ class s3(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "All Buckets have Object Versioning enabled.."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+        
+        return results
+
+    def s3_7(self):
+        # S3 buckets grant public access via ACL
+
+        results = {
+            "id" : "s3_7",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "s3",
+            "name" : "S3 Buckets Grant Public Access Via ACL",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected S3 buckets have an Access Control List (ACL) configured which grant public acces to objects. Either list or read access. Public S3 buckets can be accessed without authentication and increase teh risk of senstivie data being exposed to unauthorised network bearers.",
+            "remediation" : "Review the affected buckets and confirm that public access to objects is required.",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        passing_buckets = []      
+        
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    public_access_block_configuration = self.client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
+                #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    # no public access block configuration exists
+                    pass
+                else:
+                    if public_access_block_configuration["BlockPublicAcls"] == True:
+                        if public_access_block_configuration["IgnorePublicAcls"] == True:
+                            if public_access_block_configuration["BlockPublicPolicy"] == True:
+                                if public_access_block_configuration["RestrictPublicBuckets"] == True:
+                                    passing_buckets.append(bucket)
+
+            public_buckets = [i for i in self.buckets if i not in passing_buckets]
+            for bucket in public_buckets:
+                try:
+                    grants = self.client.get_bucket_acl(Bucket=bucket)["Grants"]
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    logging.error("Error getting bucket acl - %s" % e.response["Error"]["Code"])
+                else:
+                    for grant in grants:
+                        if grant["Grantee"]["Type"] == "Group":
+                            if grant["Grantee"]["URI"] == "http://acs.amazonaws.com/groups/global/AllUsers" or grant["Grantee"]["URI"] == "http://acs.amazonaws.com/groups/global/AuthenticatedUsers":
+                                if bucket not in results["affected"]:
+                                    results["affected"].append(bucket)
+        
+        if results["affected"]:
+            results["analysis"] = "The affected buckets grant public access via an ACL. Review the buckets to ensure public access is intended."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No buckets were found which grant public access via an ACL."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+        
+        return results
+
+    def s3_8(self):
+        # S3 buckets grant public access via Policy
+
+        results = {
+            "id" : "s3_8",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "s3",
+            "name" : "S3 Buckets Grant Public Access Via Policy",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected S3 buckets have a bucket policy configured which grants public acces to objects, possibly for S3 static website hosting. Public S3 buckets can be accessed without authentication and increase teh risk of senstivie data being exposed to unauthorised network bearers.",
+            "remediation" : "Review the affected buckets and confirm that public access to objects is required. and update the bucket policy accordingly",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        passing_buckets = []      
+        
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    public_access_block_configuration = self.client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
+                    #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    # no public access block configuration exists
+                    pass
+                else:
+                    if public_access_block_configuration["BlockPublicAcls"] == True:
+                        if public_access_block_configuration["IgnorePublicAcls"] == True:
+                            if public_access_block_configuration["BlockPublicPolicy"] == True:
+                                if public_access_block_configuration["RestrictPublicBuckets"] == True:
+                                    passing_buckets.append(bucket)
+
+            public_buckets = [i for i in self.buckets if i not in passing_buckets]
+            for bucket in public_buckets:
+                try:
+                    policy = self.client.get_bucket_policy(Bucket=bucket)["Policy"]
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    pass
+                    # no bucket policy
+                else:
+                    policy_dict = json.loads(policy)
+                    try:
+                        for statement in policy_dict["Statement"]:
+                            if statement["Effect"] == "Allow":
+                                if statement["Principal"] == "*":
+                                    if bucket not in results["affected"]:
+                                        results["affected"].append(bucket)
+                    except KeyError:
+                        logging.error("Error getting parsing bucket policy - %s" % e.response["Error"]["Code"])
+
+        
+        if results["affected"]:
+            results["analysis"] = "The affected buckets grant public access via a Bucket Policy. Review the buckets to ensure public access is intended."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No buckets were found which grant public access via an ACL."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+        
+        return results
+
+    def s3_8(self):
+        # S3 buckets grant public access via Policy
+
+        results = {
+            "id" : "s3_8",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "s3",
+            "name" : "S3 Buckets Grant Public Access Via Policy",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected S3 buckets have a bucket policy configured which grants public acces to objects, possibly for S3 static website hosting. Public S3 buckets can be accessed without authentication and increase teh risk of senstivie data being exposed to unauthorised network bearers.",
+            "remediation" : "Review the affected buckets and confirm that public access to objects is required. and update the bucket policy accordingly",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        passing_buckets = []      
+        
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    public_access_block_configuration = self.client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
+                    #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    # no public access block configuration exists
+                    pass
+                else:
+                    if public_access_block_configuration["BlockPublicAcls"] == True:
+                        if public_access_block_configuration["IgnorePublicAcls"] == True:
+                            if public_access_block_configuration["BlockPublicPolicy"] == True:
+                                if public_access_block_configuration["RestrictPublicBuckets"] == True:
+                                    passing_buckets.append(bucket)
+
+            public_buckets = [i for i in self.buckets if i not in passing_buckets]
+            for bucket in public_buckets:
+                try:
+                    policy = self.client.get_bucket_policy(Bucket=bucket)["Policy"]
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    pass
+                    # no bucket policy
+                else:
+                    policy_dict = json.loads(policy)
+                    try:
+                        for statement in policy_dict["Statement"]:
+                            if statement["Effect"] == "Allow":
+                                if statement["Principal"] == "*":
+                                    if bucket not in results["affected"]:
+                                        results["affected"].append(bucket)
+                    except KeyError:
+                        logging.error("Error getting parsing bucket policy - %s" % e.response["Error"]["Code"])
+
+        
+        if results["affected"]:
+            results["analysis"] = "The affected buckets grant public access via a Bucket Policy. Review the buckets to ensure public access is intended."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No buckets were found which grant public access via an ACL."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+        
+        return results
+
+    def s3_9(self):
+        # S3 buckets with bucket Policy Attached
+
+        results = {
+            "id" : "s3_8",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "s3",
+            "name" : "S3 Buckets with Bucket Policy Attached",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected S3 buckets have a bucket policy configured",
+            "remediation" : "Review the affected buckets to ensure the bucket policy follows the principle of least privilege.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        passing_buckets = []      
+        
+        if self.buckets != None:
+            for bucket in self.buckets:
+                try:
+                    public_access_block_configuration = self.client.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
+                    #botocore.exceptions.ClientError: An error occurred (NoSuchPublicAccessBlockConfiguration) when calling the GetPublicAccessBlock operation: The public access block configuration was not found
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    # no public access block configuration exists
+                    pass
+                else:
+                    if public_access_block_configuration["BlockPublicAcls"] == True:
+                        if public_access_block_configuration["IgnorePublicAcls"] == True:
+                            if public_access_block_configuration["BlockPublicPolicy"] == True:
+                                if public_access_block_configuration["RestrictPublicBuckets"] == True:
+                                    passing_buckets.append(bucket)
+
+            public_buckets = [i for i in self.buckets if i not in passing_buckets]
+            for bucket in public_buckets:
+                try:
+                    policy = self.client.get_bucket_policy(Bucket=bucket)["Policy"]
+                except boto3.exceptions.botocore.exceptions.ClientError:
+                    pass
+                    # no bucket policy
+                else:
+                    policy_dict = json.loads(policy)
+                    if bucket not in results["affected"]:
+                        results["affected"].append(bucket)
+        
+        if results["affected"]:
+            results["analysis"] = "The affected buckets have a bucket policy attached."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No buckets were found which use a bucket policy"
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
         
