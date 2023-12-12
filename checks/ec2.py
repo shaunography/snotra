@@ -1534,8 +1534,11 @@ class ec2(object):
         for region, reservations in self.instance_reservations.items():
             for reservation in reservations:
                 for instance in reservation["Instances"]:
-                    if instance["PublicIpAddress"]:
-                        results["affected"].append("{}({})({})".format(instance["ImageId"], region, instance["PublicIpAddress"]))
+                    try:
+                        if instance["PublicIpAddress"]:
+                            results["affected"].append("{}({})({})".format(instance["ImageId"], region, instance["PublicIpAddress"]))
+                    except KeyError:
+                        pass
 
         if results["affected"]:
             results["analysis"] = "The affected instances have a public IP Address attached"
