@@ -29,35 +29,35 @@ class iam(object):
 
     def run(self):
         findings = []
-        findings += [ self.iam_1() ]
-        findings += [ self.iam_2() ]
-        findings += [ self.iam_3() ]
-        findings += [ self.iam_4() ]
-        findings += [ self.iam_5() ]
-        findings += [ self.iam_6() ]
-        findings += [ self.iam_7() ]
-        findings += [ self.iam_8() ]
-        findings += [ self.iam_9() ]
-        findings += [ self.iam_10() ]
-        findings += [ self.iam_11() ]
-        findings += [ self.iam_12() ]
-        findings += [ self.iam_13() ]
-        findings += [ self.iam_14() ]
-        findings += [ self.iam_15() ]
+#        findings += [ self.iam_1() ]
+#        findings += [ self.iam_2() ]
+#        findings += [ self.iam_3() ]
+#        findings += [ self.iam_4() ]
+#        findings += [ self.iam_5() ]
+#        findings += [ self.iam_6() ]
+#        findings += [ self.iam_7() ]
+#        findings += [ self.iam_8() ]
+#        findings += [ self.iam_9() ]
+#        findings += [ self.iam_10() ]
+#        findings += [ self.iam_11() ]
+#        findings += [ self.iam_12() ]
+#        findings += [ self.iam_13() ]
+#        findings += [ self.iam_14() ]
+#        findings += [ self.iam_15() ]
         findings += [ self.iam_16() ]
-        findings += [ self.iam_17() ]
-        findings += [ self.iam_18() ]
-        findings += [ self.iam_19() ]
-        findings += [ self.iam_20() ]
-        findings += [ self.iam_21() ]
-        findings += [ self.iam_22() ]
-        findings += [ self.iam_23() ]
-        findings += [ self.iam_24() ]
-        findings += [ self.iam_25() ]
-        findings += [ self.iam_26() ]
-        findings += [ self.iam_27() ]
-        findings += [ self.iam_28() ]
-        findings += [ self.iam_29() ]
+#        findings += [ self.iam_17() ]
+#        findings += [ self.iam_18() ]
+#        findings += [ self.iam_19() ]
+#        findings += [ self.iam_20() ]
+#        findings += [ self.iam_21() ]
+#        findings += [ self.iam_22() ]
+#        findings += [ self.iam_23() ]
+#        findings += [ self.iam_24() ]
+#        findings += [ self.iam_25() ]
+#        findings += [ self.iam_26() ]
+#        findings += [ self.iam_27() ]
+#        findings += [ self.iam_28() ]
+#        findings += [ self.iam_29() ]
         return findings
     
     def cis(self):
@@ -860,6 +860,7 @@ class iam(object):
 
         logging.info(results["name"])
 
+        # Customer Managed Policies
         for policy in self.customer_attached_policies:
 
             arn = policy["Arn"]
@@ -880,6 +881,39 @@ class iam(object):
                                 results["affected"].append(policy_name)
                 except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                     pass
+
+        # Inline User Policies
+        for user in self.users:
+            inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+            for policy_name in inline_policies:
+                policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
+                statements = policy["PolicyDocument"]["Statement"]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(policy["PolicyName"])
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        # Inline Group Policeis
+        for group in self.groups:
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            for policy_name in inline_policies:
+                policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
+                statements = policy["PolicyDocument"]["Statement"]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(policy["PolicyName"])
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
 
         if results["affected"]:
             results["analysis"] = "The affected custom policies grant full *:* privileges."
