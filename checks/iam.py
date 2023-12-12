@@ -860,6 +860,7 @@ class iam(object):
 
         logging.info(results["name"])
 
+        # Customer Managed Policies
         for policy in self.customer_attached_policies:
 
             arn = policy["Arn"]
@@ -880,6 +881,39 @@ class iam(object):
                                 results["affected"].append(policy_name)
                 except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
                     pass
+
+        # Inline User Policies
+        for user in self.users:
+            inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+            for policy_name in inline_policies:
+                policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
+                statements = policy["PolicyDocument"]["Statement"]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(policy["PolicyName"])
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        # Inline Group Policeis
+        for group in self.groups:
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            for policy_name in inline_policies:
+                policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
+                statements = policy["PolicyDocument"]["Statement"]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(policy["PolicyName"])
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
 
         if results["affected"]:
             results["analysis"] = "The affected custom policies grant full *:* privileges."
