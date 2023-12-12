@@ -533,7 +533,7 @@ class s3(object):
         # S3 buckets with bucket Policy Attached
 
         results = {
-            "id" : "s3_8",
+            "id" : "s3_9",
             "ref" : "N/A",
             "compliance" : "N/A",
             "level" : "N/A",
