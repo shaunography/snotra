@@ -58,6 +58,8 @@ class iam(object):
         findings += [ self.iam_27() ]
         findings += [ self.iam_28() ]
         findings += [ self.iam_29() ]
+        findings += [ self.iam_30() ]
+        findings += [ self.iam_31() ]
         return findings
     
     def cis(self):
@@ -889,6 +891,9 @@ class iam(object):
                 policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
                 statements = policy["PolicyDocument"]["Statement"]
 
+                if type(statements) is not list:
+                    statements = [ statements ]
+
                 for statement in statements:
                     try:
                         if statement["Effect"] == "Allow":
@@ -904,6 +909,9 @@ class iam(object):
             for policy_name in inline_policies:
                 policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
                 statements = policy["PolicyDocument"]["Statement"]
+
+                if type(statements) is not list:
+                    statements = [ statements ]
 
                 for statement in statements:
                     try:
@@ -1545,7 +1553,7 @@ class iam(object):
         return results
     
     def iam_29(self):
-        # insecure corss service trust
+        # insecure cross service trust
 
         results = {
             "id" : "iam_29",
@@ -1586,6 +1594,180 @@ class iam(object):
         else:
             results["analysis"] = "No failing roles found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def iam_30(self):
+        # Admin Users via directly attached policy
+
+        results = {
+            "id" : "iam_30",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Users Granted Full Admin Access via Directly Attached Policy",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'The affected Users have been granted full admin "*" access to the account via a permissions policy which directly attached to the user, IAM users are granted access to services, functions, and data through IAM policies. There are three ways to define policies for a user: 1) Edit the user policy directly, aka an inline, or user, policy; 2) attach a policy directly to a user; 3) add the user to an IAM group that has an attached policy. Only the third implementation is recommended. Assigning IAM policy only through groups unifies permissions management to a single, flexible layer consistent with organizational functional roles. By unifying permissions management, the likelihood of excessive permissions is reduced.',
+            "remediation" : 'Ensure only users that require admin access have it and to help maintain acount hygiene and minimise the risk of users retaining permissons for longer than required, ensure users only recieve permissions via group membershop and do not have policies attached directly.',
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        policies = self.customer_policies + self.aws_policies
+
+        for user in self.users:
+            managed_policies = self.client.list_attached_user_policies(UserName=user["UserName"])["AttachedPolicies"]
+            
+            for group_policy in managed_policies:
+                for policy in policies:
+                    arn = policy["Arn"]
+                    if group_policy["PolicyArn"] == arn:
+                        statements = self.client.get_policy_version(PolicyArn=arn, VersionId=policy["DefaultVersionId"])["PolicyVersion"]["Document"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            results["affected"].append(user["UserName"])
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
+            
+            
+            inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+
+            for policy_name in inline_policies:
+                statements = self.client.get_user_policy(UserName=user["UserName"], PolicyName=policy_name)["PolicyDocument"]["Statement"]
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(user["UserName"])
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        if results["affected"]:
+            results["analysis"] = "The affected users are granted admin access."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No Admin Users Found."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def iam_31(self):
+        # Ensure Access Keys are Protected with MFA
+
+        results = {
+            "id" : "iam_31",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Ensure Access Keys are Protected with MFA",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'The account does not appear to enforce the use of MFA when authenticating with Access Keys. AWS Access Keys are often exposed to unauthorised parties in source code or via and other poor key management practices, once an attacker has obtained the plain text keys these can be used to acces the AWS account without restriction. For greater defence in depth it is recomended to configure an IAM policy which enforces the use of MFA before any administrative actions can be performed.',
+            "remediation" : 'Create an IAM policy for all users which enforces the use of MFA to perform any administrative actions.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_users-self-manage-mfa-and-creds.html',
+            "impact" : "High",
+            "probability" : "Low",
+            "cvss_vector" : "CVSS3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_score" : "9.1",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        mfa = False
+
+        policies = self.customer_policies + self.aws_policies
+
+        for user in self.users:
+            managed_policies = self.client.list_attached_user_policies(UserName=user["UserName"])["AttachedPolicies"]
+            
+            for user_policy in managed_policies:
+                for policy in policies:
+                    arn = policy["Arn"]
+                    if user_policy["PolicyArn"] == arn:
+                        statements = self.client.get_policy_version(PolicyArn=arn, VersionId=policy["DefaultVersionId"])["PolicyVersion"]["Document"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+
+                        for statement in statements:
+                            try:
+                                if statement["Condition"]["BoolIfExists"]["aws:MultiFactorAuthPresent"] == "false":
+                                    mfa = True
+                            except KeyError:
+                                pass
+
+            inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+
+            for policy_name in inline_policies:
+                statements = self.client.get_user_policy(UserName=user["UserName"], PolicyName=policy_name)["PolicyDocument"]["Statement"]
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Condition"]["BoolIfExists"]["aws:MultiFactorAuthPresent"] == "false":
+                            mfa = True
+                    except KeyError:
+                        pass
+
+        for group in self.groups:
+            managed_policies = self.client.list_attached_group_policies(GroupName=group["Group"]["GroupName"])["AttachedPolicies"]
+            
+            for group_policy in managed_policies:
+                for policy in policies:
+                    arn = policy["Arn"]
+                    if group_policy["PolicyArn"] == arn:
+                        statements = self.client.get_policy_version(PolicyArn=arn, VersionId=policy["DefaultVersionId"])["PolicyVersion"]["Document"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+
+                        for statement in statements:
+                            try:
+                                if statement["Condition"]["BoolIfExists"]["aws:MultiFactorAuthPresent"] == "false":
+                                    mfa = True
+                            except KeyError:
+                                pass
+            
+            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+
+            for policy_name in inline_policies:
+                statements = self.client.get_group_policy(GroupName=group["Group"]["GroupName"], PolicyName=policy_name)["PolicyDocument"]["Statement"]
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Condition"]["BoolIfExists"]["aws:MultiFactorAuthPresent"] == "false":
+                            mfa = True
+                    except KeyError:
+                        pass
+
+        if mfa:
+            results["affected"].append(self.account_id)
+            results["analysis"] = "MFA Policy Found"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "Acces Keys are not secured with MFA, no policy enforcing MFA usage was found."
+            results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 
         return results
