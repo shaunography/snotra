@@ -848,11 +848,11 @@ class iam(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "iam",
-            "name" : "Ensure IAM policies that allow full *:* administrative privileges are not attached (CIS)",
+            "name" : "Ensure Custom IAM policies that allow full *:* administrative privileges are not attached (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended and considered a standard security advice to grant least privilege -that is, granting only the permissions required to perform a task. Determine what users need to do and then craft policies for them that let the users perform only those tasks, instead of allowing full administrative privileges. It's more secure to start with a minimum set of permissions and grant additional permissions as necessary, rather than starting with permissions that are too lenient and then trying to tighten them later. Providing full administrative privileges instead of restricting to the minimum set of permissions that the user is required to do exposes the resources to potentially unwanted actions. IAM policies that have a statement with Effect: Allow with Action: * over Resource: * should be removed.",
-            "remediation" : "Policies that grant full administrative privileges should be removed in favour of AWS Managed policies and applied using the principle of least privilege",
+            "description" : "IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended and considered a standard security advice to grant least privilege -that is, granting only the permissions required to perform a task. Determine what users need to do and then craft policies for them that let the users perform only those tasks, instead of allowing full administrative privileges. It's more secure to start with a minimum set of permissions and grant additional permissions as necessary, rather than starting with permissions that are too lenient and then trying to tighten them later. Providing full administrative privileges instead of restricting to the minimum set of permissions that the user is required to do exposes the resources to potentially unwanted actions. Where Administrator access is required use the AWS Management policy instead of Customer Managed or Inline Policies.",
+            "remediation" : "Customer Managed and Inline policies that grant full administrative privileges should be removed in favour of AWS Managed policies. Ensure all permissions are applied using the principle of least privilege and remove adminisrtator access from anyone that doesnt require it.",
             "impact" : "high",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
@@ -924,7 +924,7 @@ class iam(object):
 
 
         if results["affected"]:
-            results["analysis"] = "The affected custom policies grant full *:* privileges."
+            results["analysis"] = "The affected custom policies grant full * and remove adminisrtator access from anyone that doesnt require it.:* privileges."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No custom policies that allow full *:* privileges found."

@@ -375,6 +375,23 @@ class ec2(object):
         }
 
         logging.info(results["name"])
+
+        # get unused security groups
+
+        unused_groups = []
+
+        for region, groups in self.security_groups.items():
+
+            attached_security_group_ids = []
+            network_interfaces = self.network_interfaces[region]
+            for interface in network_interfaces:
+                for group in interface["Groups"]:
+                    attached_security_group_ids.append(group["GroupId"])
+
+            for group in groups:
+                if group["GroupName"] != "default":
+                    if group["GroupId"] not in attached_security_group_ids:
+                        unused_groups.append(group["GroupId"])
             
         for region, groups in self.security_groups.items():
             for group in groups:
@@ -391,10 +408,12 @@ class ec2(object):
                                     to_port = ip_permission["ToPort"]
                                 except KeyError:
                                     # if no port range is defined, all ports are allowed
-                                    results["affected"].append("{}({})".format(group_id, region))
+                                    if group_id not in unused_groups:
+                                        results["affected"].append("{}({})".format(group_id, region))
                                 else:
                                     if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
-                                        results["affected"].append("{}({})".format(group_id, region))
+                                        if group_id not in unused_groups:
+                                            results["affected"].append("{}({})".format(group_id, region))
 
         if results["affected"]:
             results["analysis"] = "the affected security groups allow admin ingress traffic from 0.0.0.0/0."
@@ -710,6 +729,22 @@ class ec2(object):
         }
 
         logging.info(results["name"])
+
+        # get unused security groups
+        unused_groups = []
+
+        for region, groups in self.security_groups.items():
+
+            attached_security_group_ids = []
+            network_interfaces = self.network_interfaces[region]
+            for interface in network_interfaces:
+                for group in interface["Groups"]:
+                    attached_security_group_ids.append(group["GroupId"])
+
+            for group in groups:
+                if group["GroupName"] != "default":
+                    if group["GroupId"] not in attached_security_group_ids:
+                        unused_groups.append(group["GroupId"])
             
         for region, groups in self.security_groups.items():
             for group in groups:
@@ -726,10 +761,12 @@ class ec2(object):
                                     to_port = ip_permission["ToPort"]
                                 except KeyError:
                                     # if no port range is defined, all ports are allowed
-                                    results["affected"].append("{}({})".format(group_id, region))
+                                    if group_id not in unused_groups:
+                                        results["affected"].append("{}({})".format(group_id, region))
                                 else:
                                     if from_port == 3306 or from_port == 5432 or from_port == 1433 or 3306 in range(from_port, to_port) or 5432 in range(from_port, to_port) or 1433 in range(from_port, to_port):
-                                        results["affected"].append("{}({})".format(group_id, region))
+                                        if group_id not in unused_groups:
+                                            results["affected"].append("{}({})".format(group_id, region))
                     # ipv6
                     if "Ipv6Ranges" in ip_permission:
                         for ip_range in ip_permission["Ipv6Ranges"]:
@@ -739,10 +776,12 @@ class ec2(object):
                                     to_port = ip_permission["ToPort"]
                                 except KeyError:
                                     # if no port range is defined, all ports are allowed
-                                    results["affected"].append("{}({})".format(group_id, region))
+                                    if group_id not in unused_groups:
+                                        results["affected"].append("{}({})".format(group_id, region))
                                 else:
                                     if from_port == 3306 or from_port == 5432 or from_port == 1433 or 3306 in range(from_port, to_port) or 5432 in range(from_port, to_port) or 1433 in range(from_port, to_port):
-                                        results["affected"].append("{}({})".format(group_id, region))
+                                        if group_id not in unused_groups:
+                                            results["affected"].append("{}({})".format(group_id, region))
 
         if results["affected"]:
             results["analysis"] = "The affected security groups are considerd to be overly permissive and allow database ingress traffic from 0.0.0.0/0."
@@ -815,7 +854,7 @@ class ec2(object):
         return results
     
     def ec2_14(self):
-        # Ensure defualt Network ACLs are not defualt Allow
+        # Ensure default Network ACLs are not defualt Allow
 
         results = {
             "id" : "ec2_14",
@@ -870,7 +909,7 @@ class ec2(object):
         return results
 
     def ec2_15(self):
-        # Ensure custom Network ACLs are not defualt Allow
+        # Ensure custom Network ACLs are not default Allow
 
         results = {
             "id" : "ec2_15",
@@ -1333,6 +1372,22 @@ class ec2(object):
         }
 
         logging.info(results["name"])
+
+        # get unused security groups
+        unused_groups = []
+
+        for region, groups in self.security_groups.items():
+
+            attached_security_group_ids = []
+            network_interfaces = self.network_interfaces[region]
+            for interface in network_interfaces:
+                for group in interface["Groups"]:
+                    attached_security_group_ids.append(group["GroupId"])
+
+            for group in groups:
+                if group["GroupName"] != "default":
+                    if group["GroupId"] not in attached_security_group_ids:
+                        unused_groups.append(group["GroupId"])
             
         for region, groups in self.security_groups.items():
             for group in groups:
@@ -1348,10 +1403,12 @@ class ec2(object):
                                     to_port = ip_permission["ToPort"]
                                 except KeyError:
                                     # if no port range is defined, all ports are allowed
-                                    results["affected"].append("{}({})".format(group_id, region))
+                                    if group_id not in unused_groups:
+                                        results["affected"].append("{}({})".format(group_id, region))
                                 else:
                                     if from_port == 22 or from_port == 3389 or 22 in range(from_port, to_port) or 3389 in range(from_port, to_port):            
-                                        results["affected"] += ["{}({})".format(group_id, region)]
+                                        if group_id not in unused_groups:
+                                            results["affected"] += ["{}({})".format(group_id, region)]
 
         if results["affected"]:
             results["analysis"] = "the affected security groups allow admin ingress traffic from 0.0.0.0/0."
