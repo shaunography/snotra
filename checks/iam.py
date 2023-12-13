@@ -553,10 +553,10 @@ class iam(object):
             "analysis" : "",
             "description" : "Multi-Factor Authentication (MFA) adds an extra layer of authentication assurance beyond traditional credentials. With MFA enabled, when a user signs in to the AWS Console, they will be prompted for their user name and password as well as for an authentication code from their physical or virtual MFA token. It is recommended that MFA be enabled for all accounts that have a console password. Enabling MFA provides increased security for console access as it requires the authenticating principal to possess a device that displays a time-sensitive key and have knowledge of a credential.",
             "remediation" : "Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password",
-            "impact" : "medium",
+            "impact" : "high",
             "probability" : "medium",
-            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
-            "cvss_score" : "5.6",
+            "cvss_vector" : "CVSS3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_score" : "9.1",
             "pass_fail" : ""
         }
 
@@ -853,11 +853,11 @@ class iam(object):
             "analysis" : "",
             "description" : "IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended and considered a standard security advice to grant least privilege -that is, granting only the permissions required to perform a task. Determine what users need to do and then craft policies for them that let the users perform only those tasks, instead of allowing full administrative privileges. It's more secure to start with a minimum set of permissions and grant additional permissions as necessary, rather than starting with permissions that are too lenient and then trying to tighten them later. Providing full administrative privileges instead of restricting to the minimum set of permissions that the user is required to do exposes the resources to potentially unwanted actions. Where Administrator access is required use the AWS Management policy instead of Customer Managed or Inline Policies.",
             "remediation" : "Customer Managed and Inline policies that grant full administrative privileges should be removed in favour of AWS Managed policies. Ensure all permissions are applied using the principle of least privilege and remove adminisrtator access from anyone that doesnt require it.",
-            "impact" : "high",
+            "impact" : "medium",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
             "cvss_score" : "8.1",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         logging.info(results["name"])
@@ -995,8 +995,8 @@ class iam(object):
             "remediation" : "Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed",
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
-            "cvss_score" : "5.6",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+            "cvss_score" : "5.3",
             "pass_fail" : ""
         }
 
@@ -1306,7 +1306,7 @@ class iam(object):
             "affected": [],
             "analysis" : "",
             "description" : 'Ensure that all your IAM principals (Users, Groups, Roles) are using managed policies (AWS and customer managed policies) instead of inline policies (embedded policies) to better control and manage the access permissions to your AWS account.\nDefining access permissions for your IAM groups using managed policies can offer multiple benefits such as reusability, versioning and rollback, automatic updates, larger policy size and fine-grained control over your policies assignment.\nAlthough not directly a security issue having a large number of inline policies increases complexity and could result in users, groups and roles being given more permissions than required and potentially resulting in privilege escalation vectors.',
-            "remediation" : '- Sign in to the AWS Management Console. \n- Navigate to IAM dashboard at https://console.aws.amazon.com/iam/. \n- In the left navigation panel, choose Groups/Roles. \n- Select the IAM group/role that has inline policies attached and click on the group name to access its configuration page. \n- On the IAM group configuration page, select the Permissions tab. \n- Inside Inline Policies section, click on each Show Policy link and copy each policy document displayed in a text file. Once all the available policies are copied, click the Remove Policy link for each inline policy to remove them from the group configuration. \n- In the left navigation panel, choose Policies and click Create Policy button from the IAM dashboard top menu. \n- On the Create Policy page, select Create Your Own Policy to create your own managed policies using the data taken from your inline policies. You can also select an AWS predefined policy or create a brand new one using the AWS Policy Generator. \n- On the Review Policy page, perform the following: \n- In the Policy Name box, enter a name for your new managed policy. Choose a unique name that will reflect the policy usage.\n- In the Description textbox, enter a short description for the policy (optional).\n- In the Policy Document textbox, paste the inline policy content copied at step no. 6.\n- Click Validate Policy button to validate the policy then click Create Policy to save it.\n- In the left navigation panel, choose Groups/Roles and click on the selected IAM group/role name to access its configuration page. \n- On the configuration page, select the Permissions tab and click Attach Policy button to attach the new managed policy created earlier. \n- Select Customer Managed Policies from the Filter dropdown menu and select your newly created policy. \n- Click Attach Policy to attach the selected policy to your IAM group. \n- Repeat steps no. 4-13 for each IAM group/role with inline policies attached, available in your AWS account.More Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html',
+            "remediation" : 'Review the affected groups and remove inline policies in favour of AWS and Customer Managed Policies.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html',
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "N/A",
@@ -1566,10 +1566,10 @@ class iam(object):
             "analysis" : "",
             "description" : 'Several service-roles contained trust policies which allowed AWS services to assume those roles without conditional context restrictions. Without any conditional restrictions, service-roles are vulnerable to the confused deputy problem which could allow other unauthorised services and users to indirectly access the role and the permissions assigned to it. Where service-roles contain privileged access, service impersonation could also enable attackers to escalate privileges and/or gain access to sensitive resources and data. Within AWS, a service-role is an IAM role that allows specific AWS services to interact with resources in an account without requiring access to credentials or access keys. By using cross-service impersonation, administrators can then grant access to the resources they need without having to grant access to users themselves. Using this method, when a service needs to access resources, it requires permission to perform the STS:AssumeRole action which generates temporary credentials that the service principal then uses to access resources permitted by the corresponding IAM policy. When no conditional context restrictions are implemented within the Assume Role policy, the service role can be vulnerable to an attack typically referred to as confused deputy. This attack can allow other services and principals to access resources in your account. \nAs an example, If an administrator needed to allow a lambda function to create objects within an S3 bucket, an execution role must be created with a policy that holds the respective S3 permissions. For the Lambda function to assume the execution role, a role trust policy must be configured to trust the lambda service to temporarily assume the role and gain the privileges within the policy. Typically, a role trust policy for doing so would look like this:\n<*code*>{\n    "Version": "2012-10-17",\n    "Statement": [\n        {\n            "Sid": "",\n            "Effect": "Allow",\n            "Principal": {\n                "Service": "lambda.amazonaws.com"\n            },\n            "Action": "sts:AssumeRole"\n        }\n    ]\n}</*code*>\n\nHowever, one of the main weaknesses of AWS cross-service impersonation is that it can allow attackers to leverage AWS services to gain access to other resources, and accounts in order to escalate their privileges or exfiltrate data. For instance, with the above example policy, if an attacker with no access to S3 had permission to create lambda functions, they could create a function containing malicious code to assume the execution role and gain indirect access to S3 via Lambda. Additionally, because authentication policies may be shared across multiple AWS accounts, an attacker may be able to impersonate a service which already has access to multiple sensitive areas in the wider AWS environment. \n',
             "remediation" : 'To prevent attackers from leveraging permissive service role trust to access unauthorised resources it is recommended that role trust policies for services contain conditional access statements. Using conditions and specifying the full ARN of the allowed resources would restrict access to only legitimate resources and reduce the potential for abuse. Specifying the full ARN, including region and resource name, could prevent attackers from creating similar resources in other regions to leverage in attacks.\nAs an example, the following role trust policy could be used to restrict access to a Lambda execution role to only a specific lambda function within an AWS account:\n{\n  "Version": "2012-10-17",\n  "Statement": {\n    "Effect": "Allow",\n    "Principal": {\n      "Service": "lambda.amazonaws.com"\n    },\n    "Action": "sts:AssumeRole",\n    "Condition": {\n      "ArnLike": {\n        "aws:SourceArn": "arn:aws:lambda:us-east-2:111122223333:function:my-function”\n      }\n    }\n  }\n}\nThe above policy makes use of the aws:SourceArn global condition context key using the full ARN of an example lambda function. In this example, only the lambda function my-function within the us-east-2 region would have permission to assume the execution policy and access the privileges assigned to it. This would prevent malicious users from creating other lambda functions to gain access to additional privileges.\nWhere appropriate other conditional contexts could also be used following the principal of least privilege to effectively limit the scope of trust policies and prevent unintended access opportunities. Common conditional restrictions for services include,\nSourceArn\nSourceAccount\nPrincipalOrgID\nFurther Information\nAWS Confused Deputy - https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html#cross-service-confused-deputy-prevention\n\n',
-            "impact" : "high",
-            "probability" : "medium",
-            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
-            "cvss_score" : "8.1",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_score" : "6.8",
             "pass_fail" : ""
         }
 
@@ -1684,8 +1684,8 @@ class iam(object):
             "analysis" : "",
             "description" : 'The account does not appear to enforce the use of MFA when authenticating with Access Keys. AWS Access Keys are often exposed to unauthorised parties in source code or via and other poor key management practices, once an attacker has obtained the plain text keys these can be used to acces the AWS account without restriction. For greater defence in depth it is recomended to configure an IAM policy which enforces the use of MFA before any administrative actions can be performed.',
             "remediation" : 'Create an IAM policy for all users which enforces the use of MFA to perform any administrative actions.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_users-self-manage-mfa-and-creds.html',
-            "impact" : "High",
-            "probability" : "Low",
+            "impact" : "high",
+            "probability" : "medium",
             "cvss_vector" : "CVSS3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
             "cvss_score" : "9.1",
             "pass_fail" : ""

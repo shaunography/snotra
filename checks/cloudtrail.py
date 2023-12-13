@@ -123,18 +123,19 @@ class cloudtrail(object):
                     if trail["LogFileValidationEnabled"] == False:
                         results["affected"].append(trail["Name"])
 
-        if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
-            results["pass_fail"] = "FAIL"
-            results["affected"].append(self.account_id)
-
         if results["affected"]:
             results["analysis"] = "The affected trails do not have log file validation enabled."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "Log file validation is enabled on all trails."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
+
         return results
 
     def cloudtrail_3(self):
@@ -204,17 +205,18 @@ class cloudtrail(object):
                                         except KeyError:
                                             pass
 
-        if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
-            results["pass_fail"] = "FAIL"
-            results["affected"].append(self.account_id)
-        
         if results["affected"]:
             results["analysis"] = "The affected trails are using a potentially public S3 bucket."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No public cloud trail buckets found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+        
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
         
         return results
 
@@ -249,17 +251,18 @@ class cloudtrail(object):
                     if "CloudWatchLogsLogGroupArn" not in trail:
                         results["affected"].append(trail["Name"])
 
-        if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
-            results["pass_fail"] = "FAIL"
-            results["affected"].append(self.account_id)
-
         if results["affected"]:
             results["analysis"] = "The affected trails are not integrated with CloudWatch Logs."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "All trails are integrated with CloudWatch Logs."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
 
@@ -342,18 +345,19 @@ class cloudtrail(object):
                     if "KmsKeyId" not in trail:
                         results["affected"].append(trail["Name"])
 
-        if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
-            results["pass_fail"] = "FAIL"
-            results["affected"].append(self.account_id)
-
         if results["affected"]:
             results["analysis"] = "The affected trails do not encrypt logs at rest."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "CloudTrail logs are encrypted at rest with KMS CMKs."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
+
         return results
 
     def cloudtrail_7(self):
@@ -398,11 +402,6 @@ class cloudtrail(object):
                                         if resources["Type"] == "AWS::S3::Object":
                                             results["affected"].append(trail_name)
         
-        if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
-            results["pass_fail"] = "FAIL"
-            results["affected"].append(self.account_id)
-
         if results["affected"]:
             results["analysis"] = "The affected trails have S3 Object-Level logging for write events enabled."
             results["pass_fail"] = "PASS"
@@ -410,6 +409,11 @@ class cloudtrail(object):
             results["analysis"] = "No trails were found with S3 Object-Level Logging enabled."
             results["affected"].append(self.account_id)
             results["pass_fail"] = "FAIL"
+
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
     
@@ -455,17 +459,18 @@ class cloudtrail(object):
                                         if resources["Type"] == "AWS::S3::Object":
                                             results["affected"].append(trail_name)
         
-        if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
-            results["pass_fail"] = "FAIL"
-            results["affected"].append(self.account_id)
-
         if results["affected"]:
             results["analysis"] = "The affected trails have S3 Object-Level logging for read events enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         else:
             results["analysis"] = "No trails were found with S3 Object-Level Logging enabled."
             results["affected"].append(self.account_id)
             results["pass_fail"] = "FAIL"
+
+        if not [ i for i in self.trails.values() if i ]:
+            results["analysis"] = "no CloudTrail Trails in use"
+            results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
 
         return results
