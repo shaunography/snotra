@@ -54,6 +54,7 @@ class ec2(object):
         findings += [ self.ec2_27() ]
         findings += [ self.ec2_28() ]
         findings += [ self.ec2_29() ]
+        findings += [ self.ec2_30() ]
         return findings
 
     def cis(self):
@@ -1602,6 +1603,50 @@ class ec2(object):
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "No Public IPs found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_30(self):
+        # Stopped Instances
+
+        results = {
+            "id" : "ec2_30",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ec2",
+            "name" : "Stopped EC2 Instances",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected EC2 Instances are currently in a stopped state. To maintain account hygiene and reduce potential storage and Elastic IP costs is recommended to terminate all stopped instances that are no longer required.",
+            "remediation" : "Terminate the affected instances if no longer requried.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        analysis = []
+
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    if instance["State"]["Name"] == "stopped":
+                        results["affected"].append("{} ({})".format(instance["InstanceId"], region))
+#                        year, month, day = str(instance["LaunchTime"]).split(" ")[0].split("-") #convert datetime to string so it can be converted to date and compare with time delta
+#                        launch_date = date(int(year), int(month), int(day)) # extract date, ignore time
+                        analysis.append("{} ({}) - Launch Date: {}".format(instance["InstanceId"], region, instance["LaunchTime"]))
+
+        if results["affected"]:
+            results["analysis"] = "The affected instances are in a stopped state:\n{}".format(analysis)
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Not stopped instances found."
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 
