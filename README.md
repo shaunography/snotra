@@ -107,6 +107,7 @@ Additional checks beyond the CIS benchmark
 * S3 buckets with bucket policy attacched (s3)
 * Ensure Access Keys are protected with MFA (iam)
 * Users with Admin access via directly attached policy (iam)
+* stopped ec2 instances (ec2)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
