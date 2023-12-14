@@ -352,11 +352,11 @@ class iam(object):
             "analysis" : "Root MFA is enabled",
             "description" : "The 'root' user account is the most privileged user in an AWS account. Multi-factor Authentication (MFA) adds an extra layer of protection on top of a username and password. With MFA enabled, when a user signs in to an AWS website, they will be prompted for their username and password as well as for an authentication code from their AWS MFA device. Note: When virtual MFA is used for 'root' accounts, it is recommended that the device used is NOT a personal device, but rather a dedicated mobile device (tablet or phone) that is managed to be kept charged and secured independent of any individual personal devices. non-personal virtual MFA - This lessens the risks of losing access to the MFA due to device loss, device trade-in or if the individual owning the device is no longer employed at the company. Enabling MFA provides increased security for console access as it requires the authenticating principal to possess a device that emits a time-sensitive key and have knowledge of a credential.",
             "remediation" : "Enable MFA for the root user account. Note: to manage MFA devices for the 'root' AWS account, you must use your 'root' account credentials to sign in to AWS. You cannot manage MFA devices for the 'root' account using other credentials.",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
-            "pass_fail" : "PASS"
+            "impact" : "high",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_score" : "9.1",
+            "pass_fail" : ""
         }
 
         logging.info(results["name"])
@@ -391,7 +391,7 @@ class iam(object):
             "probability" : "info",
             "cvss_vector" : "N/A",
             "cvss_score" : "N/A",
-            "pass_fail" : "PASS"
+            "pass_fail" : ""
         }
 
         logging.info(results["name"])
@@ -555,7 +555,7 @@ class iam(object):
             "remediation" : "Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password",
             "impact" : "high",
             "probability" : "medium",
-            "cvss_vector" : "CVSS3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
             "cvss_score" : "9.1",
             "pass_fail" : ""
         }
@@ -1686,7 +1686,7 @@ class iam(object):
             "remediation" : 'Create an IAM policy for all users which enforces the use of MFA to perform any administrative actions.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_users-self-manage-mfa-and-creds.html',
             "impact" : "high",
             "probability" : "medium",
-            "cvss_vector" : "CVSS3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
             "cvss_score" : "9.1",
             "pass_fail" : ""
         }
