@@ -1509,7 +1509,7 @@ class iam(object):
 
 
     def iam_28(self):
-        # Overly Permissions Cross Account Assume Role Trusts GitHub OIDC
+        # Overly Permissive Cross Account Assume Role Trusts GitHub OIDC
 
         results = {
             "id" : "iam_28",
@@ -1538,9 +1538,14 @@ class iam(object):
                     if "Federated" in statement["Principal"]:
                         if re.match("^.*oidc-provider/token.actions.githubusercontent.com", statement["Principal"]["Federated"]):
                             if "sts:AssumeRoleWithWebIdentity" in statement["Action"]:
-                                if "token.actions.githubusercontent.com:sub" not in statement["Condition"]["StringEquals"]:
+                                try:
+                                    if "token.actions.githubusercontent.com:sub" not in statement["Condition"]["StringEquals"]:
+                                        results["affected"].append(role["RoleName"])
+                                        affected_statements[role["RoleName"]] = statement
+                                except KeyError: # catch when no conditions are given
                                     results["affected"].append(role["RoleName"])
                                     affected_statements[role["RoleName"]] = statement
+
 
         if results["affected"]:
             results["analysis"] = "The affected role grants cross account administrative access to this account by trusting the GitHub OIDC Identity Provider but does not include any subject conditions\n{}".format(json.dumps(affected_statements))
