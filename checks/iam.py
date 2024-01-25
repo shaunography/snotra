@@ -1531,21 +1531,20 @@ class iam(object):
 
         logging.info(results["name"])
         affected_statements = {}
-
+        safe = True
         for role in self.roles:
             for statement in role["AssumeRolePolicyDocument"]["Statement"]:
                 if statement["Effect"] == "Allow":
                     if "Federated" in statement["Principal"]:
                         if re.match("^.*oidc-provider/token.actions.githubusercontent.com", statement["Principal"]["Federated"]):
                             if "sts:AssumeRoleWithWebIdentity" in statement["Action"]:
-                                try:
-                                    if "token.actions.githubusercontent.com:sub" not in statement["Condition"]["StringEquals"]:
-                                        results["affected"].append(role["RoleName"])
-                                        affected_statements[role["RoleName"]] = statement
-                                except KeyError: # catch when no conditions are given
-                                    results["affected"].append(role["RoleName"])
-                                    affected_statements[role["RoleName"]] = statement
-
+                                safe = False
+                                for condition, values in statement["Condition"].items():
+                                    if "token.actions.githubusercontent.com:sub" in values:
+                                        safe = True
+            if safe == False:
+                results["affected"].append(role["RoleName"])
+                affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
             results["analysis"] = "The affected role grants cross account administrative access to this account by trusting the GitHub OIDC Identity Provider but does not include any subject conditions\n{}".format(json.dumps(affected_statements))
