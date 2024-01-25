@@ -1542,7 +1542,7 @@ class iam(object):
                                 for condition, values in statement["Condition"].items():
                                     if "token.actions.githubusercontent.com:sub" in values:
                                         safe = True
-            if safe = False:
+            if safe == False:
                 results["affected"].append(role["RoleName"])
                 affected_statements[role["RoleName"]] = statement
 
