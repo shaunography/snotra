@@ -34,6 +34,7 @@ from checks.cloud_formation import cloud_formation
 from checks.ssm import ssm
 from checks.dynamo_db import dynamo_db
 from checks.athena import athena
+from checks.resourcegroupstaggingapi import resourcegroupstaggingapi
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -115,6 +116,7 @@ def lambda_handler(event, context):
     results["findings"] += ssm(session).run()
     results["findings"] += dynamo_db(session).run()
     results["findings"] += athena(session).run()
+    results["findings"] += resourcegroupstaggingapi(session).run()
     
     logging.info("writing results json S3")
 
