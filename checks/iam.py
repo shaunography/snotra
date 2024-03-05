@@ -733,7 +733,7 @@ class iam(object):
             results["analysis"] = "The affected users have more than one access key."
             results["pass_fail"] = "FAIL"
         else:
-            results["analysis"] = "No used with more than one access key found."
+            results["analysis"] = "No users with more than one access key found."
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 
@@ -924,7 +924,7 @@ class iam(object):
 
 
         if results["affected"]:
-            results["analysis"] = "The affected custom policies grant full * and remove adminisrtator access from anyone that doesnt require it.:* privileges."
+            results["analysis"] = "The affected custom policies grant full * and remove administrator access from anyone that doesnt require it.:* privileges."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No custom policies that allow full *:* privileges found."
@@ -1006,7 +1006,7 @@ class iam(object):
 
         if not server_certificates:
             results["analysis"] = "No server certificates found"
-            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
         
         for cert in server_certificates:
             expiration = cert["Expiration"]
@@ -1131,7 +1131,7 @@ class iam(object):
 
 
         if results["affected"]:
-            results["analysis"] = "The affected cross account roles do not have an external ID configured.\nAffected Roles and Statements:\n{}".format(json.dumps(affected_statements))
+            results["analysis"] = affected_statements
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing roles found."
@@ -1206,7 +1206,7 @@ class iam(object):
                         pass
 
         if results["affected"]:
-            results["analysis"] = "The affected groups grant admin access.\nAffected Groups and Users:\n{}".format(json.dumps(users))
+            results["analysis"] = users
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Admin Groups Found."
@@ -1283,7 +1283,7 @@ class iam(object):
                         pass
 
         if results["affected"]:
-            results["analysis"] = "The affected groups grant admin access which is not indicated by their name.\nAffected Groups and Users:\n{}".format(json.dumps(users))
+            results["analysis"] = users
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Admin Groups Found."
@@ -1330,7 +1330,7 @@ class iam(object):
                     policies[group_name].append(policy_name)
 
         if results["affected"]:
-            results["analysis"] = "The affected groups have inline policies attached.\nAffected Groups and Users:\n{}".format(json.dumps(policies))
+            results["analysis"] = policies
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Issues Found."
@@ -1373,7 +1373,7 @@ class iam(object):
                                 affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
-            results["analysis"] = "The affected role grants cross account administrative access to this account by trusting all principals in the specified account. As shown in the following code block the role trust policy includes the ARN: 'arn:aws:iam::<accountid>:root'. The use of 'root' in this statement indicates all users in that account, not the root user.\nAlthough restrictions may apply in the originating account any users with the prerequisite STS permissions, or ability to modify STS privileges, could grant themselves access to assume the role and gain access to this account. Having restrictions in both accounts provides greater defence in depth\n{}".format(json.dumps(affected_statements))
+            results["analysis"] = affected_statements
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing roles found."
@@ -1496,7 +1496,7 @@ class iam(object):
             analysis["Roles"] = roles
 
         if results["affected"]:
-            results["analysis"] = json.dumps(analysis)
+            results["analysis"] = analysis
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Issues Found"
@@ -1547,7 +1547,7 @@ class iam(object):
                 affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
-            results["analysis"] = "The affected role grants cross account administrative access to this account by trusting the GitHub OIDC Identity Provider but does not include any subject conditions\n{}".format(json.dumps(affected_statements))
+            results["analysis"] = affected_statements
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing roles found."
@@ -1593,7 +1593,7 @@ class iam(object):
                             pass
 
         if results["affected"]:
-            results["analysis"] = "The following service roles held overly permissive role trust policies which allowed any resource from the corresponding service to assume it's permissions:\n{}".format(json.dumps(affected_statements))
+            results["analysis"] = affected_statements
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing roles found."

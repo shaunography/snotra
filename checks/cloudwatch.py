@@ -138,7 +138,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.errorCode = "*UnauthorizedOperation") || ($.errorCode = "AccessDenied*") || ($.sourceIPAddress!="delivery.logs.amazonaws.com") || ($.eventName!="HeadBucket") }
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*UnauthorizedOperation.*)(?:.*AccessDenied.*)(?:.*"delivery.logs.amazonaws.com".*)(?:.*"HeadBucket".*)'
+                                                regex = r'(?:.*UnauthorizedOperation.*)(?:.*AccessDenied.*)(?:.*"delivery.logs.amazonaws.com".*)(?:.*"HeadBucket".*)'
                                                 if re.match(regex, metric_filter_pattern):
 
                                                     # check alarm exists for filter
@@ -252,7 +252,7 @@ class cloudwatch(object):
                                                 # { ($.eventName = "ConsoleLogin") && ($.additionalEventData.MFAUsed != "Yes") && ($.userIdentity.type = "IAMUser") && ($.responseElements.ConsoleLogin = "Success") }
                                                 metric_filter_pattern = filter["filterPattern"]
 
-                                                regex = '(?:.*"ConsoleLogin".*)(?:.*MFAUsed.*Yes.*)(?:.*"IAMUser".*)(?:.*"Success".*)'
+                                                regex = r'(?:.*"ConsoleLogin".*)(?:.*MFAUsed.*Yes.*)(?:.*"IAMUser".*)(?:.*"Success".*)'
                                                 if re.match(regex, metric_filter_pattern):
 
                                                     # check alarm exists for filter
@@ -366,7 +366,7 @@ class cloudwatch(object):
                                                 # { $.userIdentity.type = "Root" && $.userIdentity.invokedBy NOT EXISTS && $.eventType != "AwsServiceEvent" }
                                                 metric_filter_pattern = filter["filterPattern"]
 
-                                                regex = '(?:.*userIdentity.type\s=\s"Root".*)(?:.*NOT\sEXISTS.*)(?:.*eventType\s!=\s"AwsServiceEvent".*)'
+                                                regex = r'(?:.*userIdentity.type\s=\s"Root".*)(?:.*NOT\sEXISTS.*)(?:.*eventType\s!=\s"AwsServiceEvent".*)'
                                                 if re.match(regex, metric_filter_pattern):
                                                             
                                                     # check alarm exists for filter
@@ -478,7 +478,7 @@ class cloudwatch(object):
                                                 
                                                 # {($.eventName=DeleteGroupPolicy)||($.eventName=DeleteRolePolicy)||($.eventName=DeleteUserPolicy)||($.eventName=PutGroupPolicy)||($.eventName=PutRolePolicy)||($.eventName=PutUserPolicy)||($.eventName=CreatePolicy)||($.eventName=DeletePolicy)||($.eventName=CreatePolicyVersion)||($.eventName=DeletePolicyVersion)||($.eventName=AttachRolePolicy)||($.eventName=DetachRolePolicy)||($.eventName=AttachUserPolicy)||($.eventName=DetachUserPolicy)||($.eventName=AttachGroupPolicy)||($.eventName=DetachGroupPolicy)}
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = "(?:.*DeleteGroupPolicy.*)(?:.*DeleteRolePolicy.*)(?:.*DeleteUserPolicy.*)(?:.*PutGroupPolicy.*)(?:.*PutRolePolicy.*)(?:.*PutUserPolicy.*)(?:.*CreatePolicy.*)(?:.*DeletePolicy.*)(?:.*CreatePolicyVersion.*)(?:.*DeletePolicyVersion.*)(?:.*AttachRolePolicy.*)(?:.*DetachRolePolicy.*)(?:.*AttachUserPolicy.*)(?:.*DetachUserPolicy.*)(?:.*AttachGroupPolicy.*)(?:.*DetachGroupPolicy.*)"
+                                                regex = r"(?:.*DeleteGroupPolicy.*)(?:.*DeleteRolePolicy.*)(?:.*DeleteUserPolicy.*)(?:.*PutGroupPolicy.*)(?:.*PutRolePolicy.*)(?:.*PutUserPolicy.*)(?:.*CreatePolicy.*)(?:.*DeletePolicy.*)(?:.*CreatePolicyVersion.*)(?:.*DeletePolicyVersion.*)(?:.*AttachRolePolicy.*)(?:.*DetachRolePolicy.*)(?:.*AttachUserPolicy.*)(?:.*DetachUserPolicy.*)(?:.*AttachGroupPolicy.*)(?:.*DetachGroupPolicy.*)"
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -590,7 +590,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = "(?:.*CreateTrail.*)(?:.*UpdateTrail.*)(?:.*DeleteTrail.*)(?:.*StartLogging.*)(?:.*StopLogging.*)"
+                                                regex = r"(?:.*CreateTrail.*)(?:.*UpdateTrail.*)(?:.*DeleteTrail.*)(?:.*StartLogging.*)(?:.*StopLogging.*)"
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -702,7 +702,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*eventName\s\=\sConsoleLogin.*)(?:.*errorMessage\s\=\s"Failed\sauthentication".*)'
+                                                regex = r'(?:.*eventName\s\=\sConsoleLogin.*)(?:.*errorMessage\s\=\s"Failed\sauthentication".*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -814,7 +814,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*kms.amazonaws.com.*)(?:.*DisableKey.*)(?:.*ScheduleKeyDeletion.*)'
+                                                regex = r'(?:.*kms.amazonaws.com.*)(?:.*DisableKey.*)(?:.*ScheduleKeyDeletion.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -926,7 +926,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*s3.amazonaws.com.*)(?:.*PutBucketAcl.*)(?:.*PutBucketPolicy.*)(?:.*PutBucketCors.*)(?:.*PutBucketLifecycle.*)(?:.*PutBucketReplication.*)(?:.*DeleteBucketPolicy.*)(?:.*DeleteBucketCors.*)(?:.*DeleteBucketLifecycle.*)(?:.*DeleteBucketReplication.*)'
+                                                regex = r'(?:.*s3.amazonaws.com.*)(?:.*PutBucketAcl.*)(?:.*PutBucketPolicy.*)(?:.*PutBucketCors.*)(?:.*PutBucketLifecycle.*)(?:.*PutBucketReplication.*)(?:.*DeleteBucketPolicy.*)(?:.*DeleteBucketCors.*)(?:.*DeleteBucketLifecycle.*)(?:.*DeleteBucketReplication.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -1039,7 +1039,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*config.amazonaws.com.*)(?:.*StopConfigurationRecorder.*)(?:.*DeleteDeliveryChannel.*)(?:.*PutDeliveryChannel.*)(?:.*PutConfigurationRecorder.*)'
+                                                regex = r'(?:.*config.amazonaws.com.*)(?:.*StopConfigurationRecorder.*)(?:.*DeleteDeliveryChannel.*)(?:.*PutDeliveryChannel.*)(?:.*PutConfigurationRecorder.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -1152,7 +1152,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*AuthorizeSecurityGroupIngress.*)(?:.*AuthorizeSecurityGroupEgress.*)(?:.*RevokeSecurityGroupIngress.*)(?:.*RevokeSecurityGroupEgress.*)(?:.*CreateSecurityGroup.*)(?:.*DeleteSecurityGroup.*)'
+                                                regex = r'(?:.*AuthorizeSecurityGroupIngress.*)(?:.*AuthorizeSecurityGroupEgress.*)(?:.*RevokeSecurityGroupIngress.*)(?:.*RevokeSecurityGroupEgress.*)(?:.*CreateSecurityGroup.*)(?:.*DeleteSecurityGroup.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -1265,7 +1265,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*CreateNetworkAcl.*)(?:.*CreateNetworkAclEntry.*)(?:.*DeleteNetworkAcl.*)(?:.*DeleteNetworkAclEntry.*)(?:.*ReplaceNetworkAclEntry.*)(?:.*ReplaceNetworkAclAssociation.*)'
+                                                regex = r'(?:.*CreateNetworkAcl.*)(?:.*CreateNetworkAclEntry.*)(?:.*DeleteNetworkAcl.*)(?:.*DeleteNetworkAclEntry.*)(?:.*ReplaceNetworkAclEntry.*)(?:.*ReplaceNetworkAclAssociation.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -1377,7 +1377,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*CreateCustomerGateway.*)(?:.*DeleteCustomerGateway.*)(?:.*AttachInternetGateway.*)(?:.*CreateInternetGateway.*)(?:.*DeleteInternetGateway.*)(?:.*DetachInternetGateway.*)'
+                                                regex = r'(?:.*CreateCustomerGateway.*)(?:.*DeleteCustomerGateway.*)(?:.*AttachInternetGateway.*)(?:.*CreateInternetGateway.*)(?:.*DeleteInternetGateway.*)(?:.*DetachInternetGateway.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -1489,7 +1489,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*CreateRoute.*)(?:.*CreateRouteTable.*)(?:.*ReplaceRoute.*)(?:.*ReplaceRouteTableAssociation.*)(?:.*DeleteRouteTable.*)(?:.*DeleteRoute.*)(?:.*DisassociateRouteTable.*)'
+                                                regex = r'(?:.*CreateRoute.*)(?:.*CreateRouteTable.*)(?:.*ReplaceRoute.*)(?:.*ReplaceRouteTableAssociation.*)(?:.*DeleteRouteTable.*)(?:.*DeleteRoute.*)(?:.*DisassociateRouteTable.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -1601,7 +1601,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*CreateVpc.*)(?:.*DeleteVpc.*)(?:.*ModifyVpcAttribute.*)(?:.*AcceptVpcPeeringConnection.*)(?:.*CreateVpcPeeringConnection.*)(?:.*DeleteVpcPeeringConnection.*)(?:.*RejectVpcPeeringConnection.*)(?:.*AttachClassicLinkVpc.*)(?:.*DetachClassicLinkVpc.*)(?:.*DisableVpcClassicLink.*)(?:.*EnableVpcClassicLink.*)'
+                                                regex = r'(?:.*CreateVpc.*)(?:.*DeleteVpc.*)(?:.*ModifyVpcAttribute.*)(?:.*AcceptVpcPeeringConnection.*)(?:.*CreateVpcPeeringConnection.*)(?:.*DeleteVpcPeeringConnection.*)(?:.*RejectVpcPeeringConnection.*)(?:.*AttachClassicLinkVpc.*)(?:.*DetachClassicLinkVpc.*)(?:.*DisableVpcClassicLink.*)(?:.*EnableVpcClassicLink.*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                
@@ -1713,7 +1713,7 @@ class cloudwatch(object):
                                                 
                                                 # { ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }"
                                                 metric_filter_pattern = filter["filterPattern"]
-                                                regex = '(?:.*organizations.amazonaws.com.*)(?:.*"AcceptHandshake".*)(?:.*"AttachPolicy".*)(?:.*"CreateAccount".*)(?:.*"CreateOrganizationalUnit".*)(?:.*"CreatePolicy".*)(?:.*"DeclineHandshake".*)(?:.*"DeleteOrganization".*)(?:.*"DeleteOrganizationalUnit".*)(?:.*"DeletePolicy".*)(?:.*"DetachPolicy".*)(?:.*"DisablePolicyType".*)(?:.*"EnablePolicyType".*)(?:.*"InviteAccountToOrganization".*)(?:.*"LeaveOrganization".*)(?:.*"MoveAccount".*)(?:.*"RemoveAccountFromOrganization".*)(?:.*"UpdatePolicy".*)(?:.*"UpdateOrganizationalUnit".*)'
+                                                regex = r'(?:.*organizations.amazonaws.com.*)(?:.*"AcceptHandshake".*)(?:.*"AttachPolicy".*)(?:.*"CreateAccount".*)(?:.*"CreateOrganizationalUnit".*)(?:.*"CreatePolicy".*)(?:.*"DeclineHandshake".*)(?:.*"DeleteOrganization".*)(?:.*"DeleteOrganizationalUnit".*)(?:.*"DeletePolicy".*)(?:.*"DetachPolicy".*)(?:.*"DisablePolicyType".*)(?:.*"EnablePolicyType".*)(?:.*"InviteAccountToOrganization".*)(?:.*"LeaveOrganization".*)(?:.*"MoveAccount".*)(?:.*"RemoveAccountFromOrganization".*)(?:.*"UpdatePolicy".*)(?:.*"UpdateOrganizationalUnit".*)'
                                                 if re.match(regex, metric_filter_pattern):    
 
                                                     # check alarm exists for filter                                                

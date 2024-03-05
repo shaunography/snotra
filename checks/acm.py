@@ -29,7 +29,9 @@ class acm(object):
         for region in self.regions:
             client = self.session.client('acm', region_name=region)
             try:
-                certificates[region] = client.list_certificates()["CertificateSummaryList"]
+                certificate_summary_list = client.list_certificates()["CertificateSummaryList"]
+                if certificate_summary_list:
+                    certificates[region] = certificate_summary_list
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting certificate list - %s" % e.response["Error"]["Code"])
         return certificates
@@ -76,9 +78,12 @@ class acm(object):
         if results["affected"]:
             results["analysis"] = "The affected Certificates do not have transparancy logging enabled."
             results["pass_fail"] = "FAIL"
-        else:
+        elif self.certificates:
             results["analysis"] = "No issues found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+        else:
+            results["analysis"] = "No Certificates In Use"
             results["affected"].append(self.account_id)
         
         return results
@@ -123,9 +128,12 @@ class acm(object):
         if results["affected"]:
             results["analysis"] = "The affected Certificates have expired."
             results["pass_fail"] = "FAIL"
-        else:
+        elif self.certificates:
             results["analysis"] = "No expired certificates found."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+        else:
+            results["analysis"] = "No Certificates In Use."
             results["affected"].append(self.account_id)
         
         return results

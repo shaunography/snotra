@@ -113,7 +113,7 @@ class guardduty(object):
                 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
-            results["analysis"] = "The Following AWS GuardDuty Detector IDs have outstanding High severity findings:\n{}".format(json.dumps(high_findings))
+            results["analysis"] = high_findings
         else:
             results["analysis"] = "No issues found"
             results["pass_fail"] = "PASS"

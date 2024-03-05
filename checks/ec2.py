@@ -785,7 +785,7 @@ class ec2(object):
                                             results["affected"].append("{}({})".format(group_id, region))
 
         if results["affected"]:
-            results["analysis"] = "The affected security groups are considerd to be overly permissive and allow database ingress traffic from 0.0.0.0/0."
+            results["analysis"] = "The affected security groups are considered to be overly permissive and allow database ingress traffic from 0.0.0.0/0."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No security groups that allow database ingress traffic from 0.0.0.0/0 found"
@@ -1341,7 +1341,7 @@ class ec2(object):
                             pass
 
         if results["affected"]:
-            results["analysis"] = "The affected VPC endpoints have a policy which is overly permissive.\nAffected endpoints and Statements:\n{}".format(json.dumps(affected_statements))
+            results["analysis"] = affected_statements
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No issues found"
@@ -1460,7 +1460,7 @@ class ec2(object):
                             results["affected"].append(instance_id)
 
         if results["affected"]:
-            results["analysis"] = json.dumps(user_data)
+            results["analysis"] = user_data
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No user data found"
@@ -1643,10 +1643,10 @@ class ec2(object):
                         analysis.append("{} ({}) - Launch Date: {}".format(instance["InstanceId"], region, instance["LaunchTime"]))
 
         if results["affected"]:
-            results["analysis"] = "The affected instances are in a stopped state:\n{}".format(analysis)
+            results["analysis"] = analysis
             results["pass_fail"] = "FAIL"
         else:
-            results["analysis"] = "Not stopped instances found."
+            results["analysis"] = "No stopped instances found."
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 
