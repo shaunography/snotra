@@ -70,7 +70,7 @@ class apigateway(object):
             client = self.session.client('apigatewayv2', region_name=region)
             for api in apis:
                 try:
-                    items = client.get_authorizers(restApiId=rest_api["id"])["Items"]
+                    items = client.get_authorizers(restApiId=api["id"])["Items"]
                     if items:
                         authorizers[api["id"]] = items
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
