@@ -114,7 +114,7 @@ class elb(object):
                     dns_names.append("{}({}) - {}".format(load_balancer["LoadBalancerName"], region, load_balancer["DNSName"]))
 
         if results["affected"]:
-            results["analysis"] = "The affected load balancers are internet facing.\nName - DNS Hostname:\n{}".format("\n".join(dns_names))
+            results["analysis"] = dns_names
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No internet facing load balancers found"
@@ -174,7 +174,7 @@ class elb(object):
                                         dns_names.append("{}({}) - {}:{}".format(load_balancer["LoadBalancerName"], region, load_balancer["DNSName"], listener["Port"]))
 
         if results["affected"]:
-            results["analysis"] = "The affected load balancers are using unencrypted HTTP listeners.\nName - DNS Hostname:\n{}".format("\n".join(dns_names))
+            results["analysis"] = dns_names
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No HTTP listeners found."

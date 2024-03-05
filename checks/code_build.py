@@ -75,10 +75,10 @@ class code_build(object):
                         results["affected"].append(project["name"])
 
         if results["affected"]:
-            results["analysis"] = json.dumps(environment)
+            results["analysis"] = environment
             results["pass_fail"] = "FAIL"
         else:
-            results["analysis"] = "Indexes are enabled in all regions"
+            results["analysis"] = "No Code Build Projects or Environment Variables in use"
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 

@@ -108,8 +108,10 @@ Additional checks beyond the CIS benchmark
 * Ensure Access Keys are protected with MFA (iam)
 * Users with Admin access via directly attached policy (iam)
 * stopped ec2 instances (ec2)
-* Ensure Tags Do Not Contain Sensitive or PII Data (resourcegroupstaggingapi_1)
-* A list of all resources (ARNs) in the account (resourcegroupstaggingapi_1)
+* Ensure Tags Do Not Contain Sensitive or PII Data (resourcegroupstaggingapi)
+* A list of all resources (ARNs) in the account (resourcegroupstaggingapi)
+* api gateways in use (apigateway)
+* api gateways using lambda authorizers (apigateways)
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:

@@ -72,7 +72,7 @@ class cloud_formation(object):
                     results["affected"].append(stack["StackName"])
 
         if results["affected"]:
-            results["analysis"] = json.dumps(output)
+            results["analysis"] = output
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "Indexes are enabled in all regions"

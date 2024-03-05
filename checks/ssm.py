@@ -78,7 +78,7 @@ class ssm(object):
                 output_json[name]["type"] = values["Type"]
                 output_json[name]["value"] = values["Value"]
 
-            results["analysis"] = json.dumps(output_json)
+            results["analysis"] = output_json
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No parameters found"

@@ -312,6 +312,7 @@ class cloudtrail(object):
         else:
             results["analysis"] = "S3 bucket access logging is enabled."
             results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
 
         return results
     

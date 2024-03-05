@@ -62,7 +62,7 @@ class resourcegroupstaggingapi(object):
                         pagination_token = response["PaginationToken"]
                         tag_values[key] = tag_values[key] + response["TagValues"]
                         if pagination_token:
-                            response = client.get_tag_values(PaginationToken=pagination_token)
+                            response = client.get_tag_values(Key=key, PaginationToken=pagination_token)
                         else:
                             break
                 except boto3.exceptions.botocore.exceptions.ClientError as e:

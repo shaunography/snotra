@@ -135,7 +135,7 @@ class s3(object):
                                 if effect == "Deny":
                                     if action == "s3:GetObject" or action == "s3:*":
                                         for resource in resources:
-                                            if re.match("arn:aws:s3*|\*", resource):
+                                            if re.match(r"arn:aws:s3*|\*", resource):
                                                 passing_buckets.append(bucket)
 
             results["affected"] = [ i for i in self.buckets if i not in passing_buckets ]

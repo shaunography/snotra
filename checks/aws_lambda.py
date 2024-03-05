@@ -71,7 +71,7 @@ class aws_lambda(object):
         
 
         if results["affected"]:
-            results["analysis"] = json.dumps(environment)
+            results["analysis"] = environment
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No environment vars in use"
