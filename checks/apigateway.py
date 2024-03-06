@@ -138,15 +138,30 @@ class apigateway(object):
             "pass_fail" : ""
         }
 
-        logging.info(results["name"])
+        app.logger.info(results["name"])
 
-        if self.authorizers:
-            results["affected"].append(self.account_id)
-            results["analysis"] = self.authorizers
+        results["analysis"] = {}
+
+        for id, items in self.authorizers.items():
+            analysis = []
+            for authorizer in items:
+                if authorizer["AuthorizerType"] == "REQUEST":
+                    analysis.append(authorizer)
+
+            if analysis:
+                results["affected"].append(id)
+                results["analysis"][id] = analysis
+
+
+        if results["affected"]:
             results["pass_fail"] = "INFO"
+        elif self.authorizers:
+            results["affected"].append(self.account_id)
+            results["analysis"] = "No Lambda authorizers in use"
+            results["pass_fail"] = "PASS"
         else:
             results["affected"].append(self.account_id)
-            results["analysis"] = "No Authorizers in use"
+            results["analysis"] = "No API Gateway Authorizers in use"
 
         return results
 
