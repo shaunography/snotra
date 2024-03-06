@@ -138,7 +138,7 @@ class apigateway(object):
             "pass_fail" : ""
         }
 
-        app.logger.info(results["name"])
+        logging.info(results["name"])
 
         results["analysis"] = {}
 
