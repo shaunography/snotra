@@ -72,7 +72,7 @@ class apigateway(object):
                 try:
                     items = client.get_authorizers(ApiId=api["ApiId"])["Items"]
                     if items:
-                        authorizers[api["id"]] = items
+                        authorizers[api["ApiId"]] = items
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting authorizers - %s" % e.response["Error"]["Code"])
 
