@@ -1,1 +1,7 @@
-boto3
+azure-mgmt-resource
+azure-identity
+azure-mgmt-web
+azure-mgmt-storage
+azure-mgmt-sql
+azure-mgmt-compute
+azure-mgmt-keyvault

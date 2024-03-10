@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
+from azure.identity import DefaultAzureCredential
+from azure.identity import ClientSecretCredential
+
 import argparse
-import boto3
 import json
 import os
 import sys
@@ -9,35 +11,19 @@ import logging
 
 from datetime import datetime
 
-from checks.iam import iam
-from checks.s3 import s3
-from checks.ec2 import ec2
-from checks.access_analyzer import access_analyzer
-from checks.rds import rds
-from checks.cloudtrail import cloudtrail
-from checks.config import config
-from checks.kms import kms
-from checks.cloudwatch import cloudwatch
-from checks.guardduty import guardduty
-from checks.efs import efs
-from checks.sns import sns
-from checks.securityhub import securityhub
-from checks.elb import elb
-from checks.ecr import ecr
-from checks.route53 import route53
-from checks.acm import acm
-from checks.resource_explorer import resource_explorer
-from checks.aws_lambda import aws_lambda
-from checks.code_build import code_build
-from checks.cloud_formation import cloud_formation
-from checks.ssm import ssm
-from checks.dynamo_db import dynamo_db
-from checks.athena import athena
-from checks.resourcegroupstaggingapi import resourcegroupstaggingapi
-from checks.apigateway import apigateway
+from checks.resource import resource
+from checks.app_service import app_service
+from checks.storage_account import storage_account
+from checks.sql import sql
+from checks.compute import compute
+from checks.keyvault import keyvault
+#from checks.subscription import subscription
+#from checks.graph_rbac_management import graph_rbac_management
 
-from utils.utils import get_user
-from utils.utils import get_account_id
+# old method
+#from azure.common.credentials import ServicePrincipalCredentials
+
+#python3 snotra.py --results-dir /tmp/ --tenant-id 055bcc6b-d242-4b55-bc54-d6440f7892a4 --default
 
 def main():
 
@@ -45,103 +31,91 @@ def main():
         level=logging.INFO,
         format="%(asctime)s : %(levelname)s : %(funcName)s - %(message)s"
     )
+    logging.getLogger("azure").setLevel(logging.WARNING)
 
     parser = argparse.ArgumentParser(description="AWS Auditor")
     parser.add_argument(
-        "--results-dir",
+        "-r",
         help="results directory",
-        dest="o",
+        dest="results_dir",
         required=True,
-        metavar="<results-dir>"
+        metavar="<results_dir>"
     ),
     parser.add_argument(
-        "--profile",
-        help="aws profile",
-        dest="p",
+        "-t",
+        help="azure tenancy id",
+        dest="tenant_id",
+        required=True,
+        metavar="<tenant_id>"
+    ),
+    parser.add_argument(
+        "-s",
+        help="azure tenancy id",
+        dest="subscription_id",
+        metavar="<subscription_id>"
+    ),
+    parser.add_argument(
+        "--default",
+        help="use azure default credential, i.e environment variables, Azure CLI credentials, and managed identity (when running on an Azure VM).",
+        dest="default",
         required=False,
-        metavar="<profile>"
-    ),
-    parser.add_argument(
-        "--cis",
-        help="do cis only scan",
         action="store_true",
-        required=False
     )
     args = parser.parse_args()
 
-    if args.p:
+    if args.default:
         try:
-            session = boto3.session.Session(profile_name=args.p)
-        except boto3.exceptions.botocore.exceptions.ProfileNotFound:
+            # Acquire a credential object
+            # default credential i.e. az login
+            credential = DefaultAzureCredential()
+            #azure.core.exceptions.ClientAuthenticationError
+        except:
             logging.error("profile not found! try harder...")
             sys.exit(0)
     else:        
-        session = boto3.session.Session()
-        if session.get_credentials() == None:
-            logging.error("you have not configured any default credentials in ~/.aws/credentials")
-            sys.exit(0)
-    
+        # Information required to authenticate using a Service Principal
+        client_id = "7d3fa6bb-7dbf-4ec9-b58b-285ac2232619"
+        #client_id = "7d3fa6bb-7dbf-4ec9-b58b-285ac2232619"
+        client_secret = "Z6F8Q~ht6VNTx-DDRNCg2J1-WrpbFCTPS~B-AaTS"
+        #client_secret = "Z6F8Q~ht6VNTx-DDRNCg2J1-WrpbFCTPS~B-AaTS"
+        # Get the application credentials
+
+        logging.info("Authenticating with service principal credentials")
+        credential = ClientSecretCredential(args.tenant_id, client_id, client_secret) 
+        #old_credential = ServicePrincipalCredentials(client_id, client_secret, tenant=args.tenant_id, resource="https://graph.windows.net")
+
+    res = resource(credential)
+
+    subscriptions = res.subscriptions
+    resource_groups = res.resource_groups
+    resources = res.resources
+
+    if args.subscription_id:
+        subscriptions = [ i for i in subscriptions if i.subscription_id == args.subscription_id ]
+
     # init results dictionary
     results = {}
 
-    try:
-        logging.info("Running test with {}".format(get_user(session)))
-    except boto3.exceptions.botocore.exceptions.ClientError as e:
-        logging.error("Client error - %s" % e.response["Error"]["Code"])
-        sys.exit(0)
-
-    results["account"] = get_account_id(session)
-    results["user"] = get_user(session)
+    results["tenant_id"] = args.tenant_id
     results["datetime"] = str(datetime.today())
     results["findings"] = []
     
-    if args.cis:
-        logging.info("performing CIS scan")
-        results["findings"] += iam(session).cis()
-        results["findings"] += s3(session).cis()
-        results["findings"] += ec2(session).cis()
-        results["findings"] += access_analyzer(session).cis()
-        results["findings"] += rds(session).cis()
-        results["findings"] += cloudtrail(session).cis()
-        results["findings"] += config(session).cis()
-        results["findings"] += kms(session).cis()
-        results["findings"] += cloudwatch(session).cis()
-        results["findings"] += efs(session).cis()
-        results["findings"] += securityhub(session).cis()
-    else:
-        logging.info("performing full scan")
-        results["findings"] += iam(session).run()
-        results["findings"] += s3(session).run()
-        results["findings"] += ec2(session).run()
-        results["findings"] += access_analyzer(session).run()
-        results["findings"] += rds(session).run()
-        results["findings"] += cloudtrail(session).run()
-        results["findings"] += config(session).run()
-        results["findings"] += kms(session).run()
-        results["findings"] += cloudwatch(session).run()
-        results["findings"] += guardduty(session).run()
-        results["findings"] += efs(session).run()
-        results["findings"] += sns(session).run()
-        results["findings"] += securityhub(session).run()
-        results["findings"] += elb(session).run()
-        results["findings"] += ecr(session).run()
-        results["findings"] += route53(session).run()
-        results["findings"] += acm(session).run()
-        results["findings"] += resource_explorer(session).run()
-        results["findings"] += aws_lambda(session).run()
-        results["findings"] += code_build(session).run()
-        results["findings"] += cloud_formation(session).run()
-        results["findings"] += ssm(session).run()
-        results["findings"] += dynamo_db(session).run()
-        results["findings"] += athena(session).run()
-        results["findings"] += resourcegroupstaggingapi(session).run()
-        results["findings"] += apigateway(session).run()
+    logging.info("performing full scan")
+    #results["findings"] += graph_rbac_management(old_credential, args.tenant_id).run()
+    #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
+    #results["findings"] += subscription(credential).run()
+    results["findings"] += res.run()
+    results["findings"] += app_service(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += compute(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += keyvault(credential, subscriptions, resource_groups, resources).run()
 
-    if not os.path.exists(args.o):
+    if not os.path.exists(args.results_dir):
         logging.info("results dir does not exist, creating it for you")
-        os.makedirs(args.o)
+        os.makedirs(args.results_dir)
     
-    filename = os.path.join(args.o, "snotra_results_{}.json".format(get_account_id(session)))
+    filename = os.path.join(args.results_dir, "snotra_results_{}.json".format(args.tenant_id))
     logging.info("writing results json {}".format(filename))
     with open(filename, 'w') as f:
         json.dump(results, f, default=str)
