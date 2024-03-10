@@ -1,26 +1,29 @@
 from azure.mgmt.keyvault import KeyVaultManagementClient
 import logging
 
-#from utils.utils import describe_regions
-#from utils.utils import list_subscriptions
-
 class keyvault(object):
 
     def __init__(self, credential, subscriptions, resource_groups, resources):
         self.credential = credential
         self.subscriptions = subscriptions
+        self.resource_groups = resource_groups
+        self.resources = resources
         self.vaults = self.get_vaults()
 
     def get_vaults(self):
         vaults = {}
-        for subscription in self.subscriptions:
-            logging.info(f'getting key vaults in subscription: { subscription.display_name }')
-            try:
-                client= KeyVaultManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
-                vaults[subscription.subscription_id] = list(client.vaults.list())
-            except Exception as e:
-                logging.error(f'error getting key vaults in subscription: { subscription.display_name }, error: { e }')
-
+        for subscription, resource_groups in self.resources.items():
+            vaults[subscription] = []
+            client = KeyVaultManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.KeyVault/vaults":
+                        logging.info(f'getting key vault { resource.name }')
+                        try:
+                            vault = client.vaults.get(vault_name=resource.name, resource_group_name=resource_group)
+                            vaults[subscription].append(vault)
+                        except Exception as e:
+                            logging.error(f'error getting key vault: { resource.name }, error: { e }')
         return vaults
 
     def run(self):
@@ -58,11 +61,8 @@ class keyvault(object):
 
         results["analysis"] = self.vaults
 
-        for subscription, vaults in self.vaults.items():
-            for vault in vaults:
-                results["affected"].append(vault.name)
-
         if results["analysis"]:
+            results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
             results["pass_fail"] = "INFO"

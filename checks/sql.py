@@ -8,47 +8,59 @@ class sql(object):
         self.credential = credential
         self.subscriptions = subscriptions
         self.resource_groups = resource_groups
+        self.resources = resources
         self.servers = self.get_servers()
-        #self.databases = self.get_databases()
+        self.databases = self.get_databases()
 
     def get_servers(self):
         servers = {}
-        for subscription in self.subscriptions:
-            logging.info(f'getting sql servers in subscription: { subscription.display_name }')
-            try:
-                client= SqlManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
-                servers[subscription.subscription_id] = list(client.servers.list())
-            except Exception as e:
-                logging.error(f'error getting sql servers in subscription: { subscription.display_name }, error: { e }')
+        for subscription, resource_groups in self.resources.items():
+            servers[subscription] = {}
+            client = SqlManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                servers_in_group = []
+                for resource in resources:
+                    if resource.type == "Microsoft.Sql/servers":
+                        logging.info(f'getting sql server { resource.name }')
+                        try:
+                            servers_in_group.append(client.servers.get(server_name=resource.name, resource_group_name=resource_group))
+                        except Exception as e:
+                            logging.error(f'error getting sql server: { resource.name }, error: { e }')
+
+                if servers_in_group:
+                    servers[subscription][resource_group] = servers_in_group
 
         return servers
 
     def get_databases(self):
         databases = {}
-        for subscription, servers in self.servers.items():
-            client = SqlManagementClient(credential=self.credential, subscription_id=subscription)
+        for subscription, resource_groups in self.servers.items():
             databases[subscription] = {}
-            for server in servers:
-                databases[subscription][server.name] = ""
-                logging.info(f'getting sql server { server.name }')
-                server_details = client.servers.get(server_name=server.name, resource_group_name=None)
-                try:
-                    response = client.databases.list_by_server(server_details.resource_group, server.name)
-                    if response:
-                        databases[subscription][server.name] = sql_client.databases.list_by_server(resource_group_name, server.name)
-                except Exception as e:
-                    logging.error(f'error getting virtual machines in resource group: { group.name }, error: { e }')
+            client = SqlManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, servers in resource_groups.items():
+                for server in servers:
+                    databases_on_server = []
+                    logging.info(f'getting sql databases for server: { server.name }')
+                    try:
+                        database_list = list(client.databases.list_by_server(server_name=server.name, resource_group_name=resource_group))
+                    except Exception as e:
+                        logging.error(f'error getting sql databases for server: { server.name }, error: { e }')
+                    else:
+                        for database in database_list:
+                            try:
+                                databases_on_server.append(client.databases.get(database_name=database.name, server_name=server.name, resource_group_name=resource_group))
+                            except Exception as e:
+                                logging.error(f'error getting sql database: { database.name }, error: { e }')
+
+                        if databases_on_server:
+                            databases[subscription][server.name] = databases_on_server
 
         return databases
 
     def run(self):
         findings = []
         findings += [ self.sql_1() ]
-        return findings
-
-    def cis(self):
-        findings = []
-        findings += [ self.sql_1() ]
+        findings += [ self.sql_2() ]
         return findings
 
     def sql_1(self):
@@ -60,7 +72,7 @@ class sql(object):
             "compliance" : "",
             "level" : 1,
             "service" : "sql",
-            "name" : "Azure SQL  Servers",
+            "name" : "Azure SQL Servers",
             "affected": [],
             "analysis" : "",
             "description" : "",
@@ -74,16 +86,48 @@ class sql(object):
 
         logging.info(results["name"]) 
 
+        #results["analysis"] = self.servers
         results["analysis"] = self.servers
 
-        for subscription, servers in self.servers.items():
-            for server in servers:
-                results["affected"].append(server.name)
-
         if results["analysis"]:
+            results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
             results["pass_fail"] = "INFO"
             results["analysis"] = "no sql servers found"
+
+        return results
+
+    def sql_2(self):
+        # 
+
+        results = {
+            "id" : "sql_2",
+            "ref" : "",
+            "compliance" : "",
+            "level" : 1,
+            "service" : "sql",
+            "name" : "Azure SQL Databases",
+            "affected": [],
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        results["analysis"] = self.databases
+
+        if results["analysis"]:
+            results["affected"] = [ i for i, v in results["analysis"].items() ]
+            results["pass_fail"] = "INFO"
+        else:
+            results["pass_fail"] = "INFO"
+            results["analysis"] = "no sql databases found"
 
         return results

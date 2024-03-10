@@ -6,18 +6,24 @@ class storage_account(object):
     def __init__(self, credential, subscriptions, resource_groups, resources):
         self.credential = credential
         self.subscriptions = subscriptions
+        self.resource_groups = resource_groups
+        self.resources = resources
         self.storage_accounts = self.get_storage_accounts()
 
     def get_storage_accounts(self):
         storage_accounts = {}
-        for subscription in self.subscriptions:
-            logging.info(f'getting storage accounts in subscription: { subscription.display_name }')
-            try:
-                client= StorageManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
-                storage_accounts[subscription.subscription_id] = list(client.storage_accounts.list())
-            except Exception as e:
-                logging.error(f'error getting storage accounts in subscription: { subscription.display_name }, error: { e }')
-
+        for subscription, resource_groups in self.resources.items():
+            storage_accounts[subscription] = []
+            client = StorageManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.Storage/storageAccounts":
+                        logging.info(f'getting storage account { resource.name }')
+                        try:
+                            storage_account = client.storage_accounts.get_properties(account_name=resource.name, resource_group_name=resource_group)
+                            storage_accounts[subscription].append(storage_account)
+                        except Exception as e:
+                            logging.error(f'error getting storage account: { resource.name }, error: { e }')
         return storage_accounts
 
     def run(self):
@@ -55,11 +61,8 @@ class storage_account(object):
 
         results["analysis"] = self.storage_accounts
 
-        for subscription, storage_accounts in self.storage_accounts.items():
-            for storage_account in storage_accounts:
-                results["affected"].append(storage_account.name)
-
         if results["analysis"]:
+            results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
             results["pass_fail"] = "INFO"

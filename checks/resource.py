@@ -47,12 +47,7 @@ class resource(object):
         findings = []
         findings += [ self.resource_1() ]
         findings += [ self.resource_2() ]
-        return findings
-
-    def cis(self):
-        findings = []
-        findings += [ self.resource_1() ]
-        findings += [ self.resource_2() ]
+        findings += [ self.resource_3() ]
         return findings
 
 
@@ -98,7 +93,7 @@ class resource(object):
         # 
 
         results = {
-            "id" : "resource_1",
+            "id" : "resource_2",
             "ref" : "",
             "compliance" : "",
             "level" : 1,
@@ -125,6 +120,49 @@ class resource(object):
                     results["affected"].append(resource.name)
 
         if results["analysis"]:
+            results["pass_fail"] = "INFO"
+        else:
+            results["pass_fail"] = "INFO"
+            results["analysis"] = "no resources found"
+
+
+        return results
+
+    def resource_3(self):
+        # 
+
+        results = {
+            "id" : "resource_3",
+            "ref" : "",
+            "compliance" : "",
+            "level" : 1,
+            "service" : "resource",
+            "name" : "Resource Types",
+            "affected": [],
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        results["analysis"]  = {}
+
+        for subscription, resource_groups in self.resources.items():
+            types = []
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    types.append(resource.type)
+
+            results["analysis"][subscription] = list(set(types))
+
+        if results["analysis"]:
+            results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
             results["pass_fail"] = "INFO"

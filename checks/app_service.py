@@ -1,26 +1,29 @@
 from azure.mgmt.web import WebSiteManagementClient
 import logging
 
-#from utils.utils import describe_regions
-#from utils.utils import list_subscriptions
-
 class app_service(object):
 
     def __init__(self, credential, subscriptions, resource_groups, resources):
         self.credential = credential
         self.subscriptions = subscriptions
+        self.resource_groups = resource_groups
+        self.resources = resources
         self.web_apps = self.get_web_apps()
 
     def get_web_apps(self):
         web_apps = {}
-        for subscription in self.subscriptions:
-            logging.info(f'getting web apps in subscription: { subscription.display_name }')
-            try:
-                client= WebSiteManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
-                web_apps[subscription.subscription_id] = list(client.web_apps.list())
-            except Exception as e:
-                logging.error(f'error getting web apps in subscription: { subscription.display_name }, error: { e }')
-
+        for subscription, resource_groups in self.resources.items():
+            web_apps[subscription] = []
+            client = WebSiteManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.Web/sites":
+                        logging.info(f'getting web app { resource.name }')
+                        try:
+                            web_app = client.web_apps.get(name=resource.name, resource_group_name=resource_group)
+                            web_apps[subscription].append(web_app)
+                        except Exception as e:
+                            logging.error(f'error getting web app: { resource.name }, error: { e }')
         return web_apps
 
     def run(self):
@@ -58,11 +61,8 @@ class app_service(object):
 
         results["analysis"] = self.web_apps
 
-        for subscription, web_apps in self.web_apps.items():
-            for app in web_apps:
-                results["affected"].append(app.name)
-
         if results["analysis"]:
+            results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
             results["pass_fail"] = "INFO"

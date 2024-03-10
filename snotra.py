@@ -11,13 +11,12 @@ import logging
 
 from datetime import datetime
 
-from checks.resource import resource
+from checks.resource import resource as Resource
 from checks.app_service import app_service
 from checks.storage_account import storage_account
 from checks.sql import sql
 from checks.compute import compute
 from checks.keyvault import keyvault
-#from checks.subscription import subscription
 #from checks.graph_rbac_management import graph_rbac_management
 
 # old method
@@ -84,11 +83,11 @@ def main():
         credential = ClientSecretCredential(args.tenant_id, client_id, client_secret) 
         #old_credential = ServicePrincipalCredentials(client_id, client_secret, tenant=args.tenant_id, resource="https://graph.windows.net")
 
-    res = resource(credential)
+    resource = Resource(credential)
 
-    subscriptions = res.subscriptions
-    resource_groups = res.resource_groups
-    resources = res.resources
+    subscriptions = resource.subscriptions
+    resource_groups = resource.resource_groups
+    resources = resource.resources
 
     if args.subscription_id:
         subscriptions = [ i for i in subscriptions if i.subscription_id == args.subscription_id ]
@@ -103,8 +102,7 @@ def main():
     logging.info("performing full scan")
     #results["findings"] += graph_rbac_management(old_credential, args.tenant_id).run()
     #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
-    #results["findings"] += subscription(credential).run()
-    results["findings"] += res.run()
+    results["findings"] += resource.run()
     results["findings"] += app_service(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
