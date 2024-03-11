@@ -22,7 +22,6 @@ from checks.keyvault import keyvault
 # old method
 #from azure.common.credentials import ServicePrincipalCredentials
 
-#python3 snotra.py --results-dir /tmp/ --tenant-id 055bcc6b-d242-4b55-bc54-d6440f7892a4 --default
 
 def main():
 
@@ -104,10 +103,10 @@ def main():
     #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
     results["findings"] += resource.run()
     results["findings"] += app_service(credential, subscriptions, resource_groups, resources).run()
-    results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
-    results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
-    results["findings"] += compute(credential, subscriptions, resource_groups, resources).run()
-    results["findings"] += keyvault(credential, subscriptions, resource_groups, resources).run()
+    #results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
+    #results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
+    #results["findings"] += compute(credential, subscriptions, resource_groups, resources).run()
+    #results["findings"] += keyvault(credential, subscriptions, resource_groups, resources).run()
 
     if not os.path.exists(args.results_dir):
         logging.info("results dir does not exist, creating it for you")

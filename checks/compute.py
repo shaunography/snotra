@@ -43,9 +43,9 @@ class compute(object):
 
         results = {
             "id" : "compute_1",
-            "ref" : "",
-            "compliance" : "",
-            "level" : "",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "compute",
             "name" : "Virtual Machines",
             "affected": [],
@@ -67,7 +67,6 @@ class compute(object):
             results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
-            results["pass_fail"] = "INFO"
             results["analysis"] = "no virtual machines found"
 
         return results

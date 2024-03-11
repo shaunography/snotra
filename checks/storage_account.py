@@ -41,9 +41,9 @@ class storage_account(object):
 
         results = {
             "id" : "storage_account_1",
-            "ref" : "",
-            "compliance" : "",
-            "level" : 1,
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "storage_account",
             "name" : "Storage Accounts",
             "affected": [],

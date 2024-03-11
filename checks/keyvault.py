@@ -41,9 +41,9 @@ class keyvault(object):
 
         results = {
             "id" : "keyvault_1",
-            "ref" : "",
-            "compliance" : "",
-            "level" : 1,
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "keyvault",
             "name" : "Azure Key Vaults",
             "affected": [],
@@ -65,7 +65,6 @@ class keyvault(object):
             results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
-            results["pass_fail"] = "INFO"
             results["analysis"] = "no key vaults found"
 
         return results

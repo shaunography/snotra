@@ -68,9 +68,9 @@ class sql(object):
 
         results = {
             "id" : "sql_1",
-            "ref" : "",
-            "compliance" : "",
-            "level" : 1,
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "sql",
             "name" : "Azure SQL Servers",
             "affected": [],
@@ -86,14 +86,12 @@ class sql(object):
 
         logging.info(results["name"]) 
 
-        #results["analysis"] = self.servers
         results["analysis"] = self.servers
 
         if results["analysis"]:
             results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
-            results["pass_fail"] = "INFO"
             results["analysis"] = "no sql servers found"
 
         return results
@@ -103,9 +101,9 @@ class sql(object):
 
         results = {
             "id" : "sql_2",
-            "ref" : "",
-            "compliance" : "",
-            "level" : 1,
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "sql",
             "name" : "Azure SQL Databases",
             "affected": [],
@@ -127,7 +125,6 @@ class sql(object):
             results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
-            results["pass_fail"] = "INFO"
             results["analysis"] = "no sql databases found"
 
         return results

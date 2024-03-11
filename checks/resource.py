@@ -56,9 +56,9 @@ class resource(object):
 
         results = {
             "id" : "resource_1",
-            "ref" : "",
-            "compliance" : "",
-            "level" : 1,
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "resource",
             "name" : "Resource Groups",
             "affected": [],
@@ -83,7 +83,6 @@ class resource(object):
         if results["analysis"]:
             results["pass_fail"] = "INFO"
         else:
-            results["pass_fail"] = "INFO"
             results["analysis"] = "no resource groups found"
 
 
@@ -94,9 +93,9 @@ class resource(object):
 
         results = {
             "id" : "resource_2",
-            "ref" : "",
-            "compliance" : "",
-            "level" : 1,
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "resource",
             "name" : "ALl Resources",
             "affected": [],
@@ -122,7 +121,6 @@ class resource(object):
         if results["analysis"]:
             results["pass_fail"] = "INFO"
         else:
-            results["pass_fail"] = "INFO"
             results["analysis"] = "no resources found"
 
 
@@ -133,9 +131,9 @@ class resource(object):
 
         results = {
             "id" : "resource_3",
-            "ref" : "",
-            "compliance" : "",
-            "level" : 1,
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "resource",
             "name" : "Resource Types",
             "affected": [],
@@ -165,7 +163,6 @@ class resource(object):
             results["affected"] = [ i for i, v in results["analysis"].items() ]
             results["pass_fail"] = "INFO"
         else:
-            results["pass_fail"] = "INFO"
             results["analysis"] = "no resources found"
 
 
