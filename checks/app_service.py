@@ -1,5 +1,7 @@
 from azure.mgmt.web import WebSiteManagementClient
+from azure.mgmt.web.models import SiteAuthSettings
 import logging
+import re
 
 class app_service(object):
 
@@ -56,6 +58,7 @@ class app_service(object):
         findings += [ self.app_service_9() ]
         findings += [ self.app_service_10() ]
         findings += [ self.app_service_11() ]
+        findings += [ self.app_service_12() ]
         return findings
 
     def cis(self):
@@ -97,10 +100,55 @@ class app_service(object):
         return results
 
     def app_service_2(self):
-        # Ensure Web App Redirects All HTTP traffic to HTTPS in Azure App Service (CIS)
+        # Ensure App Service Authentication is set up for apps in Azure App Service (CIS)
 
         results = {
             "id" : "app_service_2",
+            "ref" : "9.1",
+            "compliance" : "cis_v2.1.0",
+            "level": 2,
+            "service" : "app_service",
+            "name" : "Ensure App Service Authentication is set up for apps in Azure App Service (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Azure App Service Authentication is a feature that can prevent anonymous HTTP\nrequests from reaching a Web Application or authenticate those with tokens before they\nreach the app. If an anonymous request is received from a browser, App Service will\nredirect to a logon page. To handle the logon process, a choice from a set of identity\nproviders can be made, or a custom authentication mechanism can be implemented.\nRationale:\nBy Enabling App Service Authentication, every incoming HTTP request passes through\nit before being handled by the application code. It also handles authentication of users\nwith the specified provider (Entra ID, Facebook, Google, Microsoft Account, and\nTwitter), validation, storing and refreshing of tokens, managing the authenticated\nsessions and injecting identity information into request headers. Disabling HTTP Basic\nAuthentication functionality further ensures legacy authentication methods are disabled\nwithin the application.",
+            "remediation" : "From Azure Portal\n1. Login to Azure Portal using https://portal.azure.com\n2. Go to App Services\n3. Click on each App\n4. Under Setting section, click on Authentication\n5. If no identity providers are set up, then click Add identity provider\n6. Choose other parameters as per your requirements and click on Add\nTo disable the Basic Auth Publishing Credentials setting, perform the following\nsteps:\nPage 448\n1. Login to Azure Portal using https://portal.azure.com\n2. Go to App Services\n3. Click on each App\n4. Under Settings, click on Configuration\n5. Click on the 'General Settings' tab\n6. Under Platform settings, ensure Basic Auth Publishing Credentials is set to\nOff",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "4.8",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        results["analysis"]["system assigned"] = []
+        results["analysis"]["user assigned"] = []
+
+        for subscription, web_apps in self.web_apps.items():
+            client = WebSiteManagementClient(credential=self.credential, subscription_id=subscription)
+
+            for web_app in web_apps:
+                auth_settings = client.web_apps.get_auth_settings(web_app.resource_group, web_app.name)
+                if auth_settings.enabled == False:
+                    results["affected"].append(web_app.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected web apps are not using app service authentication"
+        elif self.web_apps:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "app service authentication is in use"
+        else:
+            results["analysis"] = "no web apps in use"
+
+        return results
+
+    def app_service_3(self):
+        # Ensure Web App Redirects All HTTP traffic to HTTPS in Azure App Service (CIS)
+
+        results = {
+            "id" : "app_service_3",
             "ref" : "9.2",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -119,7 +167,7 @@ class app_service(object):
 
         logging.info(results["name"]) 
 
-        for subcription, web_apps in self.web_apps.items():
+        for subscription, web_apps in self.web_apps.items():
             for web_app in web_apps:
                 if web_app.https_only == False:
                     results["affected"].append(web_app.name)
@@ -136,14 +184,14 @@ class app_service(object):
 
         return results
 
-    def app_service_3(self):
+    def app_service_4(self):
         # Ensure Web App is using the latest version of TLS encryption
 
         results = {
-            "id" : "app_service_3",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "id" : "app_service_4",
+            "ref" : "9.3",
+            "compliance" : "cis_v2.1.0",
+            "level" : 1,
             "service" : "app_service",
             "name" : "App Services Lacking Network Access Restrictions",
             "affected": [],
@@ -159,7 +207,7 @@ class app_service(object):
 
         logging.info(results["name"]) 
 
-        for subcription, web_apps in self.web_apps.items():
+        for subscription, web_apps in self.web_apps.items():
             for web_app in web_apps:
                 if web_app.public_network_access == "Enabled":
                     results["affected"].append(web_app.name)
@@ -175,11 +223,11 @@ class app_service(object):
 
         return results
 
-    def app_service_4(self):
+    def app_service_5(self):
         # Ensure Web App is using the latest version of TLS encryption (CIS)
 
         results = {
-            "id" : "app_service_4",
+            "id" : "app_service_5",
             "ref" : "9.3",
             "compliance" : "cis_v2.1.0",
             "level": 1,
@@ -198,9 +246,7 @@ class app_service(object):
 
         logging.info(results["name"]) 
 
-        #'http20_enabled': False, 'min_tls_version': '1.2', 'min_tls_cipher_suite': None, 'scm_min_tls_version': '1.2', 'ftps_state': 'FtpsOnly',
-
-        for subcription, web_apps in self.web_apps_config.items():
+        for subscription, web_apps in self.web_apps_config.items():
             for web_app in web_apps:
                 if web_app.min_tls_version != "1.2":
                     results["affected"].append(web_app.name)
@@ -216,12 +262,102 @@ class app_service(object):
 
         return results
 
+    def app_service_6(self):
+        # Ensure App Services Are Using Managed Identities To Access Resources In Azure (CIS)
 
-    def app_service_5(self):
+        results = {
+            "id" : "app_service_6",
+            "ref" : "9.4",
+            "compliance" : "cis_v2.1.0",
+            "level": 1,
+            "service" : "app_service",
+            "name" : "Ensure Web App is using the latest version of TLS encryption (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Managed service identity in App Service provides more security by eliminating secrets\nfrom the app, such as credentials in the connection strings. When registering an App\nService with Entra ID, the app will connect to other Azure services securely without the\nneed for usernames and passwords.\nRationale:\nApp Service provides a highly scalable, self-patching web hosting service in Azure. It\nalso provides a managed identity for apps, which is a turn-key solution for securing\naccess to Azure SQL Database and other Azure services.",
+            "remediation" : "Any App Services that require access to resources in Azure should be configured with a Managed Identity according to the principle of least privilegeFrom Azure Portal\n1. Login to Azure Portal using https://portal.azure.com\n2. Go to App Services\n3. Click on each App\n4. Under Setting section, Click on Identity\n5. Under the System assigned pane, set Status to On",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "4.8",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, web_apps in self.web_apps_config.items():
+            for web_app in web_apps:
+                if not web_app.x_managed_service_identity_id and not web_app.managed_service_identity_id:
+                    results["affected"].append(web_app.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the afected web apps do not have a managed identity configured, if the web apps not require access to other Azure resources (SQL database for example) than this finding can be ignored"
+        elif self.web_apps:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "web apps are using managed identities"
+        else:
+            results["analysis"] = "no web apps in use"
+
+        return results
+
+
+    def app_service_7(self):
+        # Ensure Web Apps Are Using Supported Runtimes (CIS)
+
+        results = {
+            "id" : "app_service_7",
+            "ref" : "9.5-9.7",
+            "compliance" : "cis_v2.1.0",
+            "level" : 1,
+            "service" : "app_service",
+            "name" : "Ensure Web Apps Are Using Supported Runtimes (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Periodically newer versions are released for stack software either due to security flaws\nor to include additional functionality. Using the latest stack version for web apps is\nrecommended in order to take advantage of security fixes, if any, and/or additional\nfunctionalities of the newer version.\nRationale:\nNewer versions may contain security enhancements and additional functionality. Using\nthe latest software version is recommended in order to take advantage of\nenhancements and new capabilities. With each software installation, organizations need\nto determine if a given update meets their requirements. They must also verify the\ncompatibility and support provided for any additional software against the update\nrevision that is selected.",
+            "remediation" : "From Azure Portal\n1. From Azure Home open the Portal Menu in the top left\n2. Go to App Services\n3. Click on each App\n4. Under Settings section, click on Configuration\n5. Click on the General settings pane, ensure that for a Stack of stack the Major\nVersion and Minor Version reflect the latest stable and supported release.",
+            "impact" : "INFO",
+            "probability" : "INFO",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+        
+        #https://github.com/Azure/app-service-linux-docs/tree/master/Runtime_Support
+        unsupported = ["NODE|16-lts", "PHP|8.0", "PHP|8.1"]
+
+        for subscription, web_apps in self.web_apps_config.items():
+            for web_app in web_apps:
+
+                # dotnet
+                if web_app.net_framework_version:
+                    if web_app.net_framework_version != "v4.0": # hack for shity api
+                        if web_app.net_framework_version == "v5.0":
+                            results["affected"].append(web_app.name)
+                            results["analysis"][web_app.name] = web_app.net_framework_version
+
+
+                if web_app.linux_fx_version in unsupported:
+                    results["affected"].append(web_app.name)
+                    results["analysis"][web_app.name] = web_app.linux_fx_version
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+        elif self.web_apps:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "web apps are using supported runtimes"
+        else:
+            results["analysis"] = "no web apps in use"
+
+        return results
+
+    def app_service_8(self):
         # Ensure that 'HTTP Version' is the Latest, if Used to Run the Web App (CIS)
 
         results = {
-            "id" : "app_service_5",
+            "id" : "app_service_8",
             "ref" : "9.8",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -240,7 +376,7 @@ class app_service(object):
 
         logging.info(results["name"]) 
 
-        for subcription, web_apps in self.web_apps_config.items():
+        for subscription, web_apps in self.web_apps_config.items():
             for web_app in web_apps:
                 if web_app.http20_enabled == False:
                     results["affected"].append(web_app.name)
@@ -257,11 +393,11 @@ class app_service(object):
         return results
 
 
-    def app_service_6(self):
+    def app_service_9(self):
         # Ensure FTP deployments are Disabled (CIS)
 
         results = {
-            "id" : "app_service_6",
+            "id" : "app_service_9",
             "ref" : "9.9",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -280,7 +416,7 @@ class app_service(object):
 
         logging.info(results["name"]) 
 
-        for subcription, web_apps in self.web_apps_config.items():
+        for subscription, web_apps in self.web_apps_config.items():
             for web_app in web_apps:
                 if web_app.ftps_state != "FtpsOnly":
                     results["affected"].append(web_app.name)
@@ -296,69 +432,67 @@ class app_service(object):
 
         return results
 
-    def app_service_7(self):
-        # Ensure That stack version is the Latest, If Used to Run the Web App (CIS)
+
+    def app_service_10(self):
+        # web apps with managed identity assigned
 
         results = {
-            "id" : "app_service_7",
-            "ref" : "9.5-9.8",
-            "compliance" : "cis_v2.1.0",
-            "level" : 1,
-            "service" : "app_service",
-            "name" : "Ensure That stack version is the Latest, If Used to Run the Web App (CIS)",
-            "affected": [],
-            "analysis" : {},
-            "description" : "Periodically newer versions are released for stack software either due to security flaws\nor to include additional functionality. Using the latest stack version for web apps is\nrecommended in order to take advantage of security fixes, if any, and/or additional\nfunctionalities of the newer version.\nRationale:\nNewer versions may contain security enhancements and additional functionality. Using\nthe latest software version is recommended in order to take advantage of\nenhancements and new capabilities. With each software installation, organizations need\nto determine if a given update meets their requirements. They must also verify the\ncompatibility and support provided for any additional software against the update\nrevision that is selected.",
-            "remediation" : "From Azure Portal\n1. From Azure Home open the Portal Menu in the top left\n2. Go to App Services\n3. Click on each App\n4. Under Settings section, click on Configuration\n5. Click on the General settings pane, ensure that for a Stack of stack the Major\nVersion and Minor Version reflect the latest stable and supported release.",
-            "impact" : "INFO",
-            "probability" : "INFO",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
-            "pass_fail" : ""
-        }
-
-        logging.info(results["name"]) 
-        
- #Python|3.11
-#PYTHON|3.12
-#PHP|8.2
-#JAVA|17-java17
-#NODE|20-lts
-        #https://github.com/Azure/app-service-linux-docs/tree/master/Runtime_Support
-
-        php = False
-        for subcription, web_apps in self.web_apps_config.items():
-            for web_app in web_apps:
-                if web_app.php_version:
-                    php = True
-                    if web_app.php_version != "PHP 8.2":
-                        results["affected"].append(web_app.name)
-                        results["analysis"][web_app.name] = web_app.php_version
-
-        if results["affected"]:
-            results["pass_fail"] = "FAIL"
-        elif php:
-            results["pass_fail"] = "PASS"
-            results["analysis"] = "web apps are using the latest version of PHP"
-        else:
-            results["analysis"] = "no PHP web apps in use"
-
-        return results
-
-    def app_service_8(self):
-        # Ensure That '.NET version' supported, If Used to Run the Web App 
-
-        results = {
-            "id" : "app_service_8",
-            "ref" : "N/A",
+            "id" : "app_service_10",
+            "ref" : "snotra",
             "compliance" : "N/A",
-            "level" : "N/A",
+            "level": "N/A",
             "service" : "app_service",
-            "name" : "Ensure That .NET Version is supported, If Used to Run the Web App",
+            "name" : "Web Apps With Managed Identity Assigned",
             "affected": [],
             "analysis" : {},
-            "description" : "Periodically newer versions are released for the .NET framework software either due to security flaws\nor to include additional functionality. Using the latest .NET version for web apps is\nrecommended in order to take advantage of security fixes, if any, and/or additional\nfunctionalities of the newer version.\nRationale:\nNewer versions may contain security enhancements and additional functionality. Using\nthe latest software version is recommended in order to take advantage of\nenhancements and new capabilities. With each software installation, organizations need\nto determine if a given update meets their requirements. They must also verify the\ncompatibility and support provided for any additional software against the update\nrevision that is selected.",
-            "remediation" : "From Azure Portal\n1. From Azure Home open the Portal Menu in the top left\n2. Go to App Services\n3. Click on each App\n4. Under Settings section, click on Configuration\n5. Click on the General settings pane, ensure that for a Stack of .NET the Major\nVersion and Minor Version reflect the latest stable and supported release.",
+            "description" : "When Web Apps require access to Azure Resources it is recomended to enabled access via a Managed Identity.This provides better security by eliminating the use of secrets such as credentials in the connection strings. System assigned Managed Identities allow each web app to have their own Managed IDentity, if you would like to use a single Managed Identity across a number of apps you can use a User Assigned Identity. Managed Identities should be configured following the principle of least privilege with only the minimal set of roles and permissions required in order for the application to function.",
+            "remediation" : "Any App Services that require access to resources in Azure should be configured with a Managed Identity according to the principle of least privilegeFrom Azure Portal\n1. Login to Azure Portal using https://portal.azure.com\n2. Go to App Services\n3. Click on each App\n4. Under Setting section, Click on Identity\n5. Under the System assigned pane, set Status to On",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "4.8",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        results["analysis"]["system assigned"] = []
+        results["analysis"]["user assigned"] = []
+
+        for subscription, web_apps in self.web_apps_config.items():
+            for web_app in web_apps:
+                if web_app.x_managed_service_identity_id:
+                    results["analysis"]["user assigned"].append(web_app.name)
+                    results["affected"].append(web_app.name)
+                if web_app.managed_service_identity_id:
+                    results["analysis"]["system assigned"].append(web_app.name)
+                    results["affected"].append(web_app.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the afected web apps have a managed identity configured, if the web apps not require access to other Azure resources (SQL database for example) the Managed ID should be removed, otherwise review the roles and permissons assigned to the ID and ensure it is configured following the principal of least privilege."
+        elif self.web_apps:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "web apps are not using managed identities"
+        else:
+            results["analysis"] = "no web apps in use"
+
+        return results
+
+    def app_service_11(self):
+        # Web Apps With Remote Debugging Enabled
+
+        results = {
+            "id" : "app_service_11",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level": "N/A",
+            "service" : "app_service",
+            "name" : "Web Apps With Remote Debugging Enabled",
+            "affected": [],
+            "analysis" : {},
+            "description" : "",
+            "remediation" : "",
             "impact" : "INFO",
             "probability" : "INFO",
             "cvss_vector" : "N/A",
@@ -367,27 +501,58 @@ class app_service(object):
         }
 
         logging.info(results["name"]) 
-        
-        #https://github.com/Azure/app-service-linux-docs/tree/master/Runtime_Support
 
-        dotnet = False
-        for subcription, web_apps in self.web_apps_config.items():
+        for subscription, web_apps in self.web_apps_config.items():
             for web_app in web_apps:
-                if web_app.net_framework_version:
-                    dotnet = True
-                    if web_app.net_framework_version != "v4.0": # hack for shity api
-                        if web_app.net_framework_version != "v6.0" and web_app.net_framework_version != "v7.0":
-                            results["affected"].append(web_app.name)
-                            results["analysis"][web_app.name] = web_app.net_framework_version
+                if web_app.remote_debugging_enabled == True:
+                    results["affected"].append(web_app.name)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
-        elif dotnet:
+            results["analysis"] = "the affected web apps have remote debugging enabled"
+        elif self.web_apps:
             results["pass_fail"] = "PASS"
-            results["analysis"] = "web apps are using a supported version of .net"
+            results["analysis"] = "remote debugging is not enabled on any web apps"
         else:
-            results["analysis"] = "no .net web apps in use"
+            results["analysis"] = "no web apps in use"
 
         return results
 
+    def app_service_12(self):
+        # Web Apps Without Always On enabled
 
+        results = {
+            "id" : "app_service_12",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level": "N/A",
+            "service" : "app_service",
+            "name" : "App Services Without Always On Enabled",
+            "affected": [],
+            "analysis" : {},
+            "description" : "",
+            "remediation" : "",
+            "impact" : "INFO",
+            "probability" : "INFO",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, web_apps in self.web_apps_config.items():
+            for web_app in web_apps:
+                if web_app.always_on == False:
+                    results["affected"].append(web_app.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected web apps do not have always on enabled"
+        elif self.web_apps:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "web apps have always on enabled"
+        else:
+            results["analysis"] = "no web apps in use"
+
+        return results
