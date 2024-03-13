@@ -10,6 +10,7 @@ class compute(object):
         self.resource_groups = resource_groups
         self.resources = resources
         self.virtual_machines = self.get_virtual_machines()
+        self.disks = self.get_disks()
 
     def get_virtual_machines(self):
         virtual_machines = {}
@@ -28,9 +29,31 @@ class compute(object):
 
         return virtual_machines
 
+    def get_disks(self):
+        disks = {}
+        for subscription, resource_groups in self.resources.items():
+            disks[subscription] = []
+            client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.Compute/disks":
+                        logging.info(f'getting disk { resource.name }')
+                        try:
+                            disk = client.disks.get(disk_name=resource.name, resource_group_name=resource_group)
+                            disks[subscription].append(disk)
+                        except Exception as e:
+                            logging.error(f'error getting disk: { resource.name }, error: { e }')
+        return disks
+
     def run(self):
         findings = []
         findings += [ self.compute_1() ]
+        findings += [ self.compute_2() ]
+        findings += [ self.compute_3() ]
+        findings += [ self.compute_4() ]
+        findings += [ self.compute_5() ]
+        findings += [ self.compute_6() ]
+        findings += [ self.compute_7() ]
         return findings
 
     def cis(self):
@@ -68,5 +91,247 @@ class compute(object):
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "no virtual machines found"
+
+        return results
+
+    def compute_2(self):
+        # Ensure Virtual Machines are utilizing Managed Disks (CIS)
+
+        results = {
+            "id" : "compute_2",
+            "ref" : "7.2",
+            "compliance" : "cis_v2.1.0",
+            "level" : 1,
+            "service" : "compute",
+            "name" : "Ensure Virtual Machines are utilizing Managed Disks (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Migrate blob-based VHDs to Managed Disks on Virtual Machines to exploit the default\nfeatures of this configuration. The features include:\n1. Default Disk Encryption\n2. Resilience, as Microsoft will managed the disk storage and move around if\nunderlying hardware goes faulty\n3. Reduction of costs over storage accounts\nRationale:\nManaged disks are by default encrypted on the underlying hardware, so no additional\nencryption is required for basic protection. It is available if additional encryption is\nrequired. Managed disks are by design more resilient that storage accounts.\nFor ARM-deployed Virtual Machines, Azure Adviser will at some point recommend\nmoving VHDs to managed disks both from a security and cost management\nperspective.",
+            "remediation" : "From Azure Portal\n1. Using the search feature, go to Virtual Machines\n2. Select the virtual machine you would like to convert\n3. Select Disks in the menu for the VM\n4. At the top select Migrate to managed disks\n5. You may follow the prompts to convert the disk and finish by selecting Migrate to\nstart the process\nNOTE VMs will be stopped and restarted after migration is complete",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, virtual_machines in self.virtual_machines.items():
+            for virtual_machine in virtual_machines:
+
+                if not virtual_machine.storage_profile.os_disk.managed_disk:
+                    results["affected"].append(virtual_machine.name)
+                    results["analysis"][virtual_machine.name] = virtual_machine.storage_profile.os_disk.name
+
+                for disk in virtual_machine.storage_profile.data_disks:
+                    if not disk.managed_disk:
+                        results["affected"].append(virtual_machine.name)
+                        results["analysis"][virtual_machine.name] = disk.name
+
+        if results["affected"]:
+            results["affected"] = set(results["affected"])
+            results["pass_fail"] = "FAIL"
+        elif self.virtual_machines:
+            results["analysis"] = "no unmanaged disks found"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no virtual machines in use"
+
+        return results
+
+    def compute_3(self):
+        # Ensure that 'OS and Data' disks are encrypted with Customer Managed Key (CMK) (CIS)
+
+        results = {
+            "id" : "compute_3",
+            "ref" : "7.3",
+            "compliance" : "cis_v2.1.0",
+            "level" : 2,
+            "service" : "compute",
+            "name" : "Ensure that 'OS and Data' disks are encrypted with Customer Managed Key (CMK) (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Ensure that OS disks (boot volumes) and data disks (non-boot volumes) are encrypted\nwith CMK (Customer Managed Keys). Customer Managed keys can be either ADE or\nServer Side Encryption (SSE).\nRationale:\nEncrypting the IaaS VM's OS disk (boot volume) and Data disks (non-boot volume)\nensures that the entire content is fully unrecoverable without a key, thus protecting the\nvolume from unwanted reads. PMK (Platform Managed Keys) are enabled by default in\nAzure-managed disks and allow encryption at rest. CMK is recommended because it\ngives the customer the option to control which specific keys are used for the encryption\nand decryption of the disk. The customer can then change keys and increase security\nby disabling them instead of relying on the PMK key that remains unchanging. There is\nalso the option to increase security further by using automatically rotating keys so that\naccess to disk is ensured to be limited. Organizations should evaluate what their\nsecurity requirements are, however, for the data stored on the disk. For high-risk data\nusing CMK is a must, as it provides extra steps of security. If the data is low risk, PMK is\nenabled by default and provides sufficient data security.",
+            "remediation" : "From Azure Portal\nNote: Disks must be detached from VMs to have encryption changed.\n1. Go to Virtual machines\n2. For each virtual machine, go to Settings\n3. Click on Disks\n4. Click the ellipsis (...), then click Detach to detach the disk from the VM\n5. Now search for Disks and locate the unattached disk\n6. Click the disk then select Encryption\n7. Change your encryption type, then select your encryption set\n8. Click Save\n9. Go back to the VM and re-attach the disk",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, disks in self.disks.items():
+            for disk in disks:
+                if disk.encryption.type == "EncryptionAtRestWithPlatformKey":
+                    results["affected"].append(disk.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected disks are not encrypted with a customer managed key (cmk)"
+            results["pass_fail"] = "FAIL"
+        elif self.disks:
+            results["analysis"] = "disks are encrypted with customer managed keys"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no disks in use"
+
+        return results
+
+    def compute_4(self):
+        # unencrpyted disks
+
+        results = {
+            "id" : "compute_4",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Unencrpyted Disks",
+            "affected": [],
+            "analysis" : {},
+            "description" : "",
+            "remediation" : "",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, disks in self.disks.items():
+            for disk in disks:
+                if not disk.encryption:
+                    results["affected"].append(disk.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected disks are not encrypted"
+            results["pass_fail"] = "FAIL"
+        elif self.disks:
+            results["analysis"] = "no unencrypted disks found"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no disks in use"
+
+        return results
+
+    def compute_5(self):
+        # disks with public network access enabled
+
+        results = {
+            "id" : "compute_5",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Disks With Public Network Access Enabled",
+            "affected": [],
+            "analysis" : {},
+            "description" : "",
+            "remediation" : "",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "5.4",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, disks in self.disks.items():
+            for disk in disks:
+                if disk.public_network_access == "enabled":
+                    results["affected"].append(disk.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected disks have public network access enabled"
+            results["pass_fail"] = "FAIL"
+        elif self.disks:
+            results["analysis"] = "disks do not have public network access enabled"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no disks in use"
+
+        return results
+
+    def compute_6(self):
+        # unattached disks
+
+        results = {
+            "id" : "compute_6",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Unattached Disks",
+            "affected": [],
+            "analysis" : {},
+            "description" : "The account contains Virtual Machine Disks that are not attached to any resources and are therefore likely no longer required. To maintain the hygiene of your subscription, lower costs and reduce the risk  of sensitive data disclosure it is recommended that all unused virtual machine disks are deleted. ",
+            "remediation" : "Determine if the affect virtual disk is required and if not delete it.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, disks in self.disks.items():
+            for disk in disks:
+                if disk.disk_state == "Unattached":
+                    results["affected"].append(disk.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected disks are not attached to any resources and are therfore not being used"
+            results["pass_fail"] = "FAIL"
+        elif self.disks:
+            results["analysis"] = "no unattached disks found"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no disks in use"
+
+        return results
+
+    def compute_7(self):
+        # Ensure that 'Unattached disks' are encrypted with Customer Managed Key (CMK) (CIS)
+
+        results = {
+            "id" : "compute_7",
+            "ref" : "7.4",
+            "compliance" : "cis_v2.1.0",
+            "level" : 2,
+            "service" : "compute",
+            "name" : "Ensure that 'Unattached disks' are encrypted with Customer Managed Key (CMK) (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Ensure that unattached disks in a subscription are encrypted with a Customer Managed\nKey (CMK).\nRationale:\nManaged disks are encrypted by default with Platform-managed keys. Using Customer-\nmanaged keys may provide an additional level of security or meet an organization's\nregulatory requirements. Encrypting managed disks ensures that its entire content is\nfully unrecoverable without a key and thus protects the volume from unwarranted reads.\nEven if the disk is not attached to any of the VMs, there is always a risk where a\ncompromised user account with administrative access to VM service can mount/attach\nthese data disks, which may lead to sensitive information disclosure and tampering.",
+            "remediation" : "If data stored in the disk is no longer useful, refer to Azure documentation to delete\nunattached data disks at:\n-https://docs.microsoft.com/en-us/rest/api/compute/disks/delete\n-https://docs.microsoft.com/en-us/cli/azure/disk?view=azure-cli-latest#az-\ndisk-delete\nIf data stored in the disk is important, To encrypt the disk refer azure documentation at:\n-https://docs.microsoft.com/en-us/azure/virtual-machines/disks-enable-\ncustomer-managed-keys-portal\n-https://docs.microsoft.com/en-\nus/rest/api/compute/disks/update#encryptionsettings",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, disks in self.disks.items():
+            for disk in disks:
+                if disk.disk_state == "Unattached":
+                    if disk.encryption.type == "EncryptionAtRestWithPlatformKey":
+                        results["affected"].append(disk.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected unattached disks are not encrypted with a customer managed key (cmk)"
+            results["pass_fail"] = "FAIL"
+        elif self.disks:
+            results["analysis"] = "no unenvrypted unattached disks found"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no disks in use"
 
         return results

@@ -185,7 +185,7 @@ class app_service(object):
         return results
 
     def app_service_4(self):
-        # Ensure Web App is using the latest version of TLS encryption
+        # App Services Lacking Network Access Restrictions
 
         results = {
             "id" : "app_service_4",
@@ -195,7 +195,7 @@ class app_service(object):
             "service" : "app_service",
             "name" : "App Services Lacking Network Access Restrictions",
             "affected": [],
-            "analysis" : "",
+            "analysis" : {},
             "description" : "The subscription under review contained resources which did not implement network level access restrictions (Firewall rules) and therefore allowed unrestricted traffic from the public internet. This configuration impacted the security posture of the cloud environment and increased the risk of unauthorized data exposure. \nBy default resources in Azure do not implement a firewall to restrict network level access, therefore all users, applications, and services including those on the public internet could potentially communicate with resources  hosted within a subscription at the network layer. Although often protected by authentication, the lack of network restrictions increased the attack surface of the resources and the wider Azure environment. An attacker able to compromise valid credentials could use those credentials to interact with the service from clients on any network or from other Azure tenancies. \nTo restrict access to Storage Accounts and provide a greater defence in depth for stored data, it is recommended to use private endpoints that only permit access from internal Azure Virtual Networks and/or configure Firewall rules following the principle of least privilege to only allow access from trusted networks and IP addresses.",
             "remediation" : "The affected resources should be configured to restrict network access to the internal virtual private networks. Where external access is required for legitimate purposes, access should be restricted to a subset of whitelisted public IP addresses. \nAdditionally, where external access is not required, organisations should consider implementing a private endpoint connection to facilitate a secure connection between internal services whilst removing the requirement to use public infrastructure. When a private endpoint is configured all traffic between resources is transmitted over the Azure backbone ‘Azure PrivateLink’ network using virtual private IP addresses reducing the exposure of sensitive data. \nTo configure firewall rules within the Azure Portal:\nGo to resource.\nFor each resource, click on the settings menu called ‘Networking’.\nEnsure that you have elected to allow access from Selected networks.\nAdd rules to allow traffic from specific networks and IPs as required. \nClick Save to apply your changes.\nIf you want to limit access at the SQL Server database level consider also implementing an additional layer of database level firewall rules.",
             "impact" : "low",
@@ -211,10 +211,10 @@ class app_service(object):
             for web_app in web_apps:
                 if web_app.public_network_access == "Enabled":
                     results["affected"].append(web_app.name)
+                    results["analysis"][web_app.name] = web_app.default_host_name
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
-            results["analysis"] = "the afected web apps have public network acces enabled"
         elif self.web_apps:
             results["pass_fail"] = "PASS"
             results["analysis"] = "web apps do not have public network access enabled"
@@ -469,10 +469,10 @@ class app_service(object):
                     results["affected"].append(web_app.name)
 
         if results["affected"]:
-            results["pass_fail"] = "FAIL"
+            results["pass_fail"] = "INFO"
             results["analysis"] = "the afected web apps have a managed identity configured, if the web apps not require access to other Azure resources (SQL database for example) the Managed ID should be removed, otherwise review the roles and permissons assigned to the ID and ensure it is configured following the principal of least privilege."
         elif self.web_apps:
-            results["pass_fail"] = "PASS"
+            results["pass_fail"] = "INFO"
             results["analysis"] = "web apps are not using managed identities"
         else:
             results["analysis"] = "no web apps in use"
@@ -556,3 +556,4 @@ class app_service(object):
             results["analysis"] = "no web apps in use"
 
         return results
+

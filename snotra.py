@@ -17,6 +17,7 @@ from checks.storage_account import storage_account
 from checks.sql import sql
 from checks.compute import compute
 from checks.keyvault import keyvault
+from checks.network import network
 #from checks.graph_rbac_management import graph_rbac_management
 
 # old method
@@ -102,10 +103,11 @@ def main():
     #results["findings"] += graph_rbac_management(old_credential, args.tenant_id).run()
     #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
     results["findings"] += resource.run()
-    results["findings"] += app_service(credential, subscriptions, resource_groups, resources).run()
+    #results["findings"] += network(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += compute(credential, subscriptions, resource_groups, resources).run()
+    #results["findings"] += app_service(credential, subscriptions, resource_groups, resources).run()
     #results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
     #results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
-    #results["findings"] += compute(credential, subscriptions, resource_groups, resources).run()
     #results["findings"] += keyvault(credential, subscriptions, resource_groups, resources).run()
 
     if not os.path.exists(args.results_dir):
