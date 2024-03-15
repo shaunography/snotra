@@ -11,6 +11,7 @@ class compute(object):
         self.resources = resources
         self.virtual_machines = self.get_virtual_machines()
         self.disks = self.get_disks()
+        self.virtual_machine_extensions = self.get_virtual_machine_extensions()
 
     def get_virtual_machines(self):
         virtual_machines = {}
@@ -28,6 +29,26 @@ class compute(object):
                             logging.error(f'error getting virtual machine: { resource.name }, error: { e }')
 
         return virtual_machines
+
+    def get_virtual_machine_extensions(self):
+        virtual_machine_extensions = {}
+        for subscription, resource_groups in self.resources.items():
+            virtual_machine_extensions[subscription] = {}
+            client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.Compute/virtualMachines":
+                        logging.info(f'getting virtual machine { resource.name }')
+                        virtual_machine_extensions[subscription][resource.name] = []
+                        try:
+                            extensions = client.virtual_machine_extensions.list(vm_name=resource.name, resource_group_name=resource_group)
+                            for extension in extensions.value:
+                                extention_details = client.virtual_machine_extensions.get(resource_group, resource.name, extension.name)
+                                virtual_machine_extensions[subscription][resource.name].append(extention_details)
+                        except Exception as e:
+                            logging.error(f'error getting virtual machine: { resource.name }, error: { e }')
+
+        return virtual_machine_extensions
 
     def get_disks(self):
         disks = {}
@@ -54,6 +75,8 @@ class compute(object):
         findings += [ self.compute_5() ]
         findings += [ self.compute_6() ]
         findings += [ self.compute_7() ]
+        findings += [ self.compute_8() ]
+        findings += [ self.compute_9() ]
         return findings
 
     def cis(self):
@@ -333,5 +356,143 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+
+        return results
+
+    def compute_8(self):
+        # Ensure that Only Approved Extensions Are Installed (CIS)
+
+        results = {
+            "id" : "compute_8",
+            "ref" : "7.5",
+            "compliance" : "cis_v2.1.0",
+            "level" : 1,
+            "service" : "compute",
+            "name" : "Ensure that Only Approved Extensions Are Installed (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "For added security, only install organization-approved extensions on VMs.\nAzure virtual machine extensions are small applications that provide post-deployment\nconfiguration and automation tasks on Azure virtual machines. These extensions run\nwith administrative privileges and could potentially access anything on a virtual\nmachine. The Azure Portal and community provide several such extensions. Each\norganization should carefully evaluate these extensions and ensure that only those that\nare approved for use are actually implemented.",
+            "remediation" : "From Azure Portal\n1. Go to Virtual machines\n2. For each virtual machine, go to Settings\n3. Click on Extensions + applications\n4. If there are unapproved extensions, uninstall them.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, virtual_machines in self.virtual_machine_extensions.items():
+            for virtual_machine, extensions in virtual_machines.items():
+                results["affected"].append(virtual_machine)
+                results["analysis"][virtual_machine] = {}
+                for extension in extensions:
+                    results["analysis"][virtual_machine] = extension.name
+
+        if results["affected"]:
+            results["pass_fail"] = "INFO"
+        else:
+            results["analysis"] = "no virtual machines in use"
+
+        return results
+
+    #def compute_9(self):
+        ## Ensure Trusted Launch is enabled on Virtual Machines (CIS)
+#
+        #results = {
+            #"id" : "compute_9",
+            #"ref" : "7.9",
+            #"compliance" : "cis_v2.1.0",
+            #"level" : 1,
+            #"service" : "compute",
+            #"name" : "Ensure Trusted Launch is enabled on Virtual Machines (CIS)",
+            #"affected": [],
+            #"analysis" : "",
+            #"description" : "When Secure Boot and vTPM are enabled together, they provide a strong foundation\nfor protecting your VM from boot attacks. For example, if an attacker attempts to replace\nthe bootloader with a malicious version, Secure Boot will prevent the VM from booting. If\nthe attacker is able to bypass Secure Boot and install a malicious bootloader, vTPM can\nbe used to detect the intrusion and alert you.\nRationale:\nSecure Boot and vTPM work together to protect your VM from a variety of boot attacks,\nincluding bootkits, rootkits, and firmware rootkits. Not enabling Trusted Launch in Azure\nVM can lead to increased vulnerability to rootkits and boot-level malware, reduced\nability to detect and prevent unauthorized changes to the boot process, and a potential\ncompromise of system integrity and data security.\nImpact:\nSecure Boot and vTPM are not currently supported for Azure Generation 1 VMs.\nIMPORTANT: Before enabling Secure Boot and vTPM on a Generation 2 VM which\ndoes not already have both enabled, it is highly recommended to create a restore point\nof the VM prior to remediation.",
+            #"remediation" : "From Azure Portal\n1. Go to Virtual Machines\n2. For each VM, under Settings, click on Configuration on the left blade\n3. Under Security Type, select 'Trusted Launch Virtual Machines'\n4. Make sure Enable Secure Boot & Enable vTPM are checked\n5. Click on Apply.\nNote: Trusted launch on existing virtual machines (VMs) is currently not supported for\nAzure Generation 1 VMs",
+            #"impact" : "info",
+            #"probability" : "info",
+            #"cvss_vector" : "N/A",
+            #"cvss_score" : "N/A",
+            #"pass_fail" : ""
+        #}
+#
+        #logging.info(results["name"]) 
+#
+        #for subscription, virtual_machines in self.virtual_machines.items():
+            #for virtual_machine in virtual_machines:
+                #if virtual_machine.os_profile.windows_configuration:
+                    #print(virtual_machine.os_profile.windows_configuration)
+
+        #for subscription, virtual_machines in self.virtual_machine_extensions.items():
+            #for virtual_machine, extensions in virtual_machines.items():
+                #enabled = False
+                #for extension in extensions:
+                    #print(extension.name)
+                    #if extension.name == "TrustedLaunchExtension":
+                        #print(virtual_machine.name)
+                        #enabled = True
+                #if not enabled:
+                    #results["affected"].append(virtual_machine)
+
+        #for subscription, virtual_machines in self.virtual_machine_extensions.items():
+            #for virtual_machine, extensions in virtual_machines.items():
+                #enabled = False
+                #for extension in extensions.value:
+                    #if extension.name == "TrustedLaunchExtension":
+                        #print(virtual_machine.name)
+                        #enabled = True
+                #if not enabled:
+                    #results["affected"].append(virtual_machine)
+
+
+        #if results["affected"]:
+            #results["pass_fail"] = "FAIL"
+            #results["analysis"] = "the affected virtual machiones do not have trusted launch enabled"
+        #elif self.virtual_machines:
+            #results["analysis"] = "no virtual machines in use"
+            #results["pass_fail"] = "PASS"
+        #else:
+            #results["analysis"] = "all virtual machines have trusted launch enabled"
+#
+        #return results
+
+    def compute_9(self):
+        # virtual machines with user data
+
+        results = {
+            "id" : "compute_9",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Virtual Machines With User Data",
+            "affected": [],
+            "analysis" : {},
+            "description" : "User data allows you to pass your own scripts or metadata to your virtual machine. This data can be viewed by Azure users and can be retrieved from the Azure Instance Metadata Service (IMDS). Therefore, user data should not be used to store secrets or sensitive data. This check simply lists the virtual machines that are using user data and the contents of said data. This list should be reviewed to ensure it does not contain sensitive information.",
+            "remediation" : "Do not sotre secres or sensitive data in virtual machine user data.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, virtual_machines in self.virtual_machines.items():
+            for virtual_machine in virtual_machines:
+                if virtual_machine.user_data:
+                    results["affected"].append(virtual_machine.name)
+                    results["analysis"][virtual_machine.name] = virtual_machine.user_data
+
+
+        if results["affected"]:
+            results["pass_fail"] = "INFO"
+        elif self.virtual_machines:
+            results["analysis"] = "no user data found"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no virtual machines in use"
 
         return results
