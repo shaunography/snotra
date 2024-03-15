@@ -138,7 +138,7 @@ class network(object):
         return results
 
     def network_3(self):
-        # Ensure an Azure Bastion Host Exists (CIS)
+        # unused public ip addresses
 
         results = {
             "id" : "network_3",

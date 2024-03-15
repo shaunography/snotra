@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import logging
+import base64
 
 from datetime import datetime
 
@@ -18,11 +19,6 @@ from checks.sql import sql
 from checks.compute import compute
 from checks.keyvault import keyvault
 from checks.network import network
-#from checks.graph_rbac_management import graph_rbac_management
-
-# old method
-#from azure.common.credentials import ServicePrincipalCredentials
-
 
 def main():
 
@@ -52,36 +48,13 @@ def main():
         help="azure tenancy id",
         dest="subscription_id",
         metavar="<subscription_id>"
-    ),
-    parser.add_argument(
-        "--default",
-        help="use azure default credential, i.e environment variables, Azure CLI credentials, and managed identity (when running on an Azure VM).",
-        dest="default",
-        required=False,
-        action="store_true",
     )
     args = parser.parse_args()
 
-    if args.default:
-        try:
-            # Acquire a credential object
-            # default credential i.e. az login
-            credential = DefaultAzureCredential()
-            #azure.core.exceptions.ClientAuthenticationError
-        except:
-            logging.error("profile not found! try harder...")
-            sys.exit(0)
-    else:        
-        # Information required to authenticate using a Service Principal
-        client_id = "7d3fa6bb-7dbf-4ec9-b58b-285ac2232619"
-        #client_id = "7d3fa6bb-7dbf-4ec9-b58b-285ac2232619"
-        client_secret = "Z6F8Q~ht6VNTx-DDRNCg2J1-WrpbFCTPS~B-AaTS"
-        #client_secret = "Z6F8Q~ht6VNTx-DDRNCg2J1-WrpbFCTPS~B-AaTS"
-        # Get the application credentials
-
-        logging.info("Authenticating with service principal credentials")
-        credential = ClientSecretCredential(args.tenant_id, client_id, client_secret) 
-        #old_credential = ServicePrincipalCredentials(client_id, client_secret, tenant=args.tenant_id, resource="https://graph.windows.net")
+    # Acquire a credential object
+    # default credential i.e. az login
+    credential = DefaultAzureCredential()
+    #azure.core.exceptions.ClientAuthenticationError
 
     resource = Resource(credential)
 
@@ -103,10 +76,10 @@ def main():
     #results["findings"] += graph_rbac_management(old_credential, args.tenant_id).run()
     #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
     results["findings"] += resource.run()
-    #results["findings"] += network(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += network(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += compute(credential, subscriptions, resource_groups, resources).run()
-    #results["findings"] += app_service(credential, subscriptions, resource_groups, resources).run()
-    #results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += app_service(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
     #results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
     #results["findings"] += keyvault(credential, subscriptions, resource_groups, resources).run()
 
@@ -121,3 +94,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

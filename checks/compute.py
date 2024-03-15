@@ -266,7 +266,7 @@ class compute(object):
 
         for subscription, disks in self.disks.items():
             for disk in disks:
-                if disk.public_network_access == "enabled":
+                if disk.public_network_access != "Disabled":
                     results["affected"].append(disk.name)
 
         if results["affected"]:

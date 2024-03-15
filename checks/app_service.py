@@ -209,7 +209,7 @@ class app_service(object):
 
         for subscription, web_apps in self.web_apps.items():
             for web_app in web_apps:
-                if web_app.public_network_access == "Enabled":
+                if web_app.public_network_access != "Disabled":
                     results["affected"].append(web_app.name)
                     results["analysis"][web_app.name] = web_app.default_host_name
 
