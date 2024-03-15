@@ -185,4 +185,4 @@ All checks are a function/method of the relevent class and are in the following 
 All methods contain the results dictionary object, print the name of the check on start up and retun the results dict after completing the check logic and populating it (affected, analysis and pass_fail) with the results of the check. 
 
 ### donations
-If you appreciate my work and gain value from using Snotra feel free to donate some sats at https://coinos.io/shaunography
+If you appreciate my work and gain value from using Snotra feel free to donate some sats at https://coinos.io/shaunwebber
