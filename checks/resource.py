@@ -20,27 +20,30 @@ class resource(object):
             logging.info(f'getting resource groups in subscription: { subscription.display_name }')
             try:
                 client= ResourceManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
-                groups[subscription.subscription_id] = list(client.resource_groups.list())
+                results = list(client.resource_groups.list())
             except Exception as e:
                 logging.error(f'error getting resource groups in subscription: { subscription.display_name }, error: { e }')
-
+            else:
+                if results:
+                    groups[subscription.subscription_id] = results
         return groups
 
     def get_resources(self):
         resources = {}
 
         for subscription in self.subscriptions:
-            resources[subscription.subscription_id] = {}
+            results = {}
             for group in self.resource_groups[subscription.subscription_id]:
                 logging.info(f'getting resources in resource group { group.name }')
                 try:
                     client = ResourceManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
                     response = list(client.resources.list_by_resource_group(group.name, expand = "createdTime,changedTime"))
                     if response:
-                        resources[subscription.subscription_id][group.name] = response
+                        results[group.name] = response
                 except Exception as e:
                     logging.error(f'error getting resources in resource group: { group.name }, error: { e }')
-
+            if results:
+                resources[subscription.subscription_id] = results
         return resources
 
     def run(self):
@@ -97,7 +100,7 @@ class resource(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "resource",
-            "name" : "ALl Resources",
+            "name" : "All Resources",
             "affected": [],
             "analysis" : "",
             "description" : "",

@@ -6,3 +6,4 @@ azure-mgmt-sql
 azure-mgmt-compute
 azure-mgmt-keyvault
 azure-mgmt-network
+azure-mgmt-monitor

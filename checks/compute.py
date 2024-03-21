@@ -16,7 +16,7 @@ class compute(object):
     def get_virtual_machines(self):
         virtual_machines = {}
         for subscription, resource_groups in self.resources.items():
-            virtual_machines[subscription] = []
+            results = []
             client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
             for resource_group, resources in resource_groups.items():
                 for resource in resources:
@@ -24,36 +24,40 @@ class compute(object):
                         logging.info(f'getting virtual machine { resource.name }')
                         try:
                             virtual_machine = client.virtual_machines.get(vm_name=resource.name, resource_group_name=resource_group)
-                            virtual_machines[subscription].append(virtual_machine)
+                            results.append(virtual_machine)
                         except Exception as e:
                             logging.error(f'error getting virtual machine: { resource.name }, error: { e }')
 
+            if results:
+                virtual_machines[subscription] = results
         return virtual_machines
 
     def get_virtual_machine_extensions(self):
         virtual_machine_extensions = {}
         for subscription, resource_groups in self.resources.items():
-            virtual_machine_extensions[subscription] = {}
+            results = {}
             client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
             for resource_group, resources in resource_groups.items():
                 for resource in resources:
                     if resource.type == "Microsoft.Compute/virtualMachines":
                         logging.info(f'getting virtual machine { resource.name }')
-                        virtual_machine_extensions[subscription][resource.name] = []
+                        results[resource.name] = []
                         try:
                             extensions = client.virtual_machine_extensions.list(vm_name=resource.name, resource_group_name=resource_group)
                             for extension in extensions.value:
                                 extention_details = client.virtual_machine_extensions.get(resource_group, resource.name, extension.name)
-                                virtual_machine_extensions[subscription][resource.name].append(extention_details)
+                                results[resource.name].append(extention_details)
                         except Exception as e:
                             logging.error(f'error getting virtual machine: { resource.name }, error: { e }')
+            if results:
+                virtual_machine_extensions[subscription] = results
 
         return virtual_machine_extensions
 
     def get_disks(self):
         disks = {}
         for subscription, resource_groups in self.resources.items():
-            disks[subscription] = []
+            results = []
             client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
             for resource_group, resources in resource_groups.items():
                 for resource in resources:
@@ -61,9 +65,11 @@ class compute(object):
                         logging.info(f'getting disk { resource.name }')
                         try:
                             disk = client.disks.get(disk_name=resource.name, resource_group_name=resource_group)
-                            disks[subscription].append(disk)
+                            results.append(disk)
                         except Exception as e:
                             logging.error(f'error getting disk: { resource.name }, error: { e }')
+            if results:
+                disks[subscription] = results
         return disks
 
     def run(self):
@@ -129,7 +135,7 @@ class compute(object):
             "name" : "Ensure Virtual Machines are utilizing Managed Disks (CIS)",
             "affected": [],
             "analysis" : {},
-            "description" : "Migrate blob-based VHDs to Managed Disks on Virtual Machines to exploit the default\nfeatures of this configuration. The features include:\n1. Default Disk Encryption\n2. Resilience, as Microsoft will managed the disk storage and move around if\nunderlying hardware goes faulty\n3. Reduction of costs over storage accounts\nRationale:\nManaged disks are by default encrypted on the underlying hardware, so no additional\nencryption is required for basic protection. It is available if additional encryption is\nrequired. Managed disks are by design more resilient that storage accounts.\nFor ARM-deployed Virtual Machines, Azure Adviser will at some point recommend\nmoving VHDs to managed disks both from a security and cost management\nperspective.",
+            "description" : "Migrate blob-based VHDs to Managed Disks on Virtual Machines to exploit the default features of this configuration. The features include: 1. Default Disk Encryption 2. Resilience, as Microsoft will managed the disk storage and move around if underlying hardware goes faulty 3. Reduction of costs over storage accounts Managed disks are by default encrypted on the underlying hardware, so no additional encryption is required for basic protection. It is available if additional encryption is required. Managed disks are by design more resilient that storage accounts. For ARM-deployed Virtual Machines, Azure Adviser will at some point recommend moving VHDs to managed disks both from a security and cost management perspective.",
             "remediation" : "From Azure Portal\n1. Using the search feature, go to Virtual Machines\n2. Select the virtual machine you would like to convert\n3. Select Disks in the menu for the VM\n4. At the top select Migrate to managed disks\n5. You may follow the prompts to convert the disk and finish by selecting Migrate to\nstart the process\nNOTE VMs will be stopped and restarted after migration is complete",
             "impact" : "info",
             "probability" : "info",
@@ -175,7 +181,7 @@ class compute(object):
             "name" : "Ensure that 'OS and Data' disks are encrypted with Customer Managed Key (CMK) (CIS)",
             "affected": [],
             "analysis" : {},
-            "description" : "Ensure that OS disks (boot volumes) and data disks (non-boot volumes) are encrypted\nwith CMK (Customer Managed Keys). Customer Managed keys can be either ADE or\nServer Side Encryption (SSE).\nRationale:\nEncrypting the IaaS VM's OS disk (boot volume) and Data disks (non-boot volume)\nensures that the entire content is fully unrecoverable without a key, thus protecting the\nvolume from unwanted reads. PMK (Platform Managed Keys) are enabled by default in\nAzure-managed disks and allow encryption at rest. CMK is recommended because it\ngives the customer the option to control which specific keys are used for the encryption\nand decryption of the disk. The customer can then change keys and increase security\nby disabling them instead of relying on the PMK key that remains unchanging. There is\nalso the option to increase security further by using automatically rotating keys so that\naccess to disk is ensured to be limited. Organizations should evaluate what their\nsecurity requirements are, however, for the data stored on the disk. For high-risk data\nusing CMK is a must, as it provides extra steps of security. If the data is low risk, PMK is\nenabled by default and provides sufficient data security.",
+            "description" : "Ensure that OS disks (boot volumes) and data disks (non-boot volumes) are encrypted with CMK (Customer Managed Keys). Customer Managed keys can be either ADE or Server Side Encryption (SSE). Rationale: Encrypting the IaaS VM's OS disk (boot volume) and Data disks (non-boot volume) ensures that the entire content is fully unrecoverable without a key, thus protecting the volume from unwanted reads. PMK (Platform Managed Keys) are enabled by default in Azure-managed disks and allow encryption at rest. CMK is recommended because it gives the customer the option to control which specific keys are used for the encryption and decryption of the disk. The customer can then change keys and increase security by disabling them instead of relying on the PMK key that remains unchanging. There is also the option to increase security further by using automatically rotating keys so that access to disk is ensured to be limited. Organizations should evaluate what their security requirements are, however, for the data stored on the disk. For high-risk data using CMK is a must, as it provides extra steps of security. If the data is low risk, PMK is enabled by default and provides sufficient data security.",
             "remediation" : "From Azure Portal\nNote: Disks must be detached from VMs to have encryption changed.\n1. Go to Virtual machines\n2. For each virtual machine, go to Settings\n3. Click on Disks\n4. Click the ellipsis (...), then click Detach to detach the disk from the VM\n5. Now search for Disks and locate the unattached disk\n6. Click the disk then select Encryption\n7. Change your encryption type, then select your encryption set\n8. Click Save\n9. Go back to the VM and re-attach the disk",
             "impact" : "low",
             "probability" : "low",
@@ -292,7 +298,7 @@ class compute(object):
             "name" : "Unattached Disks",
             "affected": [],
             "analysis" : {},
-            "description" : "The account contains Virtual Machine Disks that are not attached to any resources and are therefore likely no longer required. To maintain the hygiene of your subscription, lower costs and reduce the risk  of sensitive data disclosure it is recommended that all unused virtual machine disks are deleted. ",
+            "description" : "The account contains Virtual Machine Disks that are not attached to any resources and are therefore likely no longer required. To maintain the hygiene of your subscription, lower costs and reduce the risk  of sensitive data disclosure it is recommended that all unused virtual machine disks are deleted.",
             "remediation" : "Determine if the affect virtual disk is required and if not delete it.",
             "impact" : "info",
             "probability" : "info",
@@ -371,7 +377,7 @@ class compute(object):
             "name" : "Ensure that Only Approved Extensions Are Installed (CIS)",
             "affected": [],
             "analysis" : {},
-            "description" : "For added security, only install organization-approved extensions on VMs.\nAzure virtual machine extensions are small applications that provide post-deployment\nconfiguration and automation tasks on Azure virtual machines. These extensions run\nwith administrative privileges and could potentially access anything on a virtual\nmachine. The Azure Portal and community provide several such extensions. Each\norganization should carefully evaluate these extensions and ensure that only those that\nare approved for use are actually implemented.",
+            "description" : "For added security, only install organization-approved extensions on VMs. Azure virtual machine extensions are small applications that provide post-deployment configuration and automation tasks on Azure virtual machines. These extensions run with administrative privileges and could potentially access anything on a virtual machine. The Azure Portal and community provide several such extensions. Each organization should carefully evaluate these extensions and ensure that only those that are approved for use are actually implemented.",
             "remediation" : "From Azure Portal\n1. Go to Virtual machines\n2. For each virtual machine, go to Settings\n3. Click on Extensions + applications\n4. If there are unapproved extensions, uninstall them.",
             "impact" : "info",
             "probability" : "info",
