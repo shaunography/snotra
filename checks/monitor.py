@@ -22,6 +22,25 @@ class monitor(object):
                 results.append(setting)
             for resource_group, resources in resource_groups.items():
                 for resource in resources:
+                    # get diagnostic setting at blob etc level
+                    if resource.type == "Microsoft.Storage/storageAccounts":
+                        try:
+                            logging.info(f'getting diagnostic settings for storage account { resource.name }')
+                            for setting in client.diagnostic_settings.list(resource.id + "/blobServices/default"):
+                                results.append(setting)
+                            for setting in client.diagnostic_settings.list(resource.id + "/queueServices/default"):
+                                results.append(setting)
+                            for setting in client.diagnostic_settings.list(resource.id + "/tableServices/default"):
+                                results.append(setting)
+                            for setting in client.diagnostic_settings.list(resource.id + "/fileServices/default"):
+                                results.append(setting)
+                        except exceptions.HttpResponseError as e:
+                            if "ResourceTypeNotSupported" in e.message:
+                                pass
+                            else:
+                                logging.error(f'error getting diagnostic settings for: { resource.name }, error: { e }')
+                        except Exception as e:
+                            logging.error(f'error getting diagnostic settings for: { resource.name }, error: { e }')
                     try:
                         logging.info(f'getting diagnostic settings for { resource.name }')
                         for setting in client.diagnostic_settings.list(resource.id):
@@ -64,7 +83,7 @@ class monitor(object):
 
         results = {
             "id" : "monitor_1",
-            "ref" : "5.1",
+            "ref" : "5.1,3.13,3.14",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "monitor",
@@ -124,6 +143,20 @@ class monitor(object):
                                     if log.enabled != True:
                                         results["affected"].append(subscription)
                                         results["analysis"].append(f"the diagnostic setting {diagnostic_setting.id} is not capturing the AzurePolicyEvaluationDetails category")
+                        if "blobservices" in diagnostic_setting.id or "tableservices" in diagnostic_setting.id:
+                            for log in diagnostic_setting.logs:
+                                if log.category == "StorageRead":
+                                    if log.enabled != True:
+                                        results["affected"].append(subscription)
+                                        results["analysis"].append(f"the diagnostic setting {diagnostic_setting.id} is not capturing the StorageRead category")
+                                if log.category == "StorageWrite":
+                                    if log.enabled != True:
+                                        results["affected"].append(subscription)
+                                        results["analysis"].append(f"the diagnostic setting {diagnostic_setting.id} is not capturing the StorageWrite category")
+                                if log.category == "StorageDelete":
+                                    if log.enabled != True:
+                                        results["affected"].append(subscription)
+                                        results["analysis"].append(f"the diagnostic setting {diagnostic_setting.id} is not capturing the StorageDelete category")
 
                 if not subscription_settings:
                         results["affected"].append(subscription)

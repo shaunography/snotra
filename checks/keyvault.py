@@ -33,6 +33,8 @@ class keyvault(object):
         findings += [ self.keyvault_1() ]
         findings += [ self.keyvault_2() ]
         findings += [ self.keyvault_3() ]
+        findings += [ self.keyvault_4() ]
+        findings += [ self.keyvault_5() ]
         return findings
 
     def cis(self):
@@ -147,6 +149,84 @@ class keyvault(object):
             results["pass_fail"] = "FAIL"
         elif self.vaults:
             results["analysis"] = "key vaults have soft delete and purge protection enabled"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no key vaults found"
+
+        return results
+
+    def keyvault_4(self):
+        # Enable Role Based Access Control for Azure Key Vault (CIS)
+
+        results = {
+            "id" : "keyvault_4",
+            "ref" : "8.6",
+            "compliance" : "cis_v2.1.0",
+            "level" : 2,
+            "service" : "keyvault",
+            "name" : "Enable Role Based Access Control for Azure Key Vault (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "WARNING: Role assignments disappear when a Key Vault has been deleted (soft-delete) and recovered. Afterwards it will be required to recreate all role assignments. This is a limitation of the soft-delete feature across all Azure services.\nThe new RBAC permissions model for Key Vaults enables a much finer grained access control for key vault secrets, keys, certificates, etc., than the vault access policy. This in turn will permit the use of privileged identity management over these roles, thus securing the key vaults with JIT Access management.\nImplementation needs to be properly designed from the ground up, as this is a fundamental change to the way key vaults are accessed/managed. Changing permissions to key vaults will result in loss of service as permissions are re-applied. For the least amount of downtime, map your current groups and users to their corresponding permission needs.",
+            "remediation" : "From Azure Portal\nKey Vaults can be configured to use Azure role-based access control on creation.\nFor existing Key Vaults:\n1. From Azure Home open the Portal Menu in the top left corner\n2. Select Key Vaults\n3. Select a Key Vault to audit\n4. Select Access configuration\n5. Set the Permission model radio button to Azure role-based access control,\ntaking note of the warning message\n6. Click Save\n7. Select Access Control (IAM)\n8. Select the Role Assignments tab\n9. Reapply permissions as needed to groups or users",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "5.4",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, key_vaults in self.vaults.items():
+            for key_vault in key_vaults:
+                if key_vault.properties.enable_rbac_authorization != True:
+                    results["affected"].append(key_vault.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected key vaults do not have role based access control enabled"
+            results["pass_fail"] = "FAIL"
+        elif self.vaults:
+            results["analysis"] = "key vaults have role based access control enabled"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no key vaults found"
+
+        return results
+
+    def keyvault_5(self):
+        # Ensure that Private Endpoints are Used for Azure Key Vault (CIS)
+
+        results = {
+            "id" : "keyvault_5",
+            "ref" : "8.7",
+            "compliance" : "cis_v2.1.0",
+            "level" : 2,
+            "service" : "keyvault",
+            "name" : "Ensure that Private Endpoints are Used for Azure Key Vault (CIS)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Private endpoints will secure network traffic from Azure Key Vault to the resources requesting secrets and keys.\nPrivate endpoints will keep network requests to Azure Key Vault limited to the endpoints attached to the resources that are whitelisted to communicate with each other. Assigning the Key Vault to a network without an endpoint will allow other resources on that network to view all traffic from the Key Vault to its destination. In spite of the complexity in configuration, this is recommended for high security secrets.\nIncorrect or poorly-timed changing of network configuration could result in service interruption. There are also additional costs tiers for running a private endpoint per petabyte or more of networking traffic.",
+            "remediation" : "If key vaults are only used internally, then consider implementing private endpoint for container access, and removed all other network access to provide greater defence in depth and data confidentiality.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, key_vaults in self.vaults.items():
+            for key_vault in key_vaults:
+                if not key_vault.properties.private_endpoint_connections:
+                    results["affected"].append(key_vault.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected key vaults are not using private endpoint connections"
+            results["pass_fail"] = "FAIL"
+        elif self.vaults:
+            results["analysis"] = "key vaults are using private endpoint connnections"
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no key vaults found"

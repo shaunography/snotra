@@ -1,6 +1,10 @@
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.blob import BlobServiceClient
 
+from datetime import date
+from datetime import datetime, timezone
+from datetime import timedelta
+
 import logging
 
 class storage_account(object):
@@ -59,6 +63,11 @@ class storage_account(object):
         findings += [ self.storage_account_6() ]
         findings += [ self.storage_account_7() ]
         findings += [ self.storage_account_8() ]
+        findings += [ self.storage_account_9() ]
+        findings += [ self.storage_account_10() ]
+        findings += [ self.storage_account_11() ]
+        findings += [ self.storage_account_12() ]
+        findings += [ self.storage_account_13() ]
         return findings
 
     def cis(self):
@@ -71,7 +80,7 @@ class storage_account(object):
 
         results = {
             "id" : "storage_account_1",
-            "ref" : "N/A",
+            "ref" : "snotra",
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "storage_account",
@@ -387,3 +396,208 @@ class storage_account(object):
 
         return results
 
+    def storage_account_9(self):
+        # Ensure Default Network Access Rule for Storage Accounts is Set to Deny (CIS)
+
+        results = {
+            "id" : "storage_account_9",
+            "ref" : "3.8",
+            "compliance" : "cis_v3.1.0",
+            "level" : 1,
+            "service" : "storage_account",
+            "name" : "Ensure Default Network Access Rule for Storage Accounts is Set to Deny (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Restricting default network access helps to provide a new layer of security, since storage accounts accept connections from clients on any network. To limit access to selected networks, the default action must be changed.\nStorage accounts should be configured to deny access to traffic from all networks (including internet traffic). Access can be granted to traffic from specific Azure Virtual networks, allowing a secure network boundary for specific applications to be built. Access can also be granted to public internet IP address ranges to enable connections from specific internet or on-premises clients. When network rules are configured, only applications from allowed networks can access a storage account. When calling from an allowed network, applications continue to require proper authorization (a valid access key or SAS token) to access the storage account.\nAll allowed networks will need to be whitelisted on each specific network, creating administrative overhead. This may result in loss of network connectivity, so do not turn on for critical resources during business hours.",
+            "remediation" : "From Azure Console\n1. Go to Storage Accounts\n2. For each storage account, Click on the Networking blade\n3. Click the Firewalls and virtual networks heading.\n4. Ensure that you have elected to allow access from Selected networks\n5. Add rules to allow traffic from specific network.\n6. Click Save to apply your changes.",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N ",
+            "cvss_score" : "5.4",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, storage_accounts in self.storage_accounts.items():
+            for storage_account in storage_accounts:
+                if storage_account.public_network_access != "Disabled":
+                    if not storage_account.network_rule_set.ip_rules:
+                        if not storage_account.network_rule_set.virtual_network_rules:
+                            results["affected"].append(storage_account.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected storage accounts allow access from all networks"
+            results["pass_fail"] = "FAIL"
+        elif self.storage_accounts:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "storage acounts do not allow access from all networks"
+        else:
+            results["analysis"] = "no storage accounts in use"
+
+        return results
+
+    def storage_account_10(self):
+        # Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access (CIS)
+
+        results = {
+            "id" : "storage_account_10",
+            "ref" : "3.9",
+            "compliance" : "cis_v3.1.0",
+            "level" : 2,
+            "service" : "storage_account",
+            "name" : "Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Some Azure services that interact with storage accounts operate from networks that can't be granted access through network rules. To help this type of service work as intended, allow the set of trusted Azure services to bypass the network rules. These services will then use strong authentication to access the storage account. If the Allowtrusted Azure services exception is enabled, the following services are granted accessto the storage account: Azure Backup, Azure Site Recovery, Azure DevTest Labs,Azure Event Grid, Azure Event Hubs, Azure Networking, Azure Monitor, and Azure SQLData Warehouse (when registered in the subscription).Turning on firewall rules for storage account will block access to incoming requests fordata, including from other Azure services. We can re-enable this functionality byenabling 'Trusted Azure Services' through networking exceptions.\nThis creates authentication credentials for services that need access to storageresources so that services will no longer need to communicate via network request.\nThere may be a temporary loss of communication as you set each Storage Account. Itis recommended to not do this on mission-critical resources during business hours.",
+            "remediation" : "From Azure Portal\n1. Go to Storage Accounts\n2. For each storage account, Click on the Networking blade\n3. Click on the Firewalls and virtual networks heading.\n4. Ensure that Enabled from selected virtual networks and IP addresses is\nselected.\n5. Under the 'Exceptions' label, enable check box for Allow Azure services on the\ntrusted services list to access this storage account.\n6. Click Save to apply your changes.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, storage_accounts in self.storage_accounts.items():
+            for storage_account in storage_accounts:
+                if not storage_account.network_rule_set.bypass == "AzureServices":
+                    results["affected"].append(storage_account.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected storage accounts do not allow access from azure services"
+            results["pass_fail"] = "FAIL"
+        elif self.storage_accounts:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "storage acounts allow access from azure services"
+        else:
+            results["analysis"] = "no storage accounts in use"
+
+        return results
+
+    def storage_account_11(self):
+        # Ensure that ‘Enable Infrastructure Encryption’ for Each Storage Account in Azure Storage is Set to ‘enabled’ (CIS)
+
+        results = {
+            "id" : "storage_account_11",
+            "ref" : "3.2",
+            "compliance" : "cis_v3.1.0",
+            "level" : 2,
+            "service" : "storage_account",
+            "name" : "Ensure that ‘Enable Infrastructure Encryption’ for Each Storage Account in Azure Storage is Set to ‘enabled’ (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Enabling encryption at the hardware level on top of the default software encryption for Storage Accounts accessing Azure storage solutions. Azure Storage automatically encrypts all data in a storage account at the network levelusing 256-bit AES encryption, which is one of the strongest, FIPS 140-2-compliant blockciphers available. Customers who require higher levels of assurance that their data issecure can also enable 256-bit AES encryption at the Azure Storage infrastructure levelfor double encryption. Double encryption of Azure Storage data protects against ascenario where one of the encryption algorithms or keys may be compromised.Similarly, data is encrypted even before network transmission and in all backups. In thisscenario, the additional layer of encryption continues to protect your data. For the mostsecure implementation of key based encryption, it is recommended to use a CustomerManaged asymmetric RSA 2048 Key in Azure Key Vault.\nThe read and write speeds to the storage will be impacted if both default encryption and Infrastructure Encryption are checked, as a secondary form of encryption requires more resource overhead for the cryptography of information. This performance impact should be considered in an analysis for justifying use of the feature in your environment. Customer-managed keys are recommended for the most secure implementation, leading to overhead of key management. The key will also need to be backed up in a secure location, as loss of the key will mean loss of the information in the storage.",
+            "remediation" : "Infrastructure encryption can only be enabled on storage account creation.\nFrom Azure Portal\n1. During Storage Account creation, in the Encryption tab, check the box next to\nEnable infrastructure encryption.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, storage_accounts in self.storage_accounts.items():
+            for storage_account in storage_accounts:
+                if storage_account.encryption.require_infrastructure_encryption != True:
+                    results["affected"].append(storage_account.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected storage accounts do not hahve infrastructure encryption enabled"
+            results["pass_fail"] = "FAIL"
+        elif self.storage_accounts:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "storage acounts are using infrastructure encryption"
+        else:
+            results["analysis"] = "no storage accounts in use"
+
+        return results
+
+    def storage_account_12(self):
+        # Ensure that Storage Account Access Keys are Periodically Regenerated (CIS)
+
+        results = {
+            "id" : "storage_account_12",
+            "ref" : "3.3,3,4",
+            "compliance" : "cis_v3.1.0",
+            "level" : 2,
+            "service" : "storage_account",
+            "name" : "Ensure that Storage Account Access Keys are Periodically Regenerated (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "For increased security, regenerate storage account access keys periodically. When a storage account is created, Azure generates two 512-bit storage access keys which are used for authentication when the storage account is accessed. Rotating these keys periodically ensures that any inadvertent access or exposure does not result from the compromise of these keys.\nCryptographic key rotation periods will vary depending on your organization's security requirements and the type of data which is being stored in the Storage Account. For example, PCI DSS mandates that cryptographic keys be replaced or rotated 'regularly,' and advises that keys for static data stores be rotated every 'few months.' For the purposes of this recommendation, 90 days will prescribed for the reminder. Review and adjustment of the 90 day period is recommended, and may even be necessary. Your organization's security requirements should dictate the appropriate setting.\nRegenerating access keys can affect services in Azure as well as the organization's applications that are dependent on the storage account. All clients who use the access key to access the storage account must be updated to use the new key.",
+            "remediation" : "It is recomended that a reminder is configured to each storage account to rotate keys on a regular schedule.For the purposes of this recommendation, 90 days will prescribed for the reminder. Review and adjustment of the 90 day period is recommended, and may even be necessary. Your organization's security requirements should dictate the appropriate setting. From Azure Portal\n1. Go to Storage Accounts\n2. For each Storage Account with outdated keys, go to Access keys\n3. Click Rotate key next to the outdated key, then click Yes to the prompt confirming\nthat you want to regenerate the access key.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, storage_accounts in self.storage_accounts.items():
+            for storage_account in storage_accounts:
+                if not storage_account.key_creation_time.key1 or not storage_account.key_creation_time.key2:
+                    results["affected"].append(storage_account.name)
+                else:
+                    # get storage account created more than 90 days ago
+                    if storage_account.creation_time < (datetime.now(timezone.utc) - timedelta(days=90)):
+                        # check if key creation time is the same as the storage account creation time
+                        if storage_account.key_creation_time.key1.date() == storage_account.creation_time.date() or storage_account.key_creation_time.key2.date() == storage_account.creation_time.date():
+                            results["affected"].append(storage_account.name)
+                        elif storage_account.key_creation_time.key1 < (datetime.now(timezone.utc) - timedelta(days=90)) or storage_account.key_creation_time.key2 < (datetime.now(timezone.utc) - timedelta(days=90)):
+                            results["affected"].append(storage_account.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected storage accounts have access keys that have not been recently rotated"
+            results["pass_fail"] = "FAIL"
+        elif self.storage_accounts:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "storage acounts are access keys that have been recently rotated"
+        else:
+            results["analysis"] = "no storage accounts in use"
+
+        return results
+
+    def storage_account_13(self):
+        # Ensure Private Endpoints are used to access Storage Accounts (CIS)
+
+        results = {
+            "id" : "storage_account_13",
+            "ref" : "3.10",
+            "compliance" : "cis_v3.1.0",
+            "level" : 1,
+            "service" : "storage_account",
+            "name" : "Ensure Private Endpoints are used to access Storage Accounts (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Use private endpoints for your Azure Storage accounts to allow clients and services to securely access data located over a network via an encrypted Private Link. To do this, the private endpoint uses an IP address from the VNet for each service. Network traffic between disparate services securely traverses encrypted over the VNet. This VNet can also link addressing space, extending your network and accessing resources on it. Similarly, it can be a tunnel through public networks to connect remote infrastructures together. This creates further security through segmenting network traffic and preventing outside sources from accessing it.",
+            "remediation" : "If storage account are only used internally, then consider implementing private endpoint for container access, and removed all other network access to provide greater defence in depth and data confidentiality.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, storage_accounts in self.storage_accounts.items():
+            for storage_account in storage_accounts:
+                if not storage_account.private_endpoint_connections:
+                    results["affected"].append(storage_account.name)
+
+
+        if results["affected"]:
+            results["analysis"] = "the affected storage accounts do no have private endpoint connections configured"
+            results["pass_fail"] = "FAIL"
+        elif self.storage_accounts:
+            results["pass_fail"] = "PASS"
+            results["analysis"] = "storage acounts have private endpoint connections configured"
+        else:
+            results["analysis"] = "no storage accounts in use"
+
+        return results

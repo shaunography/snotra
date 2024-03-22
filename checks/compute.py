@@ -83,6 +83,7 @@ class compute(object):
         findings += [ self.compute_7() ]
         findings += [ self.compute_8() ]
         findings += [ self.compute_9() ]
+        findings += [ self.compute_10() ]
         return findings
 
     def cis(self):
@@ -95,7 +96,7 @@ class compute(object):
 
         results = {
             "id" : "compute_1",
-            "ref" : "N/A",
+            "ref" : "snotra",
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "compute",
@@ -259,8 +260,8 @@ class compute(object):
             "name" : "Disks With Public Network Access Enabled",
             "affected": [],
             "analysis" : {},
-            "description" : "",
-            "remediation" : "",
+            "description" : "The subscription under review contained resources which did not implement network level access restrictions (Firewall rules) and therefore allowed unrestricted traffic from the public internet. This configuration impacted the security posture of the cloud environment and increased the risk of unauthorized data exposure.\nBy default resources in Azure do not implement a firewall to restrict network level access, therefore all users, applications, and services including those on the public internet could potentially communicate with resources  hosted within a subscription at the network layer. Although often protected by authentication, the lack of network restrictions increased the attack surface of the resources and the wider Azure environment. An attacker able to compromise valid credentials could use those credentials to interact with the service from clients on any network or from other Azure tenancies.",
+            "remediation" : "The affected resources should be configured to restrict network access to the internal virtual private networks. Where external access is required for legitimate purposes, access should be restricted to a subset of whitelisted public IP addresses.\nAdditionally, where external access is not required, organisations should consider implementing a private endpoint connection to facilitate a secure connection between internal services whilst removing the requirement to use public infrastructure. When a private endpoint is configured all traffic between resources is transmitted over the Azure backbone ‘Azure PrivateLink’ network using virtual private IP addresses reducing the exposure of sensitive data.\nTo configure firewall rules within the Azure Portal:\n•	Go to resource.\n•	For each resource, click on the settings menu called ‘Networking’.\n•	Ensure that you have elected to allow access from Selected networks.\n•	Add rules to allow traffic from specific networks and IPs as required.\n•	Click Save to apply your changes.\n",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
@@ -402,66 +403,6 @@ class compute(object):
 
         return results
 
-    #def compute_9(self):
-        ## Ensure Trusted Launch is enabled on Virtual Machines (CIS)
-#
-        #results = {
-            #"id" : "compute_9",
-            #"ref" : "7.9",
-            #"compliance" : "cis_v2.1.0",
-            #"level" : 1,
-            #"service" : "compute",
-            #"name" : "Ensure Trusted Launch is enabled on Virtual Machines (CIS)",
-            #"affected": [],
-            #"analysis" : "",
-            #"description" : "When Secure Boot and vTPM are enabled together, they provide a strong foundation\nfor protecting your VM from boot attacks. For example, if an attacker attempts to replace\nthe bootloader with a malicious version, Secure Boot will prevent the VM from booting. If\nthe attacker is able to bypass Secure Boot and install a malicious bootloader, vTPM can\nbe used to detect the intrusion and alert you.\nRationale:\nSecure Boot and vTPM work together to protect your VM from a variety of boot attacks,\nincluding bootkits, rootkits, and firmware rootkits. Not enabling Trusted Launch in Azure\nVM can lead to increased vulnerability to rootkits and boot-level malware, reduced\nability to detect and prevent unauthorized changes to the boot process, and a potential\ncompromise of system integrity and data security.\nImpact:\nSecure Boot and vTPM are not currently supported for Azure Generation 1 VMs.\nIMPORTANT: Before enabling Secure Boot and vTPM on a Generation 2 VM which\ndoes not already have both enabled, it is highly recommended to create a restore point\nof the VM prior to remediation.",
-            #"remediation" : "From Azure Portal\n1. Go to Virtual Machines\n2. For each VM, under Settings, click on Configuration on the left blade\n3. Under Security Type, select 'Trusted Launch Virtual Machines'\n4. Make sure Enable Secure Boot & Enable vTPM are checked\n5. Click on Apply.\nNote: Trusted launch on existing virtual machines (VMs) is currently not supported for\nAzure Generation 1 VMs",
-            #"impact" : "info",
-            #"probability" : "info",
-            #"cvss_vector" : "N/A",
-            #"cvss_score" : "N/A",
-            #"pass_fail" : ""
-        #}
-#
-        #logging.info(results["name"]) 
-#
-        #for subscription, virtual_machines in self.virtual_machines.items():
-            #for virtual_machine in virtual_machines:
-                #if virtual_machine.os_profile.windows_configuration:
-                    #print(virtual_machine.os_profile.windows_configuration)
-
-        #for subscription, virtual_machines in self.virtual_machine_extensions.items():
-            #for virtual_machine, extensions in virtual_machines.items():
-                #enabled = False
-                #for extension in extensions:
-                    #print(extension.name)
-                    #if extension.name == "TrustedLaunchExtension":
-                        #print(virtual_machine.name)
-                        #enabled = True
-                #if not enabled:
-                    #results["affected"].append(virtual_machine)
-
-        #for subscription, virtual_machines in self.virtual_machine_extensions.items():
-            #for virtual_machine, extensions in virtual_machines.items():
-                #enabled = False
-                #for extension in extensions.value:
-                    #if extension.name == "TrustedLaunchExtension":
-                        #print(virtual_machine.name)
-                        #enabled = True
-                #if not enabled:
-                    #results["affected"].append(virtual_machine)
-
-
-        #if results["affected"]:
-            #results["pass_fail"] = "FAIL"
-            #results["analysis"] = "the affected virtual machiones do not have trusted launch enabled"
-        #elif self.virtual_machines:
-            #results["analysis"] = "no virtual machines in use"
-            #results["pass_fail"] = "PASS"
-        #else:
-            #results["analysis"] = "all virtual machines have trusted launch enabled"
-#
-        #return results
 
     def compute_9(self):
         # virtual machines with user data
@@ -502,3 +443,100 @@ class compute(object):
             results["analysis"] = "no virtual machines in use"
 
         return results
+
+    def compute_10(self):
+        # Stopped Virtual Machines
+
+        results = {
+            "id" : "compute_10",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Stopped Virtual Machines",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The subscription contains virtual machines which are in the stopped state. When you are logged in to the operating system of an Azure VM, you can issue a command to shut down the server. This will kick you out of the OS and stop all processes, but will maintain the allocated hardware (including the IP addresses currently assigned). If you find the VM in the Azure console, you’ll see the state listed as 'Stopped'. When a machine is in this state you are still being charged by the hour for this instance. The other way to stop your virtual machine is through Azure itself, whether that’s through the console, Powershell, or the Azure CLI. When you stop a VM through Azure, rather than through the OS, it goes into a 'Stopped (deallocated)' state. This means that any non-static public IPs will be released, but you’ll also stop paying for the VM’s compute costs. This is a great way to save money on your Azure costs when you don’t need those VMs running",
+            "remediation" : "To reduce the cost of your environment review the list of stopped Virtual Machines and deallocate or delete them as required.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, resource_groups in self.resources.items():
+            client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.Compute/virtualMachines":
+                        logging.info(f'getting instance view for virtual machine { resource.name }')
+                        try:
+                            instance_view = client.virtual_machines.instance_view(vm_name=resource.name, resource_group_name=resource_group)
+                            for status in instance_view.statuses:
+                                if status.code == "PowerState/stopped":
+                                    results["affected"].append(resource.name)
+                        except Exception as e:
+                            logging.error(f'error getting instance view for virtual machine: { resource.name }, error: { e }')
+
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected virtual machines are in a stopped but not deallocated state"
+        elif self.virtual_machines:
+            results["analysis"] = "no virtual machines in use"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no stopped virtual machines found"
+
+        return results
+
+    #def compute_10(self):
+        ## Ensure Trusted Launch is enabled on Virtual Machines (CIS)
+#
+        #results = {
+            #"id" : "compute_9",
+            #"ref" : "7.9",
+            #"compliance" : "cis_v2.1.0",
+            #"level" : 1,
+            #"service" : "compute",
+            #"name" : "Ensure Trusted Launch is enabled on Virtual Machines (CIS)",
+            #"affected": [],
+            #"analysis" : "",
+            #"description" : "When Secure Boot and vTPM are enabled together, they provide a strong foundation\nfor protecting your VM from boot attacks. For example, if an attacker attempts to replace\nthe bootloader with a malicious version, Secure Boot will prevent the VM from booting. If\nthe attacker is able to bypass Secure Boot and install a malicious bootloader, vTPM can\nbe used to detect the intrusion and alert you.\nRationale:\nSecure Boot and vTPM work together to protect your VM from a variety of boot attacks,\nincluding bootkits, rootkits, and firmware rootkits. Not enabling Trusted Launch in Azure\nVM can lead to increased vulnerability to rootkits and boot-level malware, reduced\nability to detect and prevent unauthorized changes to the boot process, and a potential\ncompromise of system integrity and data security.\nImpact:\nSecure Boot and vTPM are not currently supported for Azure Generation 1 VMs.\nIMPORTANT: Before enabling Secure Boot and vTPM on a Generation 2 VM which\ndoes not already have both enabled, it is highly recommended to create a restore point\nof the VM prior to remediation.",
+            #"remediation" : "From Azure Portal\n1. Go to Virtual Machines\n2. For each VM, under Settings, click on Configuration on the left blade\n3. Under Security Type, select 'Trusted Launch Virtual Machines'\n4. Make sure Enable Secure Boot & Enable vTPM are checked\n5. Click on Apply.\nNote: Trusted launch on existing virtual machines (VMs) is currently not supported for\nAzure Generation 1 VMs",
+            #"impact" : "info",
+            #"probability" : "info",
+            #"cvss_vector" : "N/A",
+            #"cvss_score" : "N/A",
+            #"pass_fail" : ""
+        #}
+#
+        #logging.info(results["name"]) 
+#
+        #for subscription, resource_groups in self.resources.items():
+            #client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
+            #for resource_group, resources in resource_groups.items():
+                #for resource in resources:
+                    #if resource.type == "Microsoft.Compute/virtualMachines":
+                        #logging.info(f'getting instance view for virtual machine { resource.name }')
+                        #try:
+                            #instance_view = client.virtual_machines.instance_view(vm_name=resource.name, resource_group_name=resource_group)
+                            #for status in instance_view.statuses:
+                                #print(status)
+                        #except Exception as e:
+                            #logging.error(f'error getting instance view for virtual machine: { resource.name }, error: { e }')
+#
+#
+        #if results["affected"]:
+            #results["pass_fail"] = "FAIL"
+            #results["analysis"] = "the affected virtual machiones do not have trusted launch enabled"
+        #elif self.virtual_machines:
+            #results["analysis"] = "no virtual machines in use"
+            #results["pass_fail"] = "PASS"
+        #else:
+            #results["analysis"] = "all virtual machines have trusted launch enabled"
+#
+        #return results

@@ -113,6 +113,7 @@ class network(object):
         findings += [ self.network_5() ]
         findings += [ self.network_6() ]
         findings += [ self.network_7() ]
+        findings += [ self.network_8() ]
         return findings
 
     def cis(self):
@@ -166,19 +167,19 @@ class network(object):
         return results
 
     def network_2(self):
-        # Ensure an Azure Bastion Host Exists (CIS)
+        # Ensure that Public IP addresses are Evaluated on a Periodic Basis (CIS)
 
         results = {
             "id" : "network_2",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "6.7",
+            "compliance" : "cis_v2.1.0",
+            "level" : 1,
             "service" : "network",
-            "name" : "Public IP Addresses",
+            "name" : "Ensure that Public IP addresses are Evaluated on a Periodic Basis (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "",
-            "remediation" : "",
+            "description" : "Public IP Addresses provide tenant accounts with Internet connectivity for resources contained within the tenant. During the creation of certain resources in Azure, a Public IP Address may be created. All Public IP Addresses within the tenant should be periodically reviewed for accuracy and necessity.\n Public IP Addresses allocated to the tenant should be periodically reviewed for necessity. Public IP Addresses that are not intentionally assigned and controlled present a publicly facing vector for threat actors and significant risk to the tenant.",
+            "remediation" : "Review all public ip addresses and determine if there continued availability is required.",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "N/A",
@@ -191,11 +192,10 @@ class network(object):
         results["analysis"] = self.public_ip_addresses
 
         if results["analysis"]:
-            results["affected"] = [ i for i, v in self.public_ip_addresses.items() ]
-            results["pass_fail"] = "PASS"
+            results["affected"] = [ i for i, v in results["analysis"].items() ]
+            results["pass_fail"] = "INFO"
         else:
-            results["analysis"] = "no public ip addresses in use"
-            results["pass_fail"] = "FAIL"
+            results["analysis"] = "no public ip addresses found"
 
         return results
 
@@ -389,5 +389,60 @@ class network(object):
         else:
             results["analysis"] = "network watchers are in use"
             results["pass_fail"] = "PASS"
+
+        return results
+
+    def network_8(self):
+        # Ensure that Network Security Group Flow logs are captured and sent to Log Analytics (CIS)
+
+        results = {
+            "id" : "network_8",
+            "ref" : "6.1-4",
+            "compliance" : "cis_v2.1.0",
+            "level" : 1,
+            "service" : "network",
+            "name" : "",
+            "affected": [],
+            "analysis" : {},
+            "description" : "The affected network security groups contain rules which allows unrestricted access to admin services from the internet. Admin services are often targetted by attackers and if compromised will often leave to unauthorised privileged access to resources. Network security groups should be periodically evaluated for port misconfigurations. Where certain ports and protocols may be exposed to the Internet, they should be evaluated for necessity and restricted wherever they are not explicitly required.\nThe potential security problem with using RDP / SSH / UDP / HTTP(S) over the Internet is that attackers can use various brute force techniques to gain access to Azure Virtual Machines. Once the attackers gain access, they can use a virtual machine as a launch point for compromising other machines on an Azure Virtual Network or even attack networked devices outside of Azure. ",
+            "remediation" : "Network should be configured following the principle of least privilege. Where external access to admin services is required, NSGs should be configured to only allows access from a white list of trusted IP addresses.",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "6.5",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        admin_ports = [ "22", "3389", "1433" ]
+        analysis = {}
+
+        for subscription, network_security_groups in self.network_security_groups.items():
+            analysis = {}
+            for network_security_group in network_security_groups:
+                rules = []
+                for rule in network_security_group.security_rules:
+                    if rule.direction == "Inbound":
+                        if rule.access == "Allow":
+                            if rule.source_address_prefix == "*":
+                                if not rule.source_address_prefixes:
+                                    if not rule.source_application_security_groups:
+                                        if rule.destination_port_range in admin_ports:
+                                            results["affected"].append(network_security_group.name)
+                                            rules.append(rule)
+
+                if rules:
+                    analysis[network_security_group.name] = rules
+            if analysis:
+                    results["analysis"][subscription] = analysis
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+        elif self.network_security_groups:
+            results["analysis"] = "no network security groups that allow access to admin services from the internet"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no network security groups in use"
 
         return results
