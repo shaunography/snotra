@@ -20,6 +20,8 @@ from checks.compute import compute
 from checks.keyvault import keyvault
 from checks.network import network
 from checks.monitor import monitor
+from checks.mysql import mysql
+from checks.postgresql import postgresql
 
 def main():
 
@@ -78,6 +80,8 @@ def main():
     #results["findings"] += graph_rbac_management(old_credential, args.tenant_id).run()
     #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
     results["findings"] += resource.run()
+    results["findings"] += mysql(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += postgresql(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += monitor(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += network(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += compute(credential, subscriptions, resource_groups, resources).run()
