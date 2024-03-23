@@ -337,9 +337,9 @@ class mysql(object):
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
-            results["analysis"] = "the affected Mysql servers do not have the 'audit_log_enabled' parameter set to 'ON'."
+            results["analysis"] = "the affected Mysql servers do not have the 'audit_log_events' parameter set to 'SESSION'."
         elif self.servers:
-            results["analysis"] = "Mysql servers have the 'audit_log_enabled' parameter set to 'ON'."
+            results["analysis"] = "Mysql servers have the 'audit_log_events' parameter set to 'SESSION'."
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Mysql servers found"
