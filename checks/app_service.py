@@ -275,7 +275,7 @@ class app_service(object):
             "compliance" : "cis_v2.1.0",
             "level": 1,
             "service" : "app_service",
-            "name" : "Ensure Web App is using the latest version of TLS encryption (CIS)",
+            "name" : "Ensure App Services Are Using Managed Identities To Access Resources In Azure (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Managed service identity in App Service provides more security by eliminating secrets\nfrom the app, such as credentials in the connection strings. When registering an App\nService with Entra ID, the app will connect to other Azure services securely without the\nneed for usernames and passwords.\nRationale:\nApp Service provides a highly scalable, self-patching web hosting service in Azure. It\nalso provides a managed identity for apps, which is a turn-key solution for securing\naccess to Azure SQL Database and other Azure services.",

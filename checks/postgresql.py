@@ -15,6 +15,7 @@ class postgresql(object):
         self.servers = self.get_servers()
         self.configurations = self.get_configurations()
         self.flexible_servers = self.get_flexible_servers()
+        self.flexible_configurations = self.get_flexible_configurations()
         #self.databases = self.get_databases()
         #self.flexible_databases = self.get_flexible_databases()
 
@@ -43,21 +44,21 @@ class postgresql(object):
         configurations = {}
         for subscription, resource_groups in self.servers.items():
             results = {}
-            client = Mysql.MySQLManagementClient(credential=self.credential, subscription_id=subscription)
+            client = Postgresql.PostgreSQLManagementClient(credential=self.credential, subscription_id=subscription)
             for resource_group, servers in resource_groups.items():
                 for server in servers:
                     configurations_on_server = []
-                    logging.info(f'getting mysql configurations for server: { server.name }')
+                    logging.info(f'getting postgresql configurations for server: { server.name }')
                     try:
                         configuration_list = list(client.configurations.list_by_server(server_name=server.name, resource_group_name=resource_group))
                     except Exception as e:
-                        logging.error(f'error getting mysql configurations for server: { server.name }, error: { e }')
+                        logging.error(f'error getting postgresql configurations for server: { server.name }, error: { e }')
                     else:
                         for configuration in configuration_list:
                             try:
                                 configurations_on_server.append(client.configurations.get(configuration_name=configuration.name, server_name=server.name, resource_group_name=resource_group))
                             except Exception as e:
-                                logging.error(f'error getting mysql configuration: { configuration.name }, error: { e }')
+                                logging.error(f'error getting postgresql configuration: { configuration.name }, error: { e }')
                         if configurations_on_server:
                             results[server.name] = configurations_on_server
             if results:
@@ -84,6 +85,31 @@ class postgresql(object):
             if results:
                 servers[subscription] = results
         return servers
+
+    def get_flexible_configurations(self):
+        configurations = {}
+        for subscription, resource_groups in self.flexible_servers.items():
+            results = {}
+            client = Postgresql_flexible.PostgreSQLManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, servers in resource_groups.items():
+                for server in servers:
+                    configurations_on_server = []
+                    logging.info(f'getting mysql configurations for server: { server.name }')
+                    try:
+                        configuration_list = list(client.configurations.list_by_server(server_name=server.name, resource_group_name=resource_group))
+                    except Exception as e:
+                        logging.error(f'error getting mysql configurations for server: { server.name }, error: { e }')
+                    else:
+                        for configuration in configuration_list:
+                            try:
+                                configurations_on_server.append(client.configurations.get(configuration_name=configuration.name, server_name=server.name, resource_group_name=resource_group))
+                            except Exception as e:
+                                logging.error(f'error getting mysql configuration: { configuration.name }, error: { e }')
+                        if configurations_on_server:
+                            results[server.name] = configurations_on_server
+            if results:
+                configurations[subscription] = results
+        return configurations
 
     def get_databases(self):
         databases = {}
@@ -140,6 +166,12 @@ class postgresql(object):
     def run(self):
         findings = []
         findings += [ self.postgresql_1() ]
+        findings += [ self.postgresql_2() ]
+        findings += [ self.postgresql_3() ]
+        findings += [ self.postgresql_4() ]
+        findings += [ self.postgresql_5() ]
+        findings += [ self.postgresql_6() ]
+        findings += [ self.postgresql_7() ]
         return findings
 
     def postgresql_1(self):
@@ -212,10 +244,17 @@ class postgresql(object):
                         if configuration.value != "ON":
                             results["affected"].append(server)
 
+        for subscription, servers in self.flexible_configurations.items():
+            for server, configurations in servers.items():
+                for configuration in configurations:
+                    if configuration.name == "log_checkpoints":
+                        if configuration.value != "ON":
+                            results["affected"].append(server)
+
         if results["affected"]:
             results["pass_fail"] = "FAIL"
             results["analysis"] = "the affected Postgresql servers do not have the 'log_checkpoints' parameter set to 'ON'."
-        elif self.servers:
+        elif self.servers or self.flexible_servers:
             results["analysis"] = "Postgresql servers have the 'log_checkpoints' parameter set to 'ON'."
             results["pass_fail"] = "PASS"
         else:
@@ -253,10 +292,17 @@ class postgresql(object):
                         if configuration.value != "ON":
                             results["affected"].append(server)
 
+        for subscription, servers in self.flexible_configurations.items():
+            for server, configurations in servers.items():
+                for configuration in configurations:
+                    if configuration.name == "log_connections":
+                        if configuration.value != "ON":
+                            results["affected"].append(server)
+
         if results["affected"]:
             results["pass_fail"] = "FAIL"
             results["analysis"] = "the affected Postgresql servers do not have the 'log_connections' parameter set to 'ON'."
-        elif self.servers:
+        elif self.servers or self.flexible_servers:
             results["analysis"] = "Postgresql servers have the 'log_connections' parameter set to 'ON'."
             results["pass_fail"] = "PASS"
         else:
@@ -294,10 +340,17 @@ class postgresql(object):
                         if configuration.value != "ON":
                             results["affected"].append(server)
 
+        for subscription, servers in self.flexible_configurations.items():
+            for server, configurations in servers.items():
+                for configuration in configurations:
+                    if configuration.name == "log_disconnections":
+                        if configuration.value != "ON":
+                            results["affected"].append(server)
+
         if results["affected"]:
             results["pass_fail"] = "FAIL"
             results["analysis"] = "the affected Postgresql servers do not have the 'log_disconnections' parameter set to 'ON'."
-        elif self.servers:
+        elif self.servers or self.flexible_servers:
             results["analysis"] = "Postgresql servers have the 'log_disconnections' parameter set to 'ON'."
             results["pass_fail"] = "PASS"
         else:
@@ -335,10 +388,17 @@ class postgresql(object):
                         if configuration.value != "ON":
                             results["affected"].append(server)
 
+        for subscription, servers in self.flexible_configurations.items():
+            for server, configurations in servers.items():
+                for configuration in configurations:
+                    if configuration.name == "connection_throttling":
+                        if configuration.value != "ON":
+                            results["affected"].append(server)
+
         if results["affected"]:
             results["pass_fail"] = "FAIL"
             results["analysis"] = "the affected Postgresql servers do not have the 'connection_throttling' parameter set to 'ON'."
-        elif self.servers:
+        elif self.servers or self.flexible_servers:
             results["analysis"] = "Postgresql servers have the 'connection_throttling' parameter set to 'ON'."
             results["pass_fail"] = "PASS"
         else:
@@ -376,11 +436,64 @@ class postgresql(object):
                         if configuration.value < 3:
                             results["affected"].append(server)
 
+        for subscription, servers in self.flexible_configurations.items():
+            for server, configurations in servers.items():
+                for configuration in configurations:
+                    if configuration.name == "log_retention_days":
+                        if configuration.value < 3:
+                            results["affected"].append(server)
+
         if results["affected"]:
             results["pass_fail"] = "FAIL"
             results["analysis"] = "the affected Postgresql servers do not have the 'log_retention_days' parameter set to greater than 3."
-        elif self.servers:
+        elif self.servers or self.flexible_servers:
             results["analysis"] = "Postgresql servers have the 'log_retention_days' parameter set to greater than 3."
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no Postgresql servers found"
+
+        return results
+
+    def postgresql_7(self):
+        # Ensure that 'Public Network Access' is `Disabled' for postgressql servers
+
+        results = {
+            "id" : "postgresql_7",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "postgresql",
+            "name" : "Ensure that 'Public Network Access' is `Disabled' for postgresql servers",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Disallowing public network access for a storage account overrides the public access\nsettings for individual containers in that storage account for Azure Resource Manager\nDeployment Model storage accounts. Azure Storage accounts that use the classic\ndeployment model will be retired on August 31, 2024.\nRationale:\nThe default network configuration for a storage account permits a user with appropriate\npermissions to configure public network access to containers and blobs in a storage\naccount. Keep in mind that public access to a container is always turned off by default\nand must be explicitly configured to permit anonymous requests. It grants read-only\naccess to these resources without sharing the account key, and without requiring a\nshared access signature. It is recommended not to provide public network access to\nstorage accounts until, and unless, it is strongly desired. A shared access signature\ntoken or Azure AD RBAC should be used for providing controlled and timed access to\nblob containers.",
+            "remediation" : "Ensure public network access is disabled.",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "5.4",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, resource_groups in self.servers.items():
+            for resource_group, servers in resource_groups.items():
+                for server in servers:
+                    if server.network.public_network_access != "Disabled":
+                        results["affected"].append(server.name)
+
+        for subscription, resource_groups in self.flexible_servers.items():
+            for resource_group, servers in resource_groups.items():
+                for server in servers:
+                    if server.network.public_network_access != "Disabled":
+                        results["affected"].append(server.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected Postgresql servers have public network access enabled."
+        elif self.servers or self.flexible_servers:
+            results["analysis"] = "Postgresql servers do not have public network access enabled"
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"

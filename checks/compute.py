@@ -2,6 +2,10 @@ from azure.mgmt.compute import ComputeManagementClient
 from checks.resource import resource
 import logging
 
+from datetime import date
+from datetime import datetime, timezone
+from datetime import timedelta
+
 class compute(object):
 
     def __init__(self, credential, subscriptions, resource_groups, resources):
@@ -11,6 +15,7 @@ class compute(object):
         self.resources = resources
         self.virtual_machines = self.get_virtual_machines()
         self.disks = self.get_disks()
+        self.snapshots = self.get_snapshots()
         self.virtual_machine_extensions = self.get_virtual_machine_extensions()
 
     def get_virtual_machines(self):
@@ -72,6 +77,24 @@ class compute(object):
                 disks[subscription] = results
         return disks
 
+    def get_snapshots(self):
+        snapshots = {}
+        for subscription, resource_groups in self.resources.items():
+            results = []
+            client = ComputeManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.Compute/snapshots":
+                        logging.info(f'getting snapshot { resource.name }')
+                        try:
+                            snapshot = client.snapshots.get(snapshot_name=resource.name, resource_group_name=resource_group)
+                            results.append(snapshot)
+                        except Exception as e:
+                            logging.error(f'error getting snapshot: { resource.name }, error: { e }')
+            if results:
+                snapshots[subscription] = results
+        return snapshots
+
     def run(self):
         findings = []
         findings += [ self.compute_1() ]
@@ -84,6 +107,10 @@ class compute(object):
         findings += [ self.compute_8() ]
         findings += [ self.compute_9() ]
         findings += [ self.compute_10() ]
+        findings += [ self.compute_11() ]
+        findings += [ self.compute_12() ]
+        findings += [ self.compute_13() ]
+        findings += [ self.compute_14() ]
         return findings
 
     def cis(self):
@@ -221,8 +248,8 @@ class compute(object):
             "name" : "Unencrpyted Disks",
             "affected": [],
             "analysis" : {},
-            "description" : "",
-            "remediation" : "",
+            "description" : "The subscription contains disks which are not encryted. Encrypting managed disks ensures that its entire content is fully unrecoverable without a key and thus protects the volume from unwarranted reads.Even if the disk is not attached to any of the VMs, there is always a risk where a compromised user account with administrative access to VM service can mount/attach these data disks, which may lead to sensitive information disclosure and tampering.",
+            "remediation" : "Ensure all disks are encrypted, and consider using Customer Managed Keys (CMK) for additional security.",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
@@ -338,7 +365,7 @@ class compute(object):
             "name" : "Ensure that 'Unattached disks' are encrypted with Customer Managed Key (CMK) (CIS)",
             "affected": [],
             "analysis" : {},
-            "description" : "Ensure that unattached disks in a subscription are encrypted with a Customer Managed\nKey (CMK).\nRationale:\nManaged disks are encrypted by default with Platform-managed keys. Using Customer-\nmanaged keys may provide an additional level of security or meet an organization's\nregulatory requirements. Encrypting managed disks ensures that its entire content is\nfully unrecoverable without a key and thus protects the volume from unwarranted reads.\nEven if the disk is not attached to any of the VMs, there is always a risk where a\ncompromised user account with administrative access to VM service can mount/attach\nthese data disks, which may lead to sensitive information disclosure and tampering.",
+            "description" : "Ensure that unattached disks in a subscription are encrypted with a Customer Managed\nKey (CMK). Managed disks are encrypted by default with Platform-managed keys. Using Customer-managed keys may provide an additional level of security or meet an organization's\nregulatory requirements. Encrypting managed disks ensures that its entire content is\nfully unrecoverable without a key and thus protects the volume from unwarranted reads.\nEven if the disk is not attached to any of the VMs, there is always a risk where a\ncompromised user account with administrative access to VM service can mount/attach\nthese data disks, which may lead to sensitive information disclosure and tampering.",
             "remediation" : "If data stored in the disk is no longer useful, refer to Azure documentation to delete\nunattached data disks at:\n-https://docs.microsoft.com/en-us/rest/api/compute/disks/delete\n-https://docs.microsoft.com/en-us/cli/azure/disk?view=azure-cli-latest#az-\ndisk-delete\nIf data stored in the disk is important, To encrypt the disk refer azure documentation at:\n-https://docs.microsoft.com/en-us/azure/virtual-machines/disks-enable-\ncustomer-managed-keys-portal\n-https://docs.microsoft.com/en-\nus/rest/api/compute/disks/update#encryptionsettings",
             "impact" : "low",
             "probability" : "low",
@@ -490,6 +517,164 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no stopped virtual machines found"
+
+        return results
+
+    def compute_11(self):
+        # Snapshots with public network acces enabled
+
+        results = {
+            "id" : "compute_11",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Snapshots With Public Network Access Enabled",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The subscription under review contained resources which did not implement network level access restrictions (Firewall rules) and therefore allowed unrestricted traffic from the public internet. This configuration impacted the security posture of the cloud environment and increased the risk of unauthorized data exposure.\nBy default resources in Azure do not implement a firewall to restrict network level access, therefore all users, applications, and services including those on the public internet could potentially communicate with resources  hosted within a subscription at the network layer. Although often protected by authentication, the lack of network restrictions increased the attack surface of the resources and the wider Azure environment. An attacker able to compromise valid credentials could use those credentials to interact with the service from clients on any network or from other Azure tenancies.",
+            "remediation" : "The affected resources should be configured to restrict network access to the internal virtual private networks. Where external access is required for legitimate purposes, access should be restricted to a subset of whitelisted public IP addresses.\nAdditionally, where external access is not required, organisations should consider implementing a private endpoint connection to facilitate a secure connection between internal services whilst removing the requirement to use public infrastructure. When a private endpoint is configured all traffic between resources is transmitted over the Azure backbone ‘Azure PrivateLink’ network using virtual private IP addresses reducing the exposure of sensitive data.\nTo configure firewall rules within the Azure Portal:\n•	Go to resource.\n•	For each resource, click on the settings menu called ‘Networking’.\n•	Ensure that you have elected to allow access from Selected networks.\n•	Add rules to allow traffic from specific networks and IPs as required.\n•	Click Save to apply your changes.\n",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "5.4",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, snapshots in self.snapshots.items():
+            for snapshot in snapshots:
+                if snapshot.public_network_access != "Disabled":
+                    results["affected"].append(snapshot.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected snapshots have public network access enabled"
+            results["pass_fail"] = "FAIL"
+        elif self.snapshots:
+            results["analysis"] = "snapshots do not have public network access enabled"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no snapshots in use"
+
+        return results
+
+    def compute_12(self):
+        # Old Snapshots
+
+        results = {
+            "id" : "compute_12",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Old Snapshots",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The account under review contains old Virtual Machine Disk snapshots. A snapshot is a read-only copy of a virtual machine disk. Each VM disk snapshot stored within your Azure cloud account is adding charges to your monthly bill, regardless whether the snapshot is being used or not. Deleting older snapshots do not affect the ability to restore the disk data from the later snapshots which allows you to keep just the necessary backup data and help lower your Azure cloud costs.",
+            "remediation" : "Review the affected snapshots and delete any that are no longer required.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, snapshots in self.snapshots.items():
+            for snapshot in snapshots:
+                # get snapshots created more than 6 months ago
+                if snapshot.time_created < (datetime.now(timezone.utc) - timedelta(days=183)):
+                    results["affected"].append(snapshot.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected snapshots were created longer than 6 months ago"
+            results["pass_fail"] = "FAIL"
+        elif self.snapshots:
+            results["analysis"] = "no old snapshots found"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no snapshots in use"
+
+        return results
+
+    def compute_13(self):
+        # unencrypted snapshots
+
+        results = {
+            "id" : "compute_13",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Unencrypted Snapshots",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The subscription contains snapshots which are not encryted. Encrypting managed disks ensures that its entire content is fully unrecoverable without a key and thus protects the volume from unwarranted reads.Even if the disk is not attached to any of the VMs, there is always a risk where a compromised user account with administrative access to VM service can mount/attach these data disks, which may lead to sensitive information disclosure and tampering.",
+            "remediation" : "ensure snapshots are encrypted.",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, snapshots in self.snapshots.items():
+            for snapshot in snapshots:
+                # get snapshots created more than 6 months ago
+                if not snapshot.encryption:
+                    results["affected"].append(snapshot.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected snapshots are not encrypted"
+            results["pass_fail"] = "FAIL"
+        elif self.snapshots:
+            results["analysis"] = "snapshots are encrypted"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no snapshots in use"
+
+        return results
+
+    def compute_14(self):
+        # Ensure that snapshots are encrypted with Customer Managed Key (CMK) (CIS)
+
+        results = {
+            "id" : "compute_14",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Ensure that snapshots are encrypted with Customer Managed Key (CMK) (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The subscription contains disks which are not encryted. Managed disks are encrypted by default with Platform-managed keys. Using Customer-managed keys may provide an additional level of security or meet an organization's regulatory requirements. Encrypting managed disks ensures that its entire content is fully unrecoverable without a key and thus protects the volume from unwarranted reads.Even if the disk is not attached to any of the VMs, there is always a risk where a compromised user account with administrative access to VM service can mount/attach these data disks, which may lead to sensitive information disclosure and tampering.",
+            "remediation" : "Ensure snapshots are encrypted.",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, snapshots in self.snapshots.items():
+            for snapshot in snapshots:
+                if snapshot.encryption.type == "EncryptionAtRestWithPlatformKey":
+                    results["affected"].append(snapshot.name)
+
+        if results["affected"]:
+            results["analysis"] = "the affected snapshots are not encrypted with a customer managed key (cmk)"
+            results["pass_fail"] = "FAIL"
+        elif self.disks:
+            results["analysis"] = "snapshot are encrypted with customer managed keys"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no disks in use"
 
         return results
 

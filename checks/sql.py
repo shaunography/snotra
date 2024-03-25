@@ -68,6 +68,7 @@ class sql(object):
         findings += [ self.sql_5() ]
         findings += [ self.sql_6() ]
         findings += [ self.sql_7() ]
+        findings += [ self.sql_8() ]
         return findings
 
     def sql_1(self):
@@ -201,7 +202,7 @@ class sql(object):
         for subscription, resource_groups in self.servers.items():
             for resource_group, servers in resource_groups.items():
                 for server in servers:
-                    if server.public_network_access == "Enabled":
+                    if server.public_network_access != "Disabled":
                         results["affected"].append(server.name)
 
         if results["affected"]:
@@ -344,7 +345,7 @@ class sql(object):
         return results
 
     def sql_8(self):
-        # SQL Servers with Managed Identities Attached
+        # 
 
         results = {
             "id" : "sql_8",
@@ -352,11 +353,11 @@ class sql(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "sql",
-            "name" : "SQL Servers with Managed Identity Attached",
+            "name" : "",
             "affected": [],
             "analysis" : "",
-            "description" : "Sql servers are using managed identities to access Azure resources. Review the RBAC roles, MS graph permissions and Azure AD roles assigned to the identity to ensure the principal of least privilege is being followed.",
-            "remediation" : "ensure managed identities are only assigned to resources that required access to other Azure resources, and ensure privileges are granted following the principal of least privilege.",
+            "description" : "",
+            "remediation" : "",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "N/A",
@@ -366,17 +367,10 @@ class sql(object):
 
         logging.info(results["name"]) 
 
-        for subscription, servers in self.databases.items():
-            for server, databases in servers.items():
-                for database in databases:
-                    print(database)
-                    #if server.identity:
-                        #results["affected"].append(server.name)
-                    #elif server.primary_user_assigned_identity_id:
-                        #results["affected"].append(server.name)
-                    #elif server.federated_client_id:
-                        #results["affected"].append(server.name)
-
+        for subscription, resource_groups in self.servers.items():
+            for resource_group, servers in resource_groups.items():
+                for server in servers:
+                    print(server)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
