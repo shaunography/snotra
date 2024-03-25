@@ -111,6 +111,7 @@ class compute(object):
         findings += [ self.compute_12() ]
         findings += [ self.compute_13() ]
         findings += [ self.compute_14() ]
+        findings += [ self.compute_15() ]
         return findings
 
     def cis(self):
@@ -675,6 +676,49 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+
+        return results
+
+    def compute_15(self):
+        # Key Based SSH Authentication Not Enforced
+
+        results = {
+            "id" : "compute_15",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "compute",
+            "name" : "Key Based SSH Authentication Not Enforced",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The subscription under review contained Linux Virtual Machines which permitted password-based SSH authentication. This configuration increased the risk of malicious users gaining unauthorised access to hosts via password guessing attacks.\nPermitting password-based SSH authentication for access to hosts can be convenient for users, however the use of passwords increases the attack surface of the host and is a common target for attackers attempting to compromise infrastructure. Attackers can attempt to leverage password guessing attacks using techniques such as brute-force, dictionary, or password spraying methods – in which an attacker uses a list of known passwords against several hosts and services – in an effort to gain access to the host.",
+            "remediation" : "It is recommended that key-based authentication is enforced as the default access method. Password-based SSH access should be disabled by updating the following elements within the SSH configuration file, which can be found in ‘/etc/ssh/sshd_config’:\nChallengeResponseAuthentication no \nPasswordAuthentication no \nUsePAM no \nIt is also recommended that the following lines are configured to ensure Root account access to hosts via SSH is also disabled: \nPermitRootLogin no \nPermitRootLogin prohibit-password \nWhere root access is required this should be provided after the login by adding administrators to the sudoers file, and enforcing password requirements for issuing the sudo command.  \nUsers who require access to the host should create strong, password-protected SSH key-pairs with the corresponding public key added to the host’s authorised key-file. In sensitive environments where the strongest authentication mechanisms are required certificate-based authentication should be considered. SSH certificates further secure the login process by using public key pairs, whilst also requiring an x.509 certificate to verify each key’s identity. The additional overhead of implementing certificates should be weighed against the sensitive of the infrastructure deployed within the environment.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, virtual_machines in self.virtual_machines.items():
+            for virtual_machine in virtual_machines:
+                try:
+                    if virtual_machine.os_profile.linux_configuration:
+                        if virtual_machine.os_profile.linux_configuration.disable_password_authentication == False:
+                            results["affected"].append(virtual_machine.name)
+                except AttributeError:
+                    pass
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected virtual machines allow password based SSH authentication"
+        elif self.virtual_machines:
+            results["analysis"] = "virtual machines are using key based ssh authentication"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no virtual machines in use"
 
         return results
 

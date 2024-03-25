@@ -68,7 +68,7 @@ class sql(object):
         findings += [ self.sql_5() ]
         findings += [ self.sql_6() ]
         findings += [ self.sql_7() ]
-        findings += [ self.sql_8() ]
+        #findings += [ self.sql_8() ]
         return findings
 
     def sql_1(self):

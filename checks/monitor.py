@@ -26,6 +26,8 @@ class monitor(object):
                     if resource.type == "Microsoft.Storage/storageAccounts":
                         try:
                             logging.info(f'getting diagnostic settings for storage account { resource.name }')
+                            for setting in client.diagnostic_settings.list(resource.id):
+                                results.append(setting)
                             for setting in client.diagnostic_settings.list(resource.id + "/blobServices/default"):
                                 results.append(setting)
                             for setting in client.diagnostic_settings.list(resource.id + "/queueServices/default"):
@@ -167,12 +169,42 @@ class monitor(object):
             client = MonitorManagementClient(credential=self.credential, subscription_id=subscription)
             for resource_group, resources in resource_groups.items():
                 for resource in resources:
-                    if resource.type == "Microsoft.KeyVault/vaults" or resource.type == "Microsoft.Web/sites":
+
+                    if resource.type == "Microsoft.KeyVault/vaults" or resource.type == "Microsoft.Web/sites" or resource.type == "Microsoft.ContainerService/managedClusters":
                         try:
                             logging.info(f'getting diagnostic settings for { resource.name }')
                             if not [ setting for setting in client.diagnostic_settings.list(resource.id) ]:
                                 results["affected"].append(subscription)
                                 results["analysis"].append(f"the {resource.type} {resource.name} does not have diagnostic settings configured")
+                        except Exception as e:
+                            logging.error(f'error getting diagnostic settings for: { resource.name }, error: { e }')
+
+                    if resource.type == "Microsoft.Storage/storageAccounts":
+                        try:
+                            logging.info(f'getting diagnostic settings for { resource.name }')
+                            #if not [ i for i in client.diagnostic_settings.list(resource.id) ]:
+                                #storage_accounts.append(resource.name)
+                            if not [ i for i in client.diagnostic_settings.list(resource.id + "/blobServices/default") ]:
+                                results["affected"].append(subscription)
+                                results["analysis"].append(f"the {resource.type} {resource.name} does not have diagnostic settings configured for blob services")
+
+                            if not [ i for i in client.diagnostic_settings.list(resource.id + "/queueServices/default") ]:
+                                results["affected"].append(subscription)
+                                results["analysis"].append(f"the {resource.type} {resource.name} does not have diagnostic settings configured queue services")
+
+                            if not [ i for i in client.diagnostic_settings.list(resource.id + "/tableServices/default") ]:
+                                results["affected"].append(subscription)
+                                results["analysis"].append(f"the {resource.type} {resource.name} does not have diagnostic settings configured table services")
+
+                            if not [ i for i in client.diagnostic_settings.list(resource.id + "/fileServices/default") ]:
+                                results["affected"].append(subscription)
+                                results["analysis"].append(f"the {resource.type} {resource.name} does not have diagnostic settings configured file services")
+
+                        except exceptions.HttpResponseError as e:
+                            if "ResourceTypeNotSupported" in e.message:
+                                pass
+                            else:
+                                logging.error(f'error getting diagnostic settings for: { resource.name }, error: { e }')
                         except Exception as e:
                             logging.error(f'error getting diagnostic settings for: { resource.name }, error: { e }')
 
