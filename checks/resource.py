@@ -33,17 +33,21 @@ class resource(object):
 
         for subscription in self.subscriptions:
             results = {}
-            for group in self.resource_groups[subscription.subscription_id]:
-                logging.info(f'getting resources in resource group { group.name }')
-                try:
-                    client = ResourceManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
-                    response = list(client.resources.list_by_resource_group(group.name, expand = "createdTime,changedTime"))
-                    if response:
-                        results[group.name] = response
-                except Exception as e:
-                    logging.error(f'error getting resources in resource group: { group.name }, error: { e }')
-            if results:
-                resources[subscription.subscription_id] = results
+            try:
+                for group in self.resource_groups[subscription.subscription_id]:
+                    logging.info(f'getting resources in resource group { group.name }')
+                    try:
+                        client = ResourceManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
+                        response = list(client.resources.list_by_resource_group(group.name, expand = "createdTime,changedTime"))
+                        if response:
+                            results[group.name] = response
+                    except Exception as e:
+                        logging.error(f'error getting resources in resource group: { group.name }, error: { e }')
+                if results:
+                    resources[subscription.subscription_id] = results
+            except KeyError:
+                logging.error(f'error subscription { subscription.subscription_id } has no resource groups')
+
         return resources
 
     def run(self):
