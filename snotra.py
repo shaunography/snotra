@@ -63,14 +63,15 @@ def main():
     credential = DefaultAzureCredential()
     #azure.core.exceptions.ClientAuthenticationError
 
-    resource = Resource(credential)
+    if args.subscription_id:
+        resource = Resource(credential, args.subscription_id)
+    else:
+        resource = Resource(credential, None)
 
     subscriptions = resource.subscriptions
     resource_groups = resource.resource_groups
     resources = resource.resources
 
-    if args.subscription_id:
-        subscriptions = [ i for i in subscriptions if i.subscription_id == args.subscription_id ]
 
     # init results dictionary
     results = {}

@@ -144,6 +144,7 @@ class network(object):
 
         logging.info(results["name"]) 
 
+        vms = False
         for subscription, resource_groups in self.resources.items():
             vms = False
             for resource_group, resources in resource_groups.items():
@@ -401,7 +402,7 @@ class network(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "network",
-            "name" : "",
+            "name" : "Ensure that Network Security Group Flow logs are captured and sent to Log Analytics (CIS)",
             "affected": [],
             "analysis" : {},
             "description" : "The affected network security groups contain rules which allows unrestricted access to admin services from the internet. Admin services are often targetted by attackers and if compromised will often leave to unauthorised privileged access to resources. Network security groups should be periodically evaluated for port misconfigurations. Where certain ports and protocols may be exposed to the Internet, they should be evaluated for necessity and restricted wherever they are not explicitly required.\nThe potential security problem with using RDP / SSH / UDP / HTTP(S) over the Internet is that attackers can use various brute force techniques to gain access to Azure Virtual Machines. Once the attackers gain access, they can use a virtual machine as a launch point for compromising other machines on an Azure Virtual Network or even attack networked devices outside of Azure. ",

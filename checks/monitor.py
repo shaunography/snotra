@@ -64,8 +64,8 @@ class monitor(object):
             results = []
             client = MonitorManagementClient(credential=self.credential, subscription_id=subscription)
             results = client.activity_log_alerts.list_by_subscription_id()
-        if results:
-            activity_log_alerts[subscription] = results
+            if results:
+                activity_log_alerts[subscription] = results
         return activity_log_alerts
 
     def run(self):

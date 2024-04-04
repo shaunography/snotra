@@ -5,9 +5,12 @@ import logging
 
 class resource(object):
 
-    def __init__(self, credential):
+    def __init__(self, credential, subscription):
         self.credential = credential
-        self.subscriptions = self.get_subscriptions()
+        if subscription:
+            self.subscriptions = [ i for i in self.get_subscriptions() if i.subscription_id == subscription ]
+        else:
+            self.subscriptions = self.get_subscriptions()
         self.resource_groups = self.get_resource_groups()
         self.resources = self.get_resources()
 
