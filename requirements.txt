@@ -9,6 +9,7 @@ azure-mgmt-network
 azure-mgmt-monitor
 azure-mgmt-rdbms
 azure-mgmt-cosmosdb
+azure-mgmt-security
 
 
 

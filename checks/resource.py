@@ -1,5 +1,6 @@
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.resource import SubscriptionClient
+from azure.mgmt.resource import PolicyClient
 
 import logging
 
@@ -13,6 +14,8 @@ class resource(object):
             self.subscriptions = self.get_subscriptions()
         self.resource_groups = self.get_resource_groups()
         self.resources = self.get_resources()
+        #self.policy_definitions = self.get_policy_definitions()
+        #self.policy_assignments = self.get_policy_assignments()
 
     def get_subscriptions(self):
         return list(SubscriptionClient(self.credential).subscriptions.list())
@@ -52,6 +55,26 @@ class resource(object):
                 logging.error(f'error subscription { subscription.subscription_id } has no resource groups')
 
         return resources
+
+    def get_policy_definitions(self):
+        policy_definitions = {}
+        for subscription in self.subscriptions:
+            client = PolicyClient(credential=self.credential, subscription_id=subscription.subscription_id)
+            try:
+                policy_definitions[subscription.subscription_id] = client.policy_definitions.list()
+            except Exception as e:
+                logging.error(f'error getting policy_definitions: , error: { e }')
+        return policy_definitions
+
+    def get_policy_assignments(self):
+        policy_assignments = {}
+        for subscription in self.subscriptions:
+            client = PolicyClient(credential=self.credential, subscription_id=subscription.subscription_id)
+            try:
+                policy_assignments[subscription.subscription_id] = client.policy_assignments.list()
+            except Exception as e:
+                logging.error(f'error getting policy_assignments: , error: { e }')
+        return policy_assignments
 
     def run(self):
         findings = []
@@ -177,3 +200,4 @@ class resource(object):
 
 
         return results
+

@@ -26,6 +26,7 @@ from checks.cosmosdb import cosmosdb
 from checks.containerservice import containerservice
 from checks.containerregistry import containerregistry
 from checks.eventhub import eventhub
+from checks.security import security
 
 def main():
 
@@ -85,6 +86,7 @@ def main():
     #results["findings"] += graph_rbac_management(old_credential, args.tenant_id).run()
     #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
     results["findings"] += resource.run()
+    results["findings"] += security(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += eventhub(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += containerservice(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += containerregistry(credential, subscriptions, resource_groups, resources).run()
