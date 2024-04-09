@@ -18,6 +18,8 @@ class security(object):
         self.auto_provisioning_settings = self.get_auto_provisioning_settings()
         self.security_contacts = self.get_security_contacts()
         self.pricings = self.get_pricings()
+        self.secure_scores = self.get_secure_scores()
+        self.secure_score_controls = self.get_secure_score_controls()
         #self.information_protection_policies = self.get_information_protection_policies()
         #self.regulatory_compliance_standards = self.get_regulatory_compliance_standards()
 
@@ -30,6 +32,26 @@ class security(object):
             except Exception as e:
                 logging.error(f'error getting defender settings: , error: { e }')
         return settings
+
+    def get_secure_scores(self):
+        secure_scores = {}
+        for subscription in self.subscriptions:
+            client = SecurityCenter(credential=self.credential, subscription_id=subscription.subscription_id)
+            try:
+                secure_scores[subscription.subscription_id] = client.secure_scores.list()
+            except Exception as e:
+                logging.error(f'error getting defender secure_scores: , error: { e }')
+        return secure_scores
+
+    def get_secure_score_controls(self):
+        secure_score_controls = {}
+        for subscription in self.subscriptions:
+            client = SecurityCenter(credential=self.credential, subscription_id=subscription.subscription_id)
+            try:
+                secure_score_controls[subscription.subscription_id] = client.secure_score_controls.list()
+            except Exception as e:
+                logging.error(f'error getting defender secure_score_controls: , error: { e }')
+        return secure_score_controls
 
     def get_auto_provisioning_settings(self):
         auto_provisioning_settings = {}
@@ -86,6 +108,7 @@ class security(object):
     def run(self):
         findings = []
         findings += [ self.security_1() ]
+        #findings += [ self.security_2() ]
         return findings
 
     def cis(self):
@@ -98,7 +121,7 @@ class security(object):
 
         results = {
             "id" : "security_1",
-            "ref" : "snotra",
+            "ref" : "cis",
             "compliance" : "2.1.1-11",
             "level" : 1,
             "service" : "security",
@@ -139,6 +162,51 @@ class security(object):
                 
             #for standard in self.regulatory_compliance_standards[subscription]:
                 #print(standard)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["affected"] = list(set(results["affected"]))
+        else:
+            results["pass_fail"] = "PASS"
+
+        return results
+
+    def security_2(self):
+        # Secure Score
+
+        results = {
+            "id" : "security_2",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "security",
+            "name" : "Secure Score",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Microsoft Secure Score is a measurement of an organisation’s security posture, with a higher number indicating more improvement actions taken. Following the Security Score recommendations can protect your organisation from threats. From a centralised dashboard in the Microsoft security center, organisations can monitor and work on the security of their Microsoft Azure identities, data, apps, devices, and infrastructure. \nDefender for Cloud has two main goals: to help you understand your current security situation, and to help you efficiently and effectively improve your security. The central aspect of Defender for Cloud that enables you to achieve those goals is secure score. \nDefender for Cloud continually assesses your resources, subscriptions, and organisation for security issues. It then aggregates all the findings into a single score so that you can tell, at a glance, your current security situation: the higher the score, the lower the identified risk level. Use the score to track security efforts and projects in your organisation.” \nMore Information: \nhttps://docs.microsoft.com/en-gb/azure/defender-for-cloud/secure-score-security-controls",
+            "remediation" : "The current configuration should be reviewed against the recommended guidelines to ensure the security risks are understood and acted upon where applicable.\nVisit Defender for Cloud within your Azure web console for more detailed information about each highlighted issue and remediation advice. \nIt is recommended to regularly review your secure score and apply actions where necessary to maintain the overall security and hygiene of your account.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, secure_scores in self.secure_scores.items():
+            results["analysis"][subscription] = []
+            for score in secure_scores:
+                print(score)
+                        #results["affected"].append(subscription)
+                        #results["analysis"][subscription].append(f"Defender for cloud is not enabled for { pricing.name }")
+
+        for subscription, secure_score_controls in self.secure_score_controls.items():
+            results["analysis"][subscription] = []
+            for control in secure_score_controls:
+                print(control)
+                        #results["affected"].append(subscription)
+                        #results["analysis"][subscription].append(f"Defender for cloud is not enabled for { pricing.name }")
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
