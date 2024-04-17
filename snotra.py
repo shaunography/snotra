@@ -27,6 +27,8 @@ from checks.containerservice import containerservice
 from checks.containerregistry import containerregistry
 from checks.eventhub import eventhub
 from checks.security import security
+from checks.graph_services import graph_services
+from checks.graph import graph
 
 def main():
 
@@ -64,6 +66,7 @@ def main():
     credential = DefaultAzureCredential()
     #azure.core.exceptions.ClientAuthenticationError
 
+
     if args.subscription_id:
         resource = Resource(credential, args.subscription_id)
     else:
@@ -83,9 +86,9 @@ def main():
     results["findings"] = []
     
     logging.info("performing full scan")
-    #results["findings"] += graph_rbac_management(old_credential, args.tenant_id).run()
-    #results["findings"] += graph_rbac_management(credential, args.tenant_id).run()
     results["findings"] += resource.run()
+    results["findings"] += graph(credential, args.tenant_id).run()
+    results["findings"] += graph_services(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += security(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += eventhub(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += containerservice(credential, subscriptions, resource_groups, resources).run()
