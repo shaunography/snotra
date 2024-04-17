@@ -247,6 +247,7 @@ class graph(object):
         findings += [ self.graph_29() ]
         findings += [ self.graph_30() ]
         findings += [ self.graph_31() ]
+        findings += [ self.graph_32() ]
         return findings
 
     def cis(self):
@@ -413,12 +414,41 @@ class graph(object):
 
         return results
 
-
     def graph_4(self):
+        # Ensure that 'Allow users to remember multi-factor authentication on devices they trust' is Disabled (CIS)(Manual)
+
+        results = {
+            "id" : "graph_4",
+            "ref" : "1.1.3",
+            "compliance" : "cis_v2.1.0",
+            "level" : 1,
+            "service" : "graph",
+            "name" : "Ensure that 'Allow users to remember multi-factor authentication on devices they trust' is Disabled (CIS)(Manual)",
+            "affected": [],
+            "analysis" : {},
+            "description" : "Do not allow users to remember multi-factor authentication on devices.\nRemembering Multi-Factor Authentication (MFA) for devices and browsers allows users to have the option to bypass MFA for a set number of days after performing a successful sign-in using MFA. This can enhance usability by minimizing the number of times a user may need to perform two-step verification on the same device. However, if an account or device is compromised, remembering MFA for trusted devices may affect security. Hence, it is recommended that users not be allowed to bypass MFA.\nFor every login attempt, the user will be required to perform multi-factor authentication",
+            "remediation" : "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Click the Per-user MFA button on the top bar\n5. Click on service settings\n6. Uncheck the box next to Allow users to remember multi-factor authentication on devices they trust",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        results["affected"] = self.tenant
+        results["analysis"] = "Manual Check -From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Registration\n6. Ensure that Number of days before users are asked to re-confirm their\nauthentication information is not set to 0 "
+        results["pass_fail"] = "INFO"
+
+        return results
+
+
+    def graph_5(self):
         # Lack Of Conditional Access (CIS)
 
         results = {
-            "id" : "greph_4",
+            "id" : "greph_5",
             "ref" : "1.2.1-7",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -454,11 +484,11 @@ class graph(object):
         return results
 
 
-    def graph_5(self):
+    def graph_6(self):
         # Ensure that 'Restrict non-admin users from creating tenants' is set to 'Yes' (Manual)
 
         results = {
-            "id" : "graph_5",
+            "id" : "graph_6",
             "ref" : "1.3",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -483,11 +513,11 @@ class graph(object):
 
         return results
 
-    def graph_6(self):
+    def graph_7(self):
         # Ensure Guest Users Are Reviewed on a Regular Basis (CIS)
 
         results = {
-            "id" : "graph_6",
+            "id" : "graph_7",
             "ref" : "1.4",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -516,11 +546,11 @@ class graph(object):
 
         return results
 
-    def graph_7(self):
+    def graph_8(self):
         # Ensure That 'Number of methods required to reset' is set to '2' (CIS)(Manual)
 
         results = {
-            "id" : "graph_7",
+            "id" : "graph_8",
             "ref" : "1.5",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -545,11 +575,11 @@ class graph(object):
 
         return results
 
-    def graph_8(self):
-        # Ensure that a Custom Bad Password List is set to 'Enforce' for your Organization (CIS)(MANUAL)
+    def graph_9(self):
+        # Ensure that a Custom Bad Password List is set to 'Enforce' for your Organization (CIS)(Manual)
 
         results = {
-            "id" : "graph_8",
+            "id" : "graph_9",
             "ref" : "1.6",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -574,11 +604,11 @@ class graph(object):
 
         return results
 
-    def graph_9(self):
+    def graph_10(self):
         # Ensure That 'Number of methods required to reset' is set to '2' (CIS)(Manual)
 
         results = {
-            "id" : "graph_9",
+            "id" : "graph_10",
             "ref" : "1.7",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -603,11 +633,11 @@ class graph(object):
 
         return results
 
-    def graph_10(self):
+    def graph_11(self):
         # Ensure that 'Notify users on password resets?' is set to 'Yes' (CIS)(Manual)
 
         results = {
-            "id" : "graph_10",
+            "id" : "graph_11",
             "ref" : "1.8",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -632,11 +662,11 @@ class graph(object):
 
         return results
 
-    def graph_11(self):
+    def graph_12(self):
         # Ensure That 'Notify all admins when other admins reset their password?' is set to 'Yes' (CIS)(Manual)
 
         results = {
-            "id" : "graph_11",
+            "id" : "graph_12",
             "ref" : "1.9",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -661,11 +691,11 @@ class graph(object):
 
         return results
 
-    def graph_12(self):
+    def graph_13(self):
         # Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)
 
         results = {
-            "id" : "graph_12",
+            "id" : "graph_13",
             "ref" : "1.10",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -690,11 +720,11 @@ class graph(object):
 
         return results
 
-    def graph_13(self):
+    def graph_14(self):
         # Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)
 
         results = {
-            "id" : "graph_13",
+            "id" : "graph_14",
             "ref" : "1.11",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -719,11 +749,11 @@ class graph(object):
 
         return results
 
-    def graph_14(self):
+    def graph_15(self):
         # Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)
 
         results = {
-            "id" : "graph_14",
+            "id" : "graph_15",
             "ref" : "1.12",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -748,11 +778,11 @@ class graph(object):
 
         return results
 
-    def graph_15(self):
+    def graph_16(self):
         # Ensure That ‘Users Can Register Applications’ Is Set to ‘No’ (CIS)(Manual)
 
         results = {
-            "id" : "graph_15",
+            "id" : "graph_16",
             "ref" : "1.13",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -777,11 +807,11 @@ class graph(object):
 
         return results
 
-    def graph_16(self):
+    def graph_17(self):
         # Ensure That 'Guest users access restrictions' is set to 'Guest user access is restricted to properties and memberships of their own directory objects' (CIS)(Manual)
 
         results = {
-            "id" : "graph_16",
+            "id" : "graph_17",
             "ref" : "1.14",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -806,11 +836,11 @@ class graph(object):
 
         return results
 
-    def graph_17(self):
+    def graph_18(self):
         # Ensure that 'Guest invite restrictions' is set to "Only users assigned to specific admin roles can invite guest users" (CIS)
 
         results = {
-            "id" : "graph_17",
+            "id" : "graph_18",
             "ref" : "1.15",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -835,11 +865,11 @@ class graph(object):
 
         return results
 
-    def graph_18(self):
+    def graph_19(self):
         # Ensure that 'Guest invite restrictions' is set to "Only users assigned to specific admin roles can invite guest users" (CIS)
 
         results = {
-            "id" : "graph_18",
+            "id" : "graph_19",
             "ref" : "1.16",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -864,11 +894,11 @@ class graph(object):
 
         return results
 
-    def graph_19(self):
+    def graph_20(self):
         # Ensure that 'Restrict user ability to access groups features in the Access Pane' is Set to 'Yes' (CIS)(Manual)
 
         results = {
-            "id" : "graph_19",
+            "id" : "graph_20",
             "ref" : "1.17",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -893,11 +923,11 @@ class graph(object):
 
         return results
 
-    def graph_20(self):
+    def graph_21(self):
         # Ensure that 'Guest invite restrictions' is set to "Only users assigned to specific admin roles can invite guest users" (CIS)
 
         results = {
-            "id" : "graph_20",
+            "id" : "graph_21",
             "ref" : "1.18",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -922,11 +952,11 @@ class graph(object):
 
         return results
 
-    def graph_21(self):
+    def graph_22(self):
         # Ensure that 'Owners can manage group membership requests in the Access Panel' is set to 'No' (CIS)(Manual)
 
         results = {
-            "id" : "graph_21",
+            "id" : "graph_22",
             "ref" : "1.19",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -951,11 +981,11 @@ class graph(object):
 
         return results
 
-    def graph_22(self):
+    def graph_23(self):
         # Ensure that 'Users can create Microsoft 365 groups in Azure portals, API or PowerShell' is set to 'No' (CIS)(Manual)
 
         results = {
-            "id" : "graph_22",
+            "id" : "graph_23",
             "ref" : "1.20",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -980,11 +1010,11 @@ class graph(object):
 
         return results
 
-    def graph_23(self):
+    def graph_24(self):
         # Ensure that 'Users can create Microsoft 365 groups in Azure portals, API or PowerShell' is set to 'No' (CIS)(Manual)
 
         results = {
-            "id" : "graph_23",
+            "id" : "graph_24",
             "ref" : "1.21",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -1009,11 +1039,11 @@ class graph(object):
 
         return results
 
-    def graph_24(self):
+    def graph_25(self):
         # Ensure That No Custom Subscription Administrator Roles Exist (CIS)(Manual)
 
         results = {
-            "id" : "graph_24",
+            "id" : "graph_25",
             "ref" : "1.22",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -1038,11 +1068,11 @@ class graph(object):
 
         return results
 
-    def graph_25(self):
+    def graph_26(self):
         # Ensure a Custom Role is Assigned Permissions for Administering Resource Locks (CIS)(Manual)
 
         results = {
-            "id" : "graph_25",
+            "id" : "graph_26",
             "ref" : "1.23",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -1067,11 +1097,11 @@ class graph(object):
 
         return results
 
-    def graph_26(self):
+    def graph_27(self):
         # Ensure That `Subscription leaving Microsoft Entra ID directory` and `Subscription entering Microsoft Entra ID directory` Is Set To ‘Permit No One’ (CIS)(Manual)
 
         results = {
-            "id" : "graph_26",
+            "id" : "graph_27",
             "ref" : "1.24",
             "compliance" : "cis_v2.1.0",
             "level" : 2,
@@ -1096,11 +1126,11 @@ class graph(object):
 
         return results
 
-    def graph_27(self):
+    def graph_28(self):
         # Ensure fewer than 5 users have global administrator assignment (CIS)
 
         results = {
-            "id" : "graph_27",
+            "id" : "graph_28",
             "ref" : "1.25",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -1129,11 +1159,11 @@ class graph(object):
 
         return results
 
-    def graph_28(self):
+    def graph_29(self):
         # Ensure 'Self service password reset enabled' is set to 'All'
 
         results = {
-            "id" : "graph_28",
+            "id" : "graph_29",
             "ref" : "snotra",
             "compliance" : "N/A",
             "level" : "N/A",
@@ -1176,11 +1206,11 @@ class graph(object):
 
         return results
 
-    def graph_29(self):
+    def graph_30(self):
         # Shadow Admin via Highly Privileged Service Principal (via role assignment)
 
         results = {
-            "id" : "graph_29",
+            "id" : "graph_30",
             "ref" : "snotra",
             "compliance" : "N/A",
             "level" : "N/A",
@@ -1240,11 +1270,11 @@ class graph(object):
 
         return results
 
-    def graph_30(self):
+    def graph_31(self):
         # service principal roles
 
         results = {
-            "id" : "graph_30",
+            "id" : "graph_31",
             "ref" : "snotra",
             "compliance" : "N/A",
             "level" : "N/A",
@@ -1272,11 +1302,11 @@ class graph(object):
 
         return results
 
-    def graph_31(self):
+    def graph_32(self):
         # service principal roles
 
         results = {
-            "id" : "graph_31",
+            "id" : "graph_32",
             "ref" : "snotra",
             "compliance" : "N/A",
             "level" : "N/A",
