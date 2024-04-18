@@ -26,7 +26,7 @@ class graph(object):
 
     def get_skus(self):
         url = "https://graph.microsoft.com/v1.0/subscribedSkus"
-        logging.info(f'getting users')
+        logging.info(f'getting skus')
         try:
             response = requests.get(url, headers=self.headers)
         except Exception as e:
@@ -47,23 +47,33 @@ class graph(object):
 
     def get_users(self):
         url = "https://graph.microsoft.com/v1.0/users"
-        logging.info(f'getting users')
-        try:
-            response = requests.get(url, headers=self.headers)
-        except Exception as e:
-            logging.error(f'error getting users: , error: { e }')
-        else:
-            if response.status_code == 200:
-                return response.json()["value"]
-            elif response.status_code == 403:
-                logging.error(f'error getting conditional access policies: , access denied: Policy.Read.All required')
+        users = []
+        while True:
+            try:
+                logging.info(f'getting users')
+                response = requests.get(url, headers=self.headers)
+            except Exception as e:
+                logging.error(f'error getting users: , error: { e }')
             else:
-                logging.error(f'error getting conditional access policies: { response.status_code }')
+                if response.status_code == 200:
+                    for user in response.json()["value"]:
+                        users.append(user)
+                    try:
+                        url = response.json()["@odata.nextLink"]
+                    except KeyError:
+                        return users
+                        break
+                elif response.status_code == 403:
+                    logging.error(f'error getting users: , access denied')
+                else:
+                    logging.error(f'error getting users: { response.status_code }')
+        return users
 
     def get_user_roles(self):
         user_roles = {}
         logging.info(f'getting user roles')
         for user in self.users:
+            logging.info(f'getting roles for user { user["displayName"] }')
             url = f"https://graph.microsoft.com/v1.0/users/{ user['id'] }/memberOf"
             try:
                 response = requests.get(url, headers=self.headers)
