@@ -1258,7 +1258,7 @@ class graph(object):
         if principals_with_ga:
             for user in self.application_administrators:
                 if user not in application_administrators_with_ga:
-                   results["analysis"].append(f"The user ({ user['displayName'] }) has the application or cloud application administrator role and can elevate privileges to Global Addmin via the service principals {[ i for i in principals_with_ga ]}")
+                   results["analysis"].append(f"The user ({ user['displayName'] }) has the application or cloud application administrator role and can elevate privileges to Global Admin via the service principals {[ i for i in principals_with_ga ]}")
                    results["affected"].append(user["displayName"])
 
 
