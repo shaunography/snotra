@@ -91,6 +91,7 @@ class graph(object):
         #return user_roles
 
     def get_user_roles(self, user):
+        user_roles = ""
         logging.info(f'getting roles for user { user["displayName"] }')
         url = f"https://graph.microsoft.com/v1.0/users/{ user['id'] }/memberOf"
         try:
