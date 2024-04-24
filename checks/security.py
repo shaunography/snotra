@@ -66,6 +66,7 @@ class security(object):
 
     def get_security_contacts(self):
         security_contacts = {}
+        logging.info("getting security contacts") 
         for subscription in self.subscriptions:
             client = SecurityCenter(credential=self.credential, subscription_id=subscription.subscription_id)
             try:
@@ -152,16 +153,6 @@ class security(object):
                     if setting.enabled != True:
                         results["affected"].append(subscription)
                         results["analysis"][subscription].append(f"Microsoft Cloud App Security integration is not enabled")
-
-            if not [i for i in self.security_contacts[subscription]]:
-                results["affected"].append(subscription)
-                results["analysis"][subscription].append(f"No Security Contacts Configured")
-
-            #for setting in self.auto_provisioning_settings[subscription]:
-                #print(setting)
-                
-            #for standard in self.regulatory_compliance_standards[subscription]:
-                #print(standard)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"

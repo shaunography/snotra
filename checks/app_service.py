@@ -193,9 +193,9 @@ class app_service(object):
 
         results = {
             "id" : "app_service_4",
-            "ref" : "9.3",
-            "compliance" : "cis_v2.1.0",
-            "level" : 1,
+            "ref" : "snorta",
+            "compliance" : "N/A",
+            "level" : "N/A",
             "service" : "app_service",
             "name" : "App Services Lacking Network Access Restrictions",
             "affected": [],

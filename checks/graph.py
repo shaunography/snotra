@@ -14,7 +14,7 @@ class graph(object):
         self.skus = self.get_skus()
         self.premium = self.get_premium()
         self.users = self.get_users()
-        self.user_roles = self.get_user_roles()
+        #self.user_roles = self.get_user_roles()
         self.guests = self.get_guests()
         self.roles = self.get_roles()
         self.global_admins = self.get_global_admins()
@@ -69,25 +69,42 @@ class graph(object):
                     logging.error(f'error getting users: { response.status_code }')
         return users
 
-    def get_user_roles(self):
-        user_roles = {}
-        logging.info(f'getting user roles')
-        for user in self.users:
-            logging.info(f'getting roles for user { user["displayName"] }')
-            url = f"https://graph.microsoft.com/v1.0/users/{ user['id'] }/memberOf"
-            try:
-                response = requests.get(url, headers=self.headers)
-            except Exception as e:
-                logging.error(f'error getting role for user { user["displayName"] }: , error: { e }')
-            else:
-                if response.status_code == 200:
-                    if response.json()["value"]:
-                        user_roles[user["displayName"]] = response.json()["value"]
-                elif response.status_code == 403:
-                    logging.error(f'error getting user roles: , access denied:')
-                else:
-                    logging.error(f'error getting user roles: { response.status_code }')
+    #def get_user_roles(self):
+        #user_roles = {}
+        #logging.info(f'getting user roles')
+        #for user in self.users:
+            #logging.info(f'getting roles for user { user["displayName"] }')
+            #url = f"https://graph.microsoft.com/v1.0/users/{ user['id'] }/memberOf"
+            #try:
+                #response = requests.get(url, headers=self.headers)
+            #except Exception as e:
+                #logging.error(f'error getting role for user { user["displayName"] }: , error: { e }')
+            #else:
+                #if response.status_code == 200:
+                    #if response.json()["value"]:
+                        #user_roles[user["displayName"]] = response.json()["value"]
+                #elif response.status_code == 403:
+                    #logging.error(f'error getting user roles: , access denied:')
+                #else:
+                    #logging.error(f'error getting user roles: { response.status_code }')
+#
+        #return user_roles
 
+    def get_user_roles(self, user):
+        logging.info(f'getting roles for user { user["displayName"] }')
+        url = f"https://graph.microsoft.com/v1.0/users/{ user['id'] }/memberOf"
+        try:
+            response = requests.get(url, headers=self.headers)
+        except Exception as e:
+            logging.error(f'error getting role for user { user["displayName"] }: , error: { e }')
+        else:
+            if response.status_code == 200:
+                if response.json()["value"]:
+                    user_roles = response.json()["value"]
+            elif response.status_code == 403:
+                logging.error(f'error getting user roles: , access denied:')
+            else:
+                logging.error(f'error getting user roles: { response.status_code }')
         return user_roles
 
     def get_guests(self):
@@ -279,10 +296,10 @@ class graph(object):
             "analysis" : {},
             "description" : "Security defaults in Microsoft Entra ID make it easier to be secure and help protect your organization. Security defaults contain preconfigured security settings for common attacks. \nSecurity defaults is available to everyone. The goal is to ensure that all organizations have a basic level of security enabled at no extra cost. You may turn on security defaults in the Azure portal.\nSecurity defaults provide secure default settings that we manage on behalf of organizations to keep customers safe until they are ready to manage their own identity security settings.\nFor example, doing the following:\n• Requiring all users and admins to register for MFA.\n• Challenging users with MFA - when necessary, based on factors such as location, device, role, and task.\n• Disabling authentication from legacy authentication clients, which can’t do MFA.\nThis recommendation should be implemented initially and then may be overridden by other service/product specific CIS Benchmarks. Administrators should also be aware that certain configurations in Microsoft Entra ID may impact other Microsoft services such as Microsoft 365.",
             "remediation" : "To enable security defaults in your directory:\n1. From Azure Home select the Portal Menu.\n2. Browse to Microsoft Entra ID > Properties\n3. Select Manage security defaults\n4. Set the Enable security defaults to Enabled\n5. Select Save",
-            "impact" : "",
-            "probability" : "",
-            "cvss_vector" : "",
-            "cvss_score" : "",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "6.5",
             "pass_fail" : ""
         }
 
@@ -299,7 +316,7 @@ class graph(object):
                 if response.status_code == 200:
                     if response.json()["isEnabled"] != True:
                         results["analysis"] = "Security Defaults is disabled."
-                        results["affected"] = self.tenant
+                        results["affected"].append(self.tenant)
 
             if results["affected"]:
                 results["pass_fail"] = "FAIL"
@@ -447,7 +464,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check -From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Registration\n6. Ensure that Number of days before users are asked to re-confirm their\nauthentication information is not set to 0 "
         results["pass_fail"] = "INFO"
 
@@ -479,7 +496,7 @@ class graph(object):
 
         if self.premium:
             if not self.conditional_access_policies:
-                results["affected"] = self.tenant
+                results["affected"].append(self.tenant)
                 results["analysis"] = "No conditional access policies in use"
             else:
                 for policy in self.conditional_access_policies:
@@ -517,7 +534,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check\n1. From Azure Home select the Portal Menu \n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Restrict non-admin users from creating tenants is set to Yes"
         results["pass_fail"] = "INFO"
 
@@ -550,7 +567,7 @@ class graph(object):
             results["analysis"] = f"no guest users found"
         else:
             for user in self.guests:
-                results["affected"] = self.tenant
+                results["affected"].append(self.tenant)
                 results["analysis"].append(user["userPrincipalName"])
                 results["pass_fail"] = "INFO"
 
@@ -579,7 +596,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check\nFrom Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Authentication methods\n6. Ensure that Number of methods required to reset is set to 2"
         results["pass_fail"] = "INFO"
 
@@ -608,7 +625,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check -  From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID.\n3. Select 'Security'.\n4. Under Manage, select Authentication Methods.\n5. Select Password Protection.\n6. Ensure Enforce custom list is set to Yes.\n7. Scroll through the list to view the enforced passwords"
         results["pass_fail"] = "INFO"
 
@@ -637,7 +654,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check -From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Registration\n6. Ensure that Number of days before users are asked to re-confirm their\nauthentication information is not set to 0 "
         results["pass_fail"] = "INFO"
 
@@ -666,7 +683,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Go to Password reset\n5. Under Manage, select Notifications\n6. Ensure that Notify users on password resets? is set to Yes"
         results["pass_fail"] = "INFO"
 
@@ -695,7 +712,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check From Azure Portal \n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Select Password reset\n5. Under Manage, select Notifications\n6. Ensure that notify all admins when other admins reset their password? is set to Yes"
         results["pass_fail"] = "INFO"
 
@@ -724,7 +741,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Enterprise Applications\n4. Select Consent and permissions\n5. Select User consent settings\n6. Ensure User consent for applications is set to Do not allow user consent"
         results["pass_fail"] = "INFO"
 
@@ -753,7 +770,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Enterprise Applications\n4. Select Consent and permissions\n5. Select User consent settings\n6. Under User consent for applications, ensure Allow user consent for apps\nfrom verified publishers, for selected permissions is selected"
         results["pass_fail"] = "INFO"
 
@@ -782,7 +799,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Enterprise applications\n4. Select User settings\n5. Ensure that Users can add gallery apps to My Apps is set to No"
         results["pass_fail"] = "INFO"
 
@@ -811,7 +828,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Users can register applications is set to No"
         results["pass_fail"] = "INFO"
 
@@ -840,7 +857,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then External Identities\n4. Select External collaboration settings\n5. Under Guest user access, ensure that Guest user access restrictions is set to Guest user access is restricted to properties and memberships of their own directory objects"
         results["pass_fail"] = "INFO"
 
@@ -869,7 +886,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then External Identities\n4. External collaboration settings\n5. Under Guest invite settings, for Guest invite restrictions, ensure that that Only users assigned to specific admin roles can invite guest users is selected"
         results["pass_fail"] = "INFO"
 
@@ -898,7 +915,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select User settings\n5. Ensure that Restrict access to Microsoft Entra admin center is set to Yes"
         results["pass_fail"] = "INFO"
 
@@ -927,7 +944,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Groups\n4. Select General under Settings\n5. Ensure that Restrict user ability to access groups features in My Groups\nis set to Yes"
         results["pass_fail"] = "INFO"
 
@@ -956,7 +973,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Groups\n4. Select General under Settings\n5. Ensure that Users can create security groups in Azure portals, API or PowerShell is set to No"
         results["pass_fail"] = "INFO"
 
@@ -985,7 +1002,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Groups\n4. Select General in settings\n5. Ensure that Owners can manage group membership requests in the Access Panel is set to No"
         results["pass_fail"] = "INFO"
 
@@ -1014,7 +1031,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Groups\n4. Select General in setting\n5. Ensure that Users can create Microsoft 365 groups in Azure portals, API or PowerShell is set to No"
         results["pass_fail"] = "INFO"
 
@@ -1043,7 +1060,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Devices\n4. Select Device settings\n5. Ensure that Require Multi-Factor Authentication to register or join devices with Microsoft Entra is set to Yes"
         results["pass_fail"] = "INFO"
 
@@ -1072,7 +1089,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu.\n2. Select Subscriptions.\n3. Select Access control (IAM).\n4. Select Roles.\n5. Click Type and select CustomRole from the drop down menu.\n6. Select View next to a role.\n7. Select JSON.\n8. Check for assignableScopes set to the subscription, and actions set to *.\n9. Repeat steps 6-8 for each custom role"
         results["pass_fail"] = "INFO"
 
@@ -1101,7 +1118,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. In the Azure portal, open a subscription or resource group where you want to view assigned roles.\n2. Select Access control (IAM)\n3. Select Roles\n4. Search for the custom role named <role_name> Ex. from remediation Resource Lock Administrator\n5. Ensure that the role is assigned to the appropriate users."
         results["pass_fail"] = "INFO"
 
@@ -1130,7 +1147,7 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"] = self.tenant
+        results["affected"].append(self.tenant)
         results["analysis"] = "From Azure Portal\n1. From the Azure Portal Home select the portal menu\n2. Select Subscriptions\n3. In the Advanced options drop-down menu, select Manage Policies\n4. Ensure Subscription leaving Microsoft Entra ID directory and Subscription entering Microsoft Entra ID directory are set to Permit no one"
         results["pass_fail"] = "INFO"
 
@@ -1160,7 +1177,7 @@ class graph(object):
         logging.info(results["name"]) 
 
         if len(self.global_admins) > 4:
-            results["affected"] = self.tenant
+            results["affected"].append(self.tenant)
             results["analysis"] = f"there are currently { len(self.global_admins) } global admins in the tenancy"
             results["pass_fail"] = "FAIL"
         else:
@@ -1202,7 +1219,7 @@ class graph(object):
             if response.status_code == 200:
 
                 if response.json()["selfServiceSignUp"]["isEnabled"] == False:
-                    results["affected"] = self.tenant
+                    results["affected"].append(self.tenant)
                     results["analysis"] = "Self-Service Password Reset is not enabled"
                     results["pass_fail"] = "FAIL"
                 else:
@@ -1251,7 +1268,7 @@ class graph(object):
                     privileged_principals.append(service_principal)
 
         for user in self.application_administrators:
-            for role in self.user_roles[user["displayName"]]:
+            for role in self.get_user_roles(user):
                 if role['displayName'] == "Global Administrator":
                     application_administrators_with_ga.append(user)
 
@@ -1268,7 +1285,7 @@ class graph(object):
                     for principal, roles in self.service_principal_roles.items():
                         for role in roles:
                             if role["displayName"] != "Global Administrator":
-                                if role not in self.user_roles[user["displayName"]]:
+                                if role not in self.get_user_roles(user):
                                     results["analysis"].append(f"The user ({ user['displayName'] }) has the application or cloud application administrator role and can use the service principal { principal } to obtain the role { role['displayName'] }")
                                     results["affected"].append(user["displayName"])
 

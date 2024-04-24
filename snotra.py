@@ -88,7 +88,6 @@ def main():
     logging.info("performing full scan")
     results["findings"] += resource.run()
     results["findings"] += graph(credential, args.tenant_id).run()
-    results["findings"] += graph_services(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += security(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += eventhub(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += containerservice(credential, subscriptions, resource_groups, resources).run()
@@ -104,6 +103,7 @@ def main():
     results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
 
     #results["findings"] += cosmosdb(credential, subscriptions, resource_groups, resources).run()
+    #results["findings"] += graph_services(credential, subscriptions, resource_groups, resources).run()
 
     if not os.path.exists(args.results_dir):
         logging.info("results dir does not exist, creating it for you")

@@ -11,36 +11,22 @@ class cosmosdb(object):
         self.subscriptions = subscriptions
         self.resource_groups = resource_groups
         self.resources = resources
-        self.servers = self.get_servers()
+        self.accounts = self.get_accounts()
         #self.configurations = self.get_configurations()
         #self.flexible_servers = self.get_flexible_servers()
         #self.databases = self.get_databases()
         #self.flexible_databases = self.get_flexible_databases()
 
-    def get_servers(self):
-        servers = {}
-        for subscription, resource_groups in self.resources.items():
-            results = {}
-            client = CosmosDBManagementClient(credential=self.credential, subscription_id=subscription)
-            for resource_group, resources in resource_groups.items():
-                servers_in_group = []
-                for resource in resources:
-                    if resource.type == "Microsoft.DBforPostgreSQL/serverGroupsv2":
-                        logging.info(f'getting mysql server { resource.name }')
-                        try:
-                            #print(resource)
-                            accounts = client.database_accounts.list()
-                            for i in accounts:
-                                print(i)
-                            #print(accounts)
-                            #servers_in_group.append(client.database_accounts.get(account_name=resource.name, resource_group_name=resource_group))
-                        except Exception as e:
-                            logging.error(f'error getting mysql server: { resource.name }, error: { e }')
-                if servers_in_group:
-                    results[resource_group] = servers_in_group
-            if results:
-                servers[subscription] = results
-        return servers
+    def get_accounts(self):
+        accounts = {}
+        for subscription in self.subscriptions:
+            accounts[subscription.subscription_id] = ""
+            client = CosmosDBManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
+            try:
+                accounts[subscription.subscription_id] = client.database_accounts.list()
+            except Exception as e:
+                logging.error(f'error cosmosdb accounts: { resource.name }, error: { e }')
+        return accounts
 
     def get_configurations(self):
         configurations = {}
@@ -171,17 +157,15 @@ class cosmosdb(object):
 
         logging.info(results["name"]) 
 
-        for subscription, resource_groups in self.servers.items():
-            for resource_group, servers in resource_groups.items():
-                for server in servers:
-                    print(server)
-                    #if server.ssl_enforcement != "Enabled":
-                        #results["affected"].append(server.name)
+        for subscription, accounts in self.accounts.items():
+            print(subscription)
+            for account in accounts:
+                print(account)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
             results["analysis"] = "the affected Mysql servers do enforce the use of SSL."
-        elif self.servers:
+        elif self.accounts:
             results["analysis"] = "Mysql servers are enforcing SSL connections"
             results["pass_fail"] = "PASS"
         else:
