@@ -94,17 +94,17 @@ class postgresql(object):
             for resource_group, servers in resource_groups.items():
                 for server in servers:
                     configurations_on_server = []
-                    logging.info(f'getting mysql configurations for server: { server.name }')
+                    logging.info(f'getting postgres configurations for flexible server: { server.name }')
                     try:
                         configuration_list = list(client.configurations.list_by_server(server_name=server.name, resource_group_name=resource_group))
                     except Exception as e:
-                        logging.error(f'error getting mysql configurations for server: { server.name }, error: { e }')
+                        logging.error(f'error getting postgres configurations for flexible server: { server.name }, error: { e }')
                     else:
                         for configuration in configuration_list:
                             try:
                                 configurations_on_server.append(client.configurations.get(configuration_name=configuration.name, server_name=server.name, resource_group_name=resource_group))
                             except Exception as e:
-                                logging.error(f'error getting mysql configuration: { configuration.name }, error: { e }')
+                                logging.error(f'error getting postgres configuration for flexible server: { configuration.name }, error: { e }')
                         if configurations_on_server:
                             results[server.name] = configurations_on_server
             if results:
@@ -175,7 +175,7 @@ class postgresql(object):
         return findings
 
     def postgresql_1(self):
-        # Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server (CIS)
+        # Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard Postgresql Database Server (CIS)
 
         results = {
             "id" : "postgresql_1",
@@ -218,7 +218,7 @@ class postgresql(object):
         # Ensure Server Parameter 'log_checkpoints' is set to 'ON' for PostgreSQL Database Server (CIS)
 
         results = {
-            "id" : "postgresql_4",
+            "id" : "postgresql_2",
             "ref" : "4.3.2",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
@@ -241,14 +241,14 @@ class postgresql(object):
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_checkpoints":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         for subscription, servers in self.flexible_configurations.items():
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_checkpoints":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         if results["affected"]:
@@ -289,14 +289,14 @@ class postgresql(object):
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_connections":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         for subscription, servers in self.flexible_configurations.items():
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_connections":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         if results["affected"]:
@@ -337,14 +337,14 @@ class postgresql(object):
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_disconnections":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         for subscription, servers in self.flexible_configurations.items():
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_disconnections":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         if results["affected"]:
@@ -385,14 +385,14 @@ class postgresql(object):
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "connection_throttling":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         for subscription, servers in self.flexible_configurations.items():
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "connection_throttling":
-                        if configuration.value != "ON":
+                        if configuration.value.upper() != "ON":
                             results["affected"].append(server)
 
         if results["affected"]:
