@@ -1781,6 +1781,8 @@ class cloudwatch(object):
                 composite_alarms = client.describe_alarms()["CompositeAlarms"]
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting alarms - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError as e:
+                logging.error("Error getting alarms - %s" % e)
 
             else:
                 for alarm in metric_alarms:
