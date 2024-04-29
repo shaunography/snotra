@@ -1473,7 +1473,7 @@ class ec2(object):
         # Ensure all security groups rules have a description
 
         results = {
-            "id" : "ec2_6",
+            "id" : "ec2_27",
             "ref" : "N/A",
             "compliance" : "N/A",
             "level" : "N/A",
