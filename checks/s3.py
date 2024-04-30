@@ -28,7 +28,6 @@ class s3(object):
 
     def cis(self):
         findings = []
-        findings += [ self.s3_1() ]
         findings += [ self.s3_2() ]
         findings += [ self.s3_3() ]
         findings += [ self.s3_4() ]
@@ -53,11 +52,11 @@ class s3(object):
 
         results = {
             "id" : "s3_1",
-            "ref" : "2.1.1",
-            "compliance" : "cis",
-            "level" : 2,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "s3",
-            "name" : "Ensure all S3 buckets employ encryption-at-rest (CIS)",
+            "name" : "Ensure all S3 buckets employ encryption-at-rest",
             "affected": [],
             "analysis" : "",
             "description" : "Amazon S3 provides a variety of no, or low, cost encryption options to protect data at rest. Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.",
@@ -93,7 +92,7 @@ class s3(object):
 
         results = {
             "id" : "s3_2",
-            "ref" : "2.1.2",
+            "ref" : "2.1.1",
             "compliance" : "cis",
             "level" : 2,
             "service" : "s3",
@@ -155,9 +154,9 @@ class s3(object):
 
         results = {
             "id" : "s3_3",
-            "ref" : "2.1.3",
+            "ref" : "2.1.2",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "s3",
             "name" : "Ensure MFA Delete is enable on S3 buckets (CIS)",
             "affected": [],
@@ -204,9 +203,9 @@ class s3(object):
 
         results = {
             "id" : "s3_4",
-            "ref" : "2.1.4",
+            "ref" : "2.1.3",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "s3",
             "name" : "Ensure all data in Amazon S3 has been discovered classified and secured when required (CIS)",
             "affected": [],
@@ -234,7 +233,7 @@ class s3(object):
 
         results = {
             "id" : "s3_5",
-            "ref" : "2.1.5",
+            "ref" : "2.1.4",
             "compliance" : "cis",
             "level" : 1,
             "service" : "s3",

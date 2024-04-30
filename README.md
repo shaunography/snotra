@@ -38,80 +38,96 @@ https://www.shaunography.com/snotra-lambda.html
 
 
 ## checks
-### CIS Benchmark v1.5.0
+### CIS Benchmark v3.0.0
 Snotra currently completes all checks included in the latest CIS Benchmark. Although Snotra reports on them, a few of the checks can not be completed programatically - these are marked accordingly.
 
 ### other
 Additional checks beyond the CIS benchmark
 
-* unused security groups (ec2)
-* guardduty not enabled in all regions (guardduty)
-* unused elastic IPs (ec2)
-* cloudwatch alarms with no actions configured (cloudwatch)
-* efs with no access policy, grants access to all clients (efs)
-* public EBS snapshots (ec2)
-* public EC2 AMIs (ec2)
-* public SNS topics (sns)
-* security groups allow database traffic from 0.0.0.0/0 (ec2)
-* network acls allow database traffic from 0.0.0.0/0 (ec2)
-* default network acls allow all traffic (ec2)
-* custom network acls allow all traffic (ec2)
-* security hub not enabled (securityhub)
-* security hub does not have autoenablecontrols enabled (securityhub)
-* unused IAM groups (iam)
-* unused network interfaces (ec2)
-* instances older than 365 days (ec2)
-* ensure EC2 instance metadata service version 2 (IMDSv2) is enabled and required (ec2)
-* instances not managed by AWS systems manager (ec2)
-* unencrypted ebs volumes (ec2)
-* unencrypted ebs snapshots (ec2)
-* old ebs snapshots (ec2)
-* cross-account assumerole policy lacks external ID (iam)
-* groups granting admin access (iam)
-* group name does not indicate admin access (iam)
-* default vpcs in use (ec2)
-* internet facing load balancers (elb)
-* internet facing load balancers using unencrypted http listeners (elb)
-* ELB listeners with weak TLS configuration (elb)
-* ALBs not configured to drop invalid headers (elb)
-* desync mitigation mode not enabled (elb)
-* S3 buckets without object versioning enabled (s3)
-* ECR Image Scan on Push is not Enabled (ecr)
-* RDS Instances Do Not Have Deletion Protection Enabled (rds)
-* Unencrypted SNS Topics (sns)
-* Domain Does Not Have Domain Transfer Lock Set (route53)
-* ACM Certificate with Transparency Logging Set to Disabled (acm)
-* Expired ACM Certificates (acm)
-* Lack of ELB Access Logging (elb)
-* Load Balancer Deletion Protection not Configured (elb)
-* Group with inline policies (iam)
-* High Risk Guard Duty Findings (guardduty)
-* Overly Permisions Cross Account Assume Role (IAM)
-* Incorrect policy used to attempt to enforce MFA (IAM)
-* Overly permissive VPC Endpoint (EC2)
-* Domain without auto renew enabled (route53)
-* AmazonEC2RoleforSSM Managed Policy In Use (iam)
-* Reource Explorer Indexes in use (resourceexplorer)
-* CodeBuild Project Environment Variabled (Check for secrets) (codebuild)
-* EC2 instance UserData (Check for secrets) (ec2)
-* CloudFormation stack output (Check for secrets) (cloudformation)
-* SSM parameter store parameters (check for secrets) (ssm)
-* ecr repositories with no lifecycle policy (ecr)
-* Overly Privileged Cross Account Assume Role Trust Policy GitHub OIDC (IAM)
-* Overly permissions cross service trust role (IAM)
-* athena work groups not using encryption (athena)
-* EC2 instances with pubic IPs (ec2)
-* EC2 instances without detailed monitoring enabled (ec2)
-* S3 buckets grant public access via ACL (s3)
-* S3 buckets grant public access via policy (s3)
-* S3 buckets with bucket policy attacched (s3)
-* Ensure Access Keys are protected with MFA (iam)
-* Users with Admin access via directly attached policy (iam)
-* stopped ec2 instances (ec2)
-* Ensure Tags Do Not Contain Sensitive or PII Data (resourcegroupstaggingapi)
-* A list of all resources (ARNs) in the account (resourcegroupstaggingapi)
-* api gateways in use (apigateway)
-* api gateways using lambda authorizers (apigateways)
+- "ACM Certificate with Transparency Logging Set to Disabled"
+- "Expired ACM Certificates"
+- "API Gateways In Use"
+- "API Gateways Using Lambda Authorizers"
+- "Ensure that encryption at rest is enabled for Amazon Athena query results stored in Amazon S3"
+- "Lambda Function Environment Variables (Check for Secrets)"
+- "CloudFormation Stacks Output (Check For Secrets)"
+- "CloudFormation Stacks Do Not Have Termination Protection Enabled"
+- "Role Passed To CLoud Formation Stack"
+- "Codebuild Projects Environment Variables (Check For Secrets)"
+- "Dynamo DB Tables Without Deletion Protection Enabled"
+- "Unused Dynamo DB Tables"
+- "Dynamo DB Tables Without Point In Time Recovery Enabled"
+- "ECR Image Scan on Push is not Enabled"
+- "ECR Image Repositories Do Not Have a LifeCycle Policy Applied"
+- "EFS Grants Access To All Clients"
+- "Internet Facing Load Balancers"
+- "Internet Facing Load Balancers Using Unencrypted HTTP Listeners"
+- "ELB Listeners with Weak TLS Configuration"
+- "ALBs Not Configured To Drop Invalid Headers"
+- "ALB HTTP Desync Mitigation Mode Not Enabled"
+- "Lack of ELB Access Logging"
+- "Load Balancer Deletion Protection not Configured"
+- "GuardDuty Not Enabled In All Regions"
+- "High Risk GuardDuty findings"
+- "Resource Explorer Indexes Not Found"
+- "Ensure Tags Do Not Contain Sensitive or PII Data"
+- "All Resources"
+- "Domain Does Not Have Domain Transfer Lock Set"
+- "Domain Does Not Have Auto Renew Enabled"
+- "Security Hub Auto Enable Controls"
+- "SNS Topic Allows Actions To All AWS Principals"
+- "Unencrypted SNS Topics"
+- "SSM Parameter Store Parameters (Check For Secrets)"
+- "Unused IAM Groups"
+- "Cross-Account AssumeRole Policy Lacks External ID"
+- "Groups Granting Full Admin Access"
+- "Group Name does not Indicate Admin Access"
+- "Group With Inline Policies"
+- "Overly permissive Cross Account Assume Role Trust Policy"
+- "Incorrect policy used to attempt to enforce MFA"
+- "AmazonEC2RoleforSSM Managed Policy In Use"
+- "Overly permissive Cross Account Assume Role Trust Policy GitHub OIDC"
+- "Insecure Cross-Service Trust"
+- "Users Granted Full Admin Access via Directly Attached Policy"
+- "Ensure Access Keys are Protected with MFA"
+- "Ensure all S3 buckets employ encryption-at-rest"
+- "S3 buckets without object versioning enabled"
+- "S3 Buckets Grant Public Access Via ACL"
+- "S3 Buckets Grant Public Access Via Policy"
+- "S3 Buckets Grant Public Access Via Policy"
+- "S3 Buckets with Bucket Policy Attached"
+- "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible"
+- "Ensure CloudTrail trails are integrated with CloudWatch Logs"
+- "CloudWatch Alarms with no actions"
+- "Ensure IAM instance roles are used for AWS resource access from instances"
+- "Ensure VPC flow logging is enabled in all VPCs"
+- "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports"
+- "Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports"
+- "Ensure the default security group of every VPC restricts all traffic"
+- "Ensure routing tables for VPC peering are least access"
+- "Unused Security Groups"
+- "Unused Elastic IPs"
+- "Ensure there are no Public EBS Snapshots"
+- "Ensure there are no Public EC2 AMIs"
+- "Ensure no security groups allow ingress from 0.0.0.0/0 to database ports"
+- "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to database ports"
+- "Ensure default Network ACLs are not default allow"
+- "Ensure custom Network ACLs do not allow all traffic"
+- "Unused Network Interfaces"
+- "Ensure running instances are not more than 365 days old"
+- "Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required"
+- "EC2 Instances Not Managed By AWS Systems Manager"
+- "Unencrypted EBS Volumes"
+- "Unencrypted EBS Snapshots"
+- "Snapshots Older Than 30 days"
+- "Default VPCs in use"
+- "Overly Permissive VPC Endpoint Policy"
+- "Ensure no security groups allow ingress from ::/0 to remote server administration ports"
+- "EC2 Instance User Data (Check For Secrets)"
+- "Ensure All Security Group Rules Have A Description"
+- "EC2 Instances Without Detailed Monitoring Enabled"
+- "EC2 Instances with a Public IP Address"
+- "Stopped EC2 Instances"
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:

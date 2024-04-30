@@ -60,6 +60,7 @@ class iam(object):
         findings += [ self.iam_29() ]
         findings += [ self.iam_30() ]
         findings += [ self.iam_31() ]
+        findings += [ self.iam_32() ]
         return findings
     
     def cis(self):
@@ -83,6 +84,7 @@ class iam(object):
         findings += [ self.iam_17() ]
         findings += [ self.iam_18() ]
         findings += [ self.iam_19() ]
+        findings += [ self.iam_32() ]
         return findings
 
     def get_client(self):
@@ -1454,8 +1456,8 @@ class iam(object):
             "name" : "AmazonEC2RoleforSSM Managed Policy In Use",
             "affected": [],
             "analysis" : "",
-            "description" : "The AWS managed policy AmazonEC2RoleforSSM is considered overly permissive.",
-            "remediation" : "Use AmazonSSMManagedInstanceCore instead and add privs as needed.\nMore Information:\nhttps://www.tripwire.com/state-of-security/security-data-protection/cloud/aws-system-manager-default-permissions/",
+            "description" : "The AWS managed policy AmazonEC2RoleforSSM is in use and is considered overly permissive. By default, this role grants access to all S3 buckets in the account. It is recommended that the role is adjusted by applying the principal of least privilege.",
+            "remediation" : "It is recommended that the AmazonSSMManagedInstanceCore policy is used instead and privileges are added as needed.\nMore Information:\nhttps://www.tripwire.com/state-of-security/security-data-protection/cloud/aws-system-manager-default-permissions/",
             "impact" : "Medium",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
@@ -1572,8 +1574,8 @@ class iam(object):
             "remediation" : 'To prevent attackers from leveraging permissive service role trust to access unauthorised resources it is recommended that role trust policies for services contain conditional access statements. Using conditions and specifying the full ARN of the allowed resources would restrict access to only legitimate resources and reduce the potential for abuse. Specifying the full ARN, including region and resource name, could prevent attackers from creating similar resources in other regions to leverage in attacks.\nAs an example, the following role trust policy could be used to restrict access to a Lambda execution role to only a specific lambda function within an AWS account:\n{\n  "Version": "2012-10-17",\n  "Statement": {\n    "Effect": "Allow",\n    "Principal": {\n      "Service": "lambda.amazonaws.com"\n    },\n    "Action": "sts:AssumeRole",\n    "Condition": {\n      "ArnLike": {\n        "aws:SourceArn": "arn:aws:lambda:us-east-2:111122223333:function:my-function”\n      }\n    }\n  }\n}\nThe above policy makes use of the aws:SourceArn global condition context key using the full ARN of an example lambda function. In this example, only the lambda function my-function within the us-east-2 region would have permission to assume the execution policy and access the privileges assigned to it. This would prevent malicious users from creating other lambda functions to gain access to additional privileges.\nWhere appropriate other conditional contexts could also be used following the principal of least privilege to effectively limit the scope of trust policies and prevent unintended access opportunities. Common conditional restrictions for services include,\nSourceArn\nSourceAccount\nPrincipalOrgID\nFurther Information\nAWS Confused Deputy - https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html#cross-service-confused-deputy-prevention\n\n',
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N",
-            "cvss_score" : "6.8",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "4.8",
             "pass_fail" : ""
         }
 
@@ -1774,4 +1776,42 @@ class iam(object):
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 
+        return results
+
+    def iam_32(self):
+        # Ensure access to AWSCloudShellFullAccess is restricted (CIS)
+
+        results = {
+            "id" : "iam_17",
+            "ref" : "1.22",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "iam",
+            "name" : "Ensure access to AWSCloudShellFullAccess is restricted (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "AWS CloudShell is a convenient way of running CLI commands against AWS services; a managed IAM policy ('AWSCloudShellFullAccess') provides full access to CloudShell, which allows file upload and download capability between a user's local system and the CloudShell environment. Within the CloudShell environment a user has sudo permissions, and can access the internet. So it is feasible to install file transfer software (for example) and move data from CloudShell to external internet servers.\nAccess to this policy should be restricted as it presents a potential channel for data exfiltration by malicious cloud admins that are given full permissions to the service. AWS documentation describes how to create a more restrictive IAM policy which denies file transfer permissions.",
+            "remediation" : "From Console\n1. Open the IAM console at https://console.aws.amazon.com/iam/\n2. In the left pane, select Policies\n3. Search for and select AWSCloudShellFullAccess\n4. On the Entities attached tab, for each item, check the box and select Detach",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for policy in self.aws_policies:
+            
+            if policy["PolicyName"] == "AWSCloudShellFullAccess":
+
+                if policy["AttachmentCount"] != 0:
+                    results["analysis"] = "AWSCloudShellFullAccess Policy is attached"
+                    results["affected"].append(self.account_id)
+                    results["pass_fail"] = "FAIL"
+                else:
+                    results["analysis"] = "AWSCloudShellFullAccess Policy is not attached to any entities"
+                    results["affected"].append(self.account_id)
+                    results["pass_fail"] = "PASS"
+                
         return results

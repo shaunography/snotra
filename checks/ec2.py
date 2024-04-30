@@ -59,13 +59,12 @@ class ec2(object):
 
     def cis(self):
         findings = []
-        findings += [ self.ec2_1() ]
         findings += [ self.ec2_2() ]
-        findings += [ self.ec2_3() ]
         findings += [ self.ec2_4() ]
         findings += [ self.ec2_5() ]
         findings += [ self.ec2_6() ]
         findings += [ self.ec2_7() ]
+        findings += [ self.ec2_18() ]
         findings += [ self.ec2_25() ]
         return findings
 
@@ -162,11 +161,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_1",
-            "ref" : "1.18",
-            "compliance" : "cis",
-            "level" : 2,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "ec2",
-            "name" : "Ensure IAM instance roles are used for AWS resource access from instances (CIS)",
+            "name" : "Ensure IAM instance roles are used for AWS resource access from instances",
             "affected": [],
             "analysis" : "",
             "description" : "AWS access from within AWS instances can be done by either encoding AWS keys into AWS API calls or by assigning the instance to a role which has an appropriate permissions policy for the required access. AWS Access means accessing the APIs of AWS in order to access AWS resources or manage AWS account resources. AWS IAM roles reduce the risks associated with sharing and rotating credentials that can be used outside of AWS itself. If credentials are compromised, they can be used from outside of the AWS account they give access to. In contrast, in order to leverage role permissions an attacker would need to gain and maintain access to a specific instance to use the privileges associated with it. Additionally, if credentials are encoded into compiled applications or other hard to change mechanisms, then they are even more unlikely to be properly rotated due to service disruption risks. As time goes on, credentials that cannot be rotated are more likely to be known by an increasing number of individuals who no longer work for the organization owning the credentials",
@@ -202,7 +201,7 @@ class ec2(object):
 
 
     def ec2_2(self):
-        # Ensure EBS volume encryption is enabled (Manual)
+        # Ensure EBS volume encryption is enabled in all regions (Manual)
 
         results = {
             "id" : "ec2_2",
@@ -210,7 +209,7 @@ class ec2(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "ec2",
-            "name" : "Ensure EBS volume encryption is enabled (CIS)",
+            "name" : "Ensure EBS Volume Encryption is Enabled in all Regions (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Elastic Compute Cloud (EC2) supports encryption at rest when using the Elastic Block Store (EBS) service. While disabled by default, forcing encryption at EBS volume creation is supported. Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.",
@@ -251,11 +250,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_3",
-            "ref" : "3.9",
-            "compliance" : "cis",
-            "level" : 2,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "ec2",
-            "name" : "Ensure VPC flow logging is enabled in all VPCs (CIS)",
+            "name" : "Ensure VPC flow logging is enabled in all VPCs",
             "affected": [],
             "analysis" : "",
             "description" : "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs. It is recommended that VPC Flow Logs be enabled for packet Rejects for VPCs. VPC Flow Logs provide visibility into network traffic that traverses the VPC and can be used to detect anomalous traffic or insight during security workflows.",
@@ -302,7 +301,7 @@ class ec2(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "ec2",
-            "name" : "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports (CIS)",
+            "name" : "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports",
             "affected": [],
             "analysis" : "",
             "description" : "The Network Access Control List (NACL) function provide stateless filtering of ingress and egress network traffic to AWS resources. It is recommended that no NACL allows unrestricted ingress access to remote server administration ports, such as SSH to port 22 and RDP to port 3389. Public access to remote server administration ports, such as 22 and 3389, increases resource attack surface and unnecessarily raises the risk of resource compromise.",
@@ -361,9 +360,9 @@ class ec2(object):
             "id" : "ec2_5",
             "ref" : "5.2",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 1, 
             "service" : "ec2",
-            "name" : "Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports (CIS)",
+            "name" : "Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports",
             "affected": [],
             "analysis" : "",
             "description" : "Security groups provide stateful filtering of ingress and egress network traffic to AWS resources. It is recommended that no security group allows unrestricted ingress access to remote server administration ports, such as SSH to port 22 and RDP to port 3389 . Public access to remote server administration ports, such as 22 and 3389, increases resource attack surface and unnecessarily raises the risk of resource compromise.",
@@ -434,9 +433,9 @@ class ec2(object):
             "id" : "ec2_6",
             "ref" : "5.4",
             "compliance" : "cis",
-            "level" : 2,
+            "level" : 2
             "service" : "ec2",
-            "name" : "Ensure the default security group of every VPC restricts all traffic (CIS)",
+            "name" : "Ensure the default security group of every VPC restricts all traffic",
             "affected": [],
             "analysis" : "",
             "description" : "A VPC comes with a default security group whose initial settings deny all inbound traffic, allow all outbound traffic, and allow all traffic between instances assigned to the security group. If you don't specify a security group when you launch an instance, the instance is automatically assigned to this default security group. Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. It is recommended that the default security group restrict all traffic. The default VPC in every region should have its default security group updated to comply. Any newly created VPCs will automatically contain a default security group that will need remediation to comply with this recommendation. NOTE: When implementing this recommendation, VPC flow logging is invaluable in determining the least privilege port access required by systems to work properly because it can log all packet acceptances and rejections occurring under the current security groups. This dramatically reduces the primary barrier to least privilege engineering - discovering the minimum ports required by systems in the environment. Even if the VPC flow logging recommendation in this benchmark is not adopted as a permanent security measure, it should be used during any period of discovery and engineering for least privileged security groups. Configuring all VPC default security groups to restrict all traffic will encourage least privilege security group development and mindful placement of AWS resources into security groups which will in-turn reduce the exposure of those resources.",
@@ -476,7 +475,7 @@ class ec2(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "ec2",
-            "name" : "Ensure routing tables for VPC peering are least access (CIS)",
+            "name" : "Ensure routing tables for VPC peering are least access",
             "affected": [],
             "analysis" : "",
             "description" : "Once a VPC peering connection is established, routing tables must be updated to establish any connections between the peered VPCs. These routes can be as specific as desired - even peering a VPC to only a single host on the other side of the connection. Being highly selective in peering routing tables is a very effective way of minimizing the impact of breach as resources outside of these routes are inaccessible to the peered VPC.",
@@ -1058,9 +1057,9 @@ class ec2(object):
 
         results = {
             "id" : "ec2_18",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "5.6",
+            "compliance" : "cis",
+            "level" : 1,
             "service" : "ec2",
             "name" : "Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required",
             "affected": [],

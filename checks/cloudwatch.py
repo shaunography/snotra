@@ -64,15 +64,15 @@ class cloudwatch(object):
         return trail_list
 
     def cloudwatch_1(self):
-        # Ensure a log metric filter and alarm exist for unauthorized API calls (Automated)
+        # Ensure unauthorized API calls are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_1",
             "ref" : "4.1",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for unauthorized API calls (CIS)",
+            "name" : "Ensure unauthorized API calls are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for unauthorized API calls. Monitoring unauthorized API calls will help reveal application errors and may reduce time to detect malicious activity.",
@@ -176,7 +176,7 @@ class cloudwatch(object):
 
 
     def cloudwatch_2(self):
-        # Ensure a log metric filter and alarm exist for Management Console sign-in without MFA (Automated)
+        # Ensure management console sign-in without MFA is monitored (CIS)
 
         results = {
             "id" : "cloudwatch_2",
@@ -184,7 +184,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for Management Console sign-in without MFA (CIS)",
+            "name" : "Ensure management console sign-in without MFA is monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for console logins that are not protected by multi-factor authentication (MFA). Monitoring for single-factor console logins will increase visibility into accounts that are not protected by MFA.",
@@ -290,7 +290,7 @@ class cloudwatch(object):
         
         
     def cloudwatch_3(self):
-        # Ensure a log metric filter and alarm exist for usage of 'root' account (Automated)
+        # Ensure usage of 'root' account is monitored (CIS)
 
         results = {
             "id" : "cloudwatch_3",
@@ -298,7 +298,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for usage of root account (CIS)",
+            "name" : "Ensure usage of 'root' account is monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for 'root' login attempts. Monitoring for 'root' account logins will provide visibility into the use of a fully privileged account and an opportunity to reduce the use of it.",
@@ -403,7 +403,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_4(self):
-        # Ensure a log metric filter and alarm exist for IAM policy changes (Automated)
+        # Ensure IAM policy changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_4",
@@ -411,7 +411,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for IAM policy changes (CIS)",
+            "name" : "Ensure IAM policy changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established changes made to Identity and Access Management (IAM) policies. Monitoring changes to IAM policies will help ensure authentication and authorization controls remain intact.",
@@ -515,7 +515,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_5(self):
-        # Ensure a log metric filter and alarm exist for CloudTrail configuration changes (Automated)
+        # Ensure CloudTrail configuration changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_5",
@@ -523,7 +523,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for CloudTrail configuration changes (CIS)",
+            "name" : "Ensure CloudTrail configuration changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for detecting changes to CloudTrail's configurations. Monitoring changes to CloudTrail's configuration will help ensure sustained visibility to activities performed in the AWS account.",
@@ -627,7 +627,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_6(self):
-        # Ensure a log metric filter and alarm exist for AWS Management Console authentication failures (Automated)
+        # Ensure AWS Management Console authentication failures are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_6",
@@ -635,7 +635,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for AWS Management Console authentication failures (CIS)",
+            "name" : "Ensure AWS Management Console authentication failures are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for failed console authentication attempts. Monitoring failed console logins may decrease lead time to detect an attempt to brute force a credential, which may provide an indicator, such as source IP, that can be used in other event correlation.",
@@ -739,7 +739,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_7(self):
-        # Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs (Automated)
+        # Ensure disabling or scheduled deletion of customer created CMKs is monitored (CIS)
 
         results = {
             "id" : "cloudwatch_7",
@@ -747,7 +747,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs (CIS)",
+            "name" : "Ensure disabling or scheduled deletion of customer created CMKs is monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for customer created CMKs which have changed state to disabled or scheduled deletion. Data encrypted with disabled or deleted keys will no longer be accessible.",
@@ -851,7 +851,7 @@ class cloudwatch(object):
         return results
 
     def cloudwatch_8(self):
-        # Ensure a log metric filter and alarm exist for S3 bucket policy changes (Automated)
+        # Ensure S3 bucket policy changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_8",
@@ -859,7 +859,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for S3 bucket policy changes (CIS)",
+            "name" : "Ensure S3 bucket policy changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for changes to S3 bucket policies. Monitoring changes to S3 bucket policies may reduce time to detect and correct permissive policies on sensitive S3 buckets.",
@@ -964,7 +964,7 @@ class cloudwatch(object):
     
     
     def cloudwatch_9(self):
-        # Ensure a log metric filter and alarm exist for AWS Config configuration changes (Automated)
+        # Ensure AWS Config configuration changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_9",
@@ -972,7 +972,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for AWS Config configuration changes (CIS)",
+            "name" : "Ensure AWS Config configuration changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for detecting changes to CloudTrail's configurations. Monitoring changes to AWS Config configuration will help ensure sustained visibility of configuration items within the AWS account.",
@@ -1077,7 +1077,7 @@ class cloudwatch(object):
 
 
     def cloudwatch_10(self):
-        # Ensure a log metric filter and alarm exist for security group changes (Automated)
+        # Ensure security group changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_10",
@@ -1085,7 +1085,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for security group changes (CIS)",
+            "name" : "Ensure security group changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
@@ -1190,7 +1190,7 @@ class cloudwatch(object):
     
     
     def cloudwatch_11(self):
-        # Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) (Automated)
+        # Ensure Network Access Control Lists (NACL) changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_11",
@@ -1198,7 +1198,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) (CIS)",
+            "name" : "Ensure Network Access Control Lists (NACL) changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
@@ -1302,7 +1302,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_12(self):
-        # Ensure a log metric filter and alarm exist for changes to network gateways (Automated)
+        # Ensure changes to network gateways are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_12",
@@ -1310,7 +1310,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for changes to network gateways (CIS)",
+            "name" : "Ensure changes to network gateways are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Security Groups are a stateful packet filter that controls ingress and egress traffic within a VPC. It is recommended that a metric filter and alarm be established for detecting changes to Security Groups. Monitoring changes to security group will help ensure that resources and services are not unintentionally exposed.",
@@ -1414,7 +1414,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_13(self):
-        # Ensure a log metric filter and alarm exist for route table changes (Automated)
+        # Ensure route table changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_13",
@@ -1422,7 +1422,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for route table changes (CIS)",
+            "name" : "Ensure route table changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. Routing tables are used to route network traffic between subnets and to network gateways. It is recommended that a metric filter and alarm be established for changes to route tables. Monitoring changes to route tables will help ensure that all VPC traffic flows through an expected path. ",
@@ -1526,7 +1526,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_14(self):
-        # Ensure a log metric filter and alarm exist for VPC changes (Automated)
+        # Ensure VPC changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_14",
@@ -1534,7 +1534,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for VPC changes (CIS)",
+            "name" : "Ensure VPC changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is possible to have more than 1 VPC within an account, in addition it is also possible to create a peer connection between 2 VPCs enabling network traffic to route between VPCs. It is recommended that a metric filter and alarm be established for changes made to VPCs. Monitoring changes to VPC will help ensure VPC traffic flow is not getting impacted.",
@@ -1638,7 +1638,7 @@ class cloudwatch(object):
         return results
     
     def cloudwatch_15(self):
-        # Ensure a log metric filter and alarm exist for AWS Organizations changes (Automated)
+        # Ensure AWS Organizations changes are monitored (CIS)
 
         results = {
             "id" : "cloudwatch_15",
@@ -1646,7 +1646,7 @@ class cloudwatch(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudwatch",
-            "name" : "Ensure a log metric filter and alarm exist for AWS Organizations changes (CIS)",
+            "name" : "Ensure AWS Organizations changes are monitored (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms. It is recommended that a metric filter and alarm be established for AWS Organizations changes made in the master AWS Account. Monitoring AWS Organizations changes can help you prevent any unwanted, accidental or intentional modifications that may lead to unauthorized access or other security breaches. This monitoring technique helps you to ensure that any unexpected changes performed within your AWS Organizations can be investigated and any unwanted changes can be rolled back.",

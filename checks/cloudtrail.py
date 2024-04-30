@@ -29,8 +29,6 @@ class cloudtrail(object):
         findings = []
         findings += [ self.cloudtrail_1() ]
         findings += [ self.cloudtrail_2() ]
-        findings += [ self.cloudtrail_3() ]
-        findings += [ self.cloudtrail_4() ]
         findings += [ self.cloudtrail_5() ]
         findings += [ self.cloudtrail_6() ]
         findings += [ self.cloudtrail_7() ]
@@ -143,11 +141,11 @@ class cloudtrail(object):
 
         results = {
             "id" : "cloudtrail_3",
-            "ref" : "3.3",
-            "compliance" : "cis",
-            "level" : 1,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "cloudtrail",
-            "name" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible (CIS)",
+            "name" : "Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible",
             "affected": [],
             "analysis" : "",
             "description" : "CloudTrail logs a record of every API call made in your AWS account. These logs file are stored in an S3 bucket. It is recommended that the bucket policy or access control list (ACL) applied to the S3 bucket that CloudTrail logs to prevent public access to the CloudTrail logs. Allowing public access to CloudTrail log content may aid an adversary in identifying weaknesses in the affected account's use or configuration.",
@@ -227,11 +225,11 @@ class cloudtrail(object):
 
         results = {
             "id" : "cloudtrail_4",
-            "ref" : "3.4",
-            "compliance" : "cis",
-            "level" : 1,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "cloudtrail",
-            "name" : "Ensure CloudTrail trails are integrated with CloudWatch Logs (CIS)",
+            "name" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
             "affected": [],
             "analysis" : "",
             "description" : "AWS CloudTrail is a web service that records AWS API calls made in a given AWS account. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, the request parameters, and the response elements returned by the AWS service. CloudTrail uses Amazon S3 for log file storage and delivery, so log files are stored durably. In addition to capturing CloudTrail logs within a specified S3 bucket for long term analysis, realtime analysis can be performed by configuring CloudTrail to send logs to CloudWatch Logs. For a trail that is enabled in all regions in an account, CloudTrail sends log files from all those regions to a CloudWatch Logs log group. It is recommended that CloudTrail logs be sent to CloudWatch Logs. Note: The intent of this recommendation is to ensure AWS account activity is being captured, monitored, and appropriately alarmed on. CloudWatch Logs is a native way to accomplish this using AWS services but does not preclude the use of an alternate solution. Sending CloudTrail logs to CloudWatch Logs will facilitate real-time and historic activity logging based on user, API, resource, and IP address, and provides opportunity to establish alarms and notifications for anomalous or sensitivity account activity. ",
@@ -272,7 +270,7 @@ class cloudtrail(object):
 
         results = {
             "id" : "cloudtrail_5",
-            "ref" : "3.6",
+            "ref" : "3.4",
             "compliance" : "cis",
             "level" : 1,
             "service" : "cloudtrail",
@@ -322,7 +320,7 @@ class cloudtrail(object):
 
         results = {
             "id" : "cloudtrail_6",
-            "ref" : "3.7",
+            "ref" : "3.5",
             "compliance" : "cis",
             "level" : 2,
             "service" : "cloudtrail",
@@ -366,7 +364,7 @@ class cloudtrail(object):
 
         results = {
             "id" : "cloudtrail_7",
-            "ref" : "3.10",
+            "ref" : "3.8",
             "compliance" : "cis",
             "level" : 2,
             "service" : "cloudtrail",
@@ -423,7 +421,7 @@ class cloudtrail(object):
 
         results = {
             "id" : "cloudtrail_8",
-            "ref" : "3.11",
+            "ref" : "3.9",
             "compliance" : "cis",
             "level" : 2,
             "service" : "cloudtrail",
