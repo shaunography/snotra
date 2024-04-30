@@ -433,7 +433,7 @@ class ec2(object):
             "id" : "ec2_6",
             "ref" : "5.4",
             "compliance" : "cis",
-            "level" : 2
+            "level" : 2,
             "service" : "ec2",
             "name" : "Ensure the default security group of every VPC restricts all traffic",
             "affected": [],
