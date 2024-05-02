@@ -1,6 +1,7 @@
 import boto3
 import logging
 import json
+import re
 
 from utils.utils import describe_regions
 from utils.utils import get_account_id
@@ -17,6 +18,7 @@ class aws_lambda(object):
         self.functions = self.list_functions()
         self.functions_get = self.get_functions()
         self.policies = self.get_policies()
+        self.configurations = self.get_configurations()
 
     def run(self):
         findings = []
@@ -26,6 +28,8 @@ class aws_lambda(object):
         findings += [ self.lambda_4() ]
         findings += [ self.lambda_5() ]
         findings += [ self.lambda_6() ]
+        findings += [ self.lambda_7() ]
+        findings += [ self.lambda_8() ]
         return findings
 
     def cis(self):
@@ -33,6 +37,8 @@ class aws_lambda(object):
         findings += [ self.lambda_3() ]
         findings += [ self.lambda_4() ]
         findings += [ self.lambda_6() ]
+        findings += [ self.lambda_7() ]
+        findings += [ self.lambda_8() ]
         findings = []
         return findings
 
@@ -74,6 +80,20 @@ class aws_lambda(object):
                     logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
         return policies
     
+    def get_configurations(self):
+        configurations = {}
+        logging.info("getting functions")
+        for region, functions in self.functions.items():
+            client = self.session.client('lambda', region_name=region)
+            configurations[region] = {}
+            for function in functions:
+                configurations[region][function["FunctionName"]] = []
+                try:
+                    configurations[region][function["FunctionName"]].append(client.get_function_configuration(FunctionName=function["FunctionName"]))
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+        return configurations
+
     def lambda_1(self):
         # Lambda functions environment variables (check for secrets)
 
@@ -346,6 +366,167 @@ class aws_lambda(object):
 
         if results["affected"]:
             results["analysis"] = "The affected Lambda functions do not have code signing enabled"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def lambda_7(self):
+        # Ensure Lambda functions do not allow unknown cross account access via permission policies (CIS)
+
+        results = {
+            "id" : "lambda_7",
+            "ref" : "4.10",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "lambda",
+            "name" : "Ensure Lambda functions do not allow unknown cross account access via permission policies (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Ensure that all your Amazon Lambda functions are configured to allow access only to trusted AWS accounts in order to protect against unauthorized cross-account access. Allowing unknown (unauthorized) AWS accounts to invoke your Amazon Lambda functions can lead to data exposure and data loss. To prevent any unauthorized invocation requests for your Lambda functions, restrict access only to trusted AWS accounts",
+            "remediation" : "From the Console\n1. Login to the AWS Console using https://console.aws.amazon.com/lambda/.\n2. In the left column, under AWS Lambda, click Functions.\n3. Under Function name click on the name of the function that you want to review\n4. Click the Configuration tab\n5. In the left column, click Permissions.\n6. In the Resource-based policy statements section, select the policy statement that allows the unknown AWS Account cross-account access\n7. Click Edit\n8. On the Edit permissions page, replace or remove the AWS Account(s) ARN of the unauthorized principal in the Principal box\n9. Click Save\n10. Repeat steps for each Lambda function that failed the Audit",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for region, functions in self.policies.items():
+            for function, policies in functions.items():
+                for policy in policies:
+                    for statement in json.loads(policy)["Statement"]:
+                        if statement["Effect"] == "Allow":
+                            try:
+                                account_id = re.match(".*\:([0-9]{12})\:.*", statement["Principal"]["AWS"]).groups()[0]
+                            except KeyError:
+                                pass
+                            except TypeError:
+                                pass
+                            else:
+                                if account_id != self.account_id:
+                                    results["affected"].append(function)
+
+        if results["affected"]:
+            results["affected"] = list(set(results["affected"]))
+            results["analysis"] = "The affected Lambda functions have a resource based policy which allows access from external AWS principals, ensure only trusted accounts are allowed and ensure access is only granted to single principals and not the whole account."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def lambda_8(self):
+        # Ensure that the runtime environment versions used for your Lambda functions do not have end of support dates (CIS)
+
+        results = {
+            "id" : "lambda_7",
+            "ref" : "4.10",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "lambda",
+            "name" : "Ensure that the runtime environment versions used for your Lambda functions do not have end of support dates (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Always using a recent version of the execution environment configured for your Amazon Lambda functions adheres to best practices for the newest software features, the latest security patches and bug fixes, and performance and reliability. When you execute your Lambda functions using recent versions of the implemented runtime environment, you should benefit from new features and enhancements, better security, along with performance and reliability.",
+            "remediation" : "From the Console\n1. Login to the AWS Console using https://console.aws.amazon.com/lambda/.\n2. In the left column, under AWS Lambda, click Functions.\n3. Under Function name click on the name of the function that you want to review\n4. Click Code tab\n5. Go to the Runtime settings section.\n6. Click Edit\n7. On the Edit runtime settings page, select the latest supported version of the runtime environment from the dropdown list.\n**Note - make sure the correct architecture is also selected.\n8. Click Save\n9. Select the Code tab\n10. Click Test from the Code source section.\n11. Once the testing is completed, the execution result of your Lambda function will be listed\n12. Repeat steps for each Lambda function that failed the Audit within the current region.",
+            "impact" : "low",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : ""
+        }
+
+        # apr 24
+        # https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html
+        supported_runtimes = [
+            "nodejs20.x",
+            "nodejs18.x",
+            "nodejs16.x",
+            "python3.12",
+            "python3.11",
+            "python3.10",
+            "python3.9",
+            "python3.8",
+            "java21",
+            "java17",
+            "java11",
+            "java8.al2",
+            "dotnet8",
+            "dotnet7",
+            "dotnet6",
+            "ruby3.3",
+            "ruby3.2",
+            "provided.al2023",
+            "provided.al2"
+        ]
+
+        logging.info(results["name"])
+
+        for region, functions in self.configurations.items():
+            for function, configurations in functions.items():
+                for config in configurations:
+                    if config["Runtime"] not in supported_runtimes:
+                        results["affected"].append(config["FunctionName"])
+
+        if results["affected"]:
+            results["analysis"] = "The affected Lambda functions are using an unsupported runtime"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def lambda_8(self):
+        # Ensure that the latest runtime environment versions used for your Lambda functions
+
+        results = {
+            "id" : "lambda_8",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "lambda",
+            "name" : "Ensure that the latest runtime environment versions used for your Lambda functions",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Always using a recent version of the execution environment configured for your Amazon Lambda functions adheres to best practices for the newest software features, the latest security patches and bug fixes, and performance and reliability. When you execute your Lambda functions using recent versions of the implemented runtime environment, you should benefit from new features and enhancements, better security, along with performance and reliability.",
+            "remediation" : "From the Console\n1. Login to the AWS Console using https://console.aws.amazon.com/lambda/.\n2. In the left column, under AWS Lambda, click Functions.\n3. Under Function name click on the name of the function that you want to review\n4. Click Code tab\n5. Go to the Runtime settings section.\n6. Click Edit\n7. On the Edit runtime settings page, select the latest supported version of the runtime environment from the dropdown list.\n**Note - make sure the correct architecture is also selected.\n8. Click Save\n9. Select the Code tab\n10. Click Test from the Code source section.\n11. Once the testing is completed, the execution result of your Lambda function will be listed\n12. Repeat steps for each Lambda function that failed the Audit within the current region.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        # apr 24
+        # https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html
+        supported_runtimes = [
+            "nodejs20.x",
+            "python3.12",
+            "java21",
+            "dotnet8",
+            "ruby3.3",
+        ]
+
+        logging.info(results["name"])
+
+        for region, functions in self.configurations.items():
+            for function, configurations in functions.items():
+                for config in configurations:
+                    if config["Runtime"] not in supported_runtimes:
+                        results["affected"].append(config["FunctionName"])
+
+        if results["affected"]:
+            results["analysis"] = "The affected Lambda functions are not using the latest supported runtime."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No issues found"

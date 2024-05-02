@@ -9,11 +9,13 @@ from datetime import date
 from datetime import timedelta
 
 from utils.utils import get_account_id
+from utils.utils import describe_regions
 
 class iam(object):
 
     def __init__(self, session):
         self.session = session
+        self.regions = describe_regions(session)
         self.account_id = get_account_id(session)
         self.client = self.get_client()
         self.account_summary = self.get_account_summary()
@@ -61,6 +63,7 @@ class iam(object):
         findings += [ self.iam_30() ]
         findings += [ self.iam_31() ]
         findings += [ self.iam_32() ]
+        findings += [ self.iam_33() ]
         return findings
     
     def cis(self):
@@ -85,6 +88,7 @@ class iam(object):
         findings += [ self.iam_18() ]
         findings += [ self.iam_19() ]
         findings += [ self.iam_32() ]
+        findings += [ self.iam_33() ]
         return findings
 
     def get_client(self):
@@ -865,65 +869,79 @@ class iam(object):
         logging.info(results["name"])
 
         # Customer Managed Policies
+        logging.info("getting customer managed policies")
         for policy in self.customer_attached_policies:
-
             arn = policy["Arn"]
             policy_name = policy["PolicyName"]
             #policy_id = policy["PolicyId"]
             version_id = policy["DefaultVersionId"]        
-
-            statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
-            
-            if type(statements) is not list:
-                statements = [ statements ]
-
-            for statement in statements:
-                try:
-                    if statement["Effect"] == "Allow":
-                        if statement["Action"] == "*":
-                            if statement["Resource"] == "*":
-                                results["affected"].append(policy_name)
-                except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                    pass
+            try:
+                statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+            else:
+                if type(statements) is not list:
+                    statements = [ statements ]
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(policy_name)
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
 
         # Inline User Policies
+        logging.info("getting inline user policies")
         for user in self.users:
-            inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
-            for policy_name in inline_policies:
-                policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
-                statements = policy["PolicyDocument"]["Statement"]
-
-                if type(statements) is not list:
-                    statements = [ statements ]
-
-                for statement in statements:
+            try:
+                inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
                     try:
-                        if statement["Effect"] == "Allow":
-                            if statement["Action"] == "*":
-                                if statement["Resource"] == "*":
-                                    results["affected"].append(policy["PolicyName"])
-                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                        pass
+                        policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            results["affected"].append(policy["PolicyName"])
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
 
         # Inline Group Policeis
+        logging.info("getting inline group policies")
         for group in self.groups:
-            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
-            for policy_name in inline_policies:
-                policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
-                statements = policy["PolicyDocument"]["Statement"]
-
-                if type(statements) is not list:
-                    statements = [ statements ]
-
-                for statement in statements:
+            try:
+                inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
                     try:
-                        if statement["Effect"] == "Allow":
-                            if statement["Action"] == "*":
-                                if statement["Resource"] == "*":
-                                    results["affected"].append(policy["PolicyName"])
-                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                        pass
-
+                        policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            results["affected"].append(policy["PolicyName"])
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
 
         if results["affected"]:
             results["analysis"] = "The affected custom policies grant full * and remove administrator access from anyone that doesnt require it.:* privileges."
@@ -1782,7 +1800,7 @@ class iam(object):
         # Ensure access to AWSCloudShellFullAccess is restricted (CIS)
 
         results = {
-            "id" : "iam_17",
+            "id" : "iam_32",
             "ref" : "1.22",
             "compliance" : "cis",
             "level" : 1,
@@ -1814,4 +1832,166 @@ class iam(object):
                     results["affected"].append(self.account_id)
                     results["pass_fail"] = "PASS"
                 
+        return results
+
+
+
+    def iam_33(self):
+        # Ensure there are no Lambda functions with admin privileges within your AWS account (CIS)
+
+        results = {
+            "id" : "iam_33",
+            "ref" : "4.9",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "lambda",
+            "name" : "Ensure there are no Lambda functions with admin privileges within your AWS account (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Ensure that your Amazon Lambda functions don't have administrative permissions potentially giving the function access to all AWS cloud services and resources. In order to promote the Principle of Least Privilege (POLP) and provide your functions the minimal amount of access required to perform their tasks the right IAM execution role associated with the function should be used. Instead of providing administrative permissions you should grant the role the necessary permissions that the function really needs.",
+            "remediation" : "From the Console\n1. Login in to the AWS Console using https://console.aws.amazon.com/lambda/\n2. In the left column, under AWS Lambda, click Functions.\n3. Under Function name click on the name of the function that you want to remediate\n4. Click the Configuration tab\n5. Click on Permissions in the left column.\n6. In the Execution role section, click the Edit\n7. Edit basic settings configuration page:\n- associate the function with an existing, compliant IAM role\n- click Use an existing role from the Execution role\n- select the required role from the Existing role dropdown\n- click Save\nOR\n- apply a new execution role to your Lambda function\n- click Create a new role from AWS policy templates\n- Provide a name for the new role based on org policy\n- select only the necessary permission set(s) from the Policy templates - optional dropdown list.\n- click Save\n8. Repeat steps for each Lambda function within the current region that failed the Audit.",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_score" : "8.1",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        function_roles = {}
+        admin_policies = []
+
+        logging.info("getting lambda functions")
+        for region in self.regions:
+            client = self.session.client('lambda', region_name=region)
+            try:
+                functions = client.list_functions()["Functions"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting functions - %s" % e.response["Error"]["Code"])
+            else:
+                for function in functions:
+                    function_roles[function["FunctionName"]] = function["Role"]
+
+
+        # AWS Managed Policies
+        logging.info("getting aws managed policies")
+        for policy in self.aws_attached_policies:
+
+            arn = policy["Arn"]
+            policy_name = policy["PolicyName"]
+            #policy_id = policy["PolicyId"]
+            version_id = policy["DefaultVersionId"]        
+            try:
+                statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+            else:
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    admin_policies.append(arn)
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        # Customer Managed Policies
+        logging.info("getting customer managed policies")
+        for policy in self.customer_attached_policies:
+
+            arn = policy["Arn"]
+            policy_name = policy["PolicyName"]
+            #policy_id = policy["PolicyId"]
+            version_id = policy["DefaultVersionId"]        
+            try:
+                statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+            else:
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    admin_policies.append(arn)
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        # Inline User Policies
+        logging.info("getting inline user policies")
+        for user in self.users:
+            try:
+                inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
+                    try:
+                        policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            admin_policies.append(arn)
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
+
+        # Inline Group Policeis
+        logging.info("getting inline group policies")
+        for group in self.groups:
+            try:
+                inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
+                    try:
+                        policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            admin_policies.append(arn)
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
+
+        for name in function_roles:
+            try:
+               attached_policies = self.client.list_attached_role_policies(RoleName=function_roles[name].split("/")[-1])["AttachedPolicies"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting attached role policies - %s" % e.response["Error"]["Code"])
+            else:
+                for attached_policy in attached_policies:
+                    if attached_policy["PolicyArn"] in admin_policies:
+                        results["affected"].append(name)
+
+        if results["affected"]:
+            results["analysis"] = "The affected lambda functions are granted admin access."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No Admin Lambda Functions Found."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
         return results
