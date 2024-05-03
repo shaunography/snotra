@@ -17,6 +17,7 @@ class graph(object):
         #self.user_roles = self.get_user_roles()
         self.guests = self.get_guests()
         self.roles = self.get_roles()
+        self.role_members = self.get_role_members()
         self.global_admins = self.get_global_admins()
         self.conditional_access_policies = self.get_conditional_access_policies()
         self.applications = self.get_applications()
@@ -38,9 +39,16 @@ class graph(object):
                 logging.error(f'error getting skus: , access denied:')
             else:
                 logging.error(f'error getting skus: { response.status_code }')
+
     def get_premium(self):
         for sku in self.skus:
             if re.match("AAD_PREMIUM*", sku["skuPartNumber"]):
+                logging.info("azure ad premium in use")
+                return True
+            if sku["skuPartNumber"] == "SPE_E3": # M365 E3
+                logging.info("azure ad premium in use")
+                return True
+            if sku["skuPartNumber"] == "SPE_E5": # M365 E5
                 logging.info("azure ad premium in use")
                 return True
 
@@ -138,6 +146,25 @@ class graph(object):
             else:
                 logging.error(f'error getting roles: { response.status_code }')
 
+    def get_role_members(self):
+        role_members = {}
+        logging.info(f'getting role members')
+        for role in self.roles:
+            url = f"https://graph.microsoft.com/v1.0/directoryRoles/{ role['id'] }/members"
+            try:
+                response = requests.get(url, headers=self.headers)
+            except Exception as e:
+                logging.error(f'error getting members for role { role["displayName"] }: , error: { e }')
+            else:
+                if response.status_code == 200:
+                    if response.json()["value"]:
+                        role_members[role["displayName"]] = response.json()["value"]
+                elif response.status_code == 403:
+                    logging.error(f'error getting service principal roles: , access denied:')
+                else:
+                    logging.error(f'error getting service principal roles: { response.status_code }')
+        return role_members
+
     def get_global_admins(self):
         logging.info(f'getting global admins')
         for role in self.roles:
@@ -219,7 +246,6 @@ class graph(object):
                     logging.error(f'error getting service principal roles: , access denied:')
                 else:
                     logging.error(f'error getting service principal roles: { response.status_code }')
-
         return service_principal_roles
 
     def get_application_administrators(self):
@@ -258,7 +284,7 @@ class graph(object):
         findings += [ self.graph_12() ]
         findings += [ self.graph_13() ]
         findings += [ self.graph_14() ]
-        findings += [ self.graph_15() ]
+            #findings += [ self.graph_15() ]
         findings += [ self.graph_16() ]
         findings += [ self.graph_17() ]
         findings += [ self.graph_18() ]
@@ -273,7 +299,7 @@ class graph(object):
         findings += [ self.graph_27() ]
         findings += [ self.graph_28() ]
         findings += [ self.graph_29() ]
-        findings += [ self.graph_30() ]
+            #findings += [ self.graph_30() ]
         findings += [ self.graph_31() ]
         findings += [ self.graph_32() ]
         return findings
@@ -451,7 +477,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that 'Allow users to remember multi-factor authentication on devices they trust' is Disabled (CIS)(Manual)",
+            "name" : "Ensure that 'Allow users to remember multi-factor authentication on devices they trust' is Disabled (CIS)(Manual)(1.1.3)",
             "affected": [],
             "analysis" : {},
             "description" : "Do not allow users to remember multi-factor authentication on devices.\nRemembering Multi-Factor Authentication (MFA) for devices and browsers allows users to have the option to bypass MFA for a set number of days after performing a successful sign-in using MFA. This can enhance usability by minimizing the number of times a user may need to perform two-step verification on the same device. However, if an account or device is compromised, remembering MFA for trusted devices may affect security. Hence, it is recommended that users not be allowed to bypass MFA.\nFor every login attempt, the user will be required to perform multi-factor authentication",
@@ -481,7 +507,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Lack Of Conditional Access (CIS)",
+            "name" : "Lack Of Conditional Access (CIS)(Manual)(1.2.1-7)",
             "affected": [],
             "analysis" : {},
             "description" : "The account under review did not implement a comprehensive set of conditional access policies to control user authentication and resource access. Securing the identity of users, especially administrators, is fundamental to protecting your cloud environment from unauthorised access and data compromise.\nOne of the Azure key security principles states to explicitly validate trusted signals to allow or deny user access to resources, as part of a zero-trust access model. Signals to validate should include strong authentication of user accounts, behavioural analytics of user accounts, device trustworthiness, user or group membership and trusted locations etc. Additionally enforcing a time out for MFA will help ensure that sessions are not kept alive for an indefinite period of time and ensuring that browser sessions are not persistent will help in prevention of drive-by attacks in web browsers. This configuration also prevents the creation and saving of user-based session cookies which prevents an attacker from leveraging compromised sessions to access a Tenant.",
@@ -501,6 +527,7 @@ class graph(object):
                 results["analysis"] = "No conditional access policies in use"
             else:
                 for policy in self.conditional_access_policies:
+                    results["affected"].append(self.tenant)
                     print(policy)
         else:
             results["analysis"] = "Azure AD Premium not in use"
@@ -521,7 +548,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that 'Restrict non-admin users from creating tenants' is set to 'Yes' (CIS)(Manual)",
+            "name" : "Ensure that 'Restrict non-admin users from creating tenants' is set to 'Yes' (CIS)(Manual)(1.3)",
             "affected": [],
             "analysis" : [],
             "description" : "Require administrators or appropriately delegated users to create new tenants. It is recommended to only allow an administrator to create new tenants. This prevent users from creating new Microsoft Entra ID or Azure AD B2C tenants and ensures that only authorized users are able to do so. Enforcing this setting will ensure that only authorized users are able to create new tenants.",
@@ -583,7 +610,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure That 'Number of methods required to reset' is set to '2' (CIS)(Manual)",
+            "name" : "Ensure That 'Number of methods required to reset' is set to '2' (CIS)(Manual)(1.5)",
             "affected": [],
             "analysis" : [],
             "description" : "Ensures that two alternate forms of identification are provided before allowing a password reset.\n A Self-service Password Reset (SSPR) through Azure Multi-factor Authentication (MFA) ensures the user's identity is confirmed using two separate methods of identification. With multiple methods set, an attacker would have to compromise both methods before they could maliciously reset a user's password.\n There may be administrative overhead, as users who lose access to their secondary authentication methods will need an administrator with permissions to remove it. There will also need to be organization-wide security policies and training to teach administrators to verify the identity of the requesting user so that social engineering can not render this setting useless.",
@@ -612,7 +639,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that a Custom Bad Password List is set to 'Enforce' for your Organization (CIS)(MANUAL)",
+            "name" : "Ensure that a Custom Bad Password List is set to 'Enforce' for your Organization (CIS)(Manual)(1.6)",
             "affected": [],
             "analysis" : [],
             "description" : "Microsoft Azure provides a Global Banned Password policy that applies to Azure administrative and normal user accounts. This is not applied to user accounts that are synced from an on-premise Active Directory unless Microsoft Entra ID Connect is used and you enable EnforceCloudPasswordPolicyForPasswordSyncedUsers. Please see the list in default values on the specifics of this policy. To further password security, it is recommended to further define a custom banned password policy.\nEnabling this gives your organization further customization on what secure passwords are allowed. Setting a bad password list enables your organization to fine-tune its password policy further, depending on your needs. Removing easy-to-guess passwords increases the security of access to your Azure resources.\nIncreasing needed password complexity might increase overhead on administration of user accounts. Licensing requirement for Global Banned Password List and Custom Banned Password list requires Microsoft Entra ID P1 or P2. On-premises Active Directory Domain Services users that are not synchronized to Microsoft Entra ID also benefit from Microsoft Entra ID Password Protection based on existing licensing for synchronized users.",
@@ -641,7 +668,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that 'Number of days before users are asked to re-confirm their authentication information' is not set to '0' (CIS)(Manual)",
+            "name" : "Ensure that 'Number of days before users are asked to re-confirm their authentication information' is not set to '0' (CIS)(Manual)(1.7)",
             "affected": [],
             "analysis" : [],
             "description" : "Ensure that the number of days before users are asked to re-confirm their authentication information is not set to 0.\nThis setting is necessary if you have setup 'Require users to register when signing in option'. If authentication re-confirmation is disabled, registered users will never be prompted to re-confirm their existing authentication information. If the authentication information for a user changes, such as a phone number or email, then the password reset information for that user reverts to the previously registered authentication information.\nUsers will be prompted for their multifactor authentication at the duration set here.",
@@ -670,7 +697,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that 'Notify users on password resets?' is set to 'Yes' (CIS)(Manual)",
+            "name" : "Ensure that 'Notify users on password resets?' is set to 'Yes' (CIS)(Manual)(1.8)",
             "affected": [],
             "analysis" : [],
             "description" : "Ensure that users are notified on their primary and secondary emails on password resets.User notification on password reset is a proactive way of confirming password reset activity. It helps the user to recognize unauthorized password reset activities.\nUsers will receive emails alerting them to password changes to both their primary and secondary emails.",
@@ -699,7 +726,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure That 'Notify all admins when other admins reset their password?' is set to 'Yes' (CIS)(Manual)",
+            "name" : "Ensure That 'Notify all admins when other admins reset their password?' is set to 'Yes' (CIS)(Manual)(1.9)",
             "affected": [],
             "analysis" : [],
             "description" : "Ensure that all Global Administrators are notified if any other administrator resets their password. \nGlobal Administrator accounts are sensitive. Any password reset activity notification, when sent to all Global Administrators, ensures that all Global administrators can passively confirm if such a reset is a common pattern within their group. For example, if all Global Administrators change their password every 30 days, any password reset activity before that may require administrator(s) to evaluate any unusual activity and confirm its origin. \nAll Global Administrators will receive a notification from Azure every time a password is reset. This is useful for auditing procedures to confirm that there are no out of the ordinary password resets for Global Administrators. There is additional overhead, however, in the time required for Global Administrators to audit the notifications. This setting is only useful if all Global Administrators pay attention to the notifications, and audit each one.",
@@ -728,7 +755,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)",
+            "name" : "Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)(1.10)",
             "affected": [],
             "analysis" : [],
             "description" : "Require administrators to provide consent for applications before use.\nIf Microsoft Entra ID is running as an identity provider for third-party applications, permissions and consent should be limited to administrators or pre-approved. Malicious applications may attempt to exfiltrate data or abuse privileged user accounts. \nEnforcing this setting may create additional requests that administrators need to review.",
@@ -757,7 +784,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure ‘User consent for applications’ Is Set To ‘Allow for Verified Publishers’ (CIS)(Manual)",
+            "name" : "Ensure ‘User consent for applications’ Is Set To ‘Allow for Verified Publishers’ (CIS)(Manual)(1.11)",
             "affected": [],
             "analysis" : [],
             "description" : "Allow users to provide consent for selected permissions when a request is coming from a verified publisher. \nIf Microsoft Entra ID is running as an identity provider for third-party applications, permissions and consent should be limited to administrators or pre-approved. Malicious applications may attempt to exfiltrate data or abuse privileged user accounts.\nEnforcing this setting may create additional requests that administrators need to review.",
@@ -786,7 +813,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (CIS)(Manual)",
+            "name" : "Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (CIS)(Manual)(1.12)",
             "affected": [],
             "analysis" : [],
             "description" : "Require administrators to provide consent for the apps before use. \nUnless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user.\nImpact:\n Can cause additional requests to administrators that need to be fulfilled quite often",
@@ -815,7 +842,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure That ‘Users Can Register Applications’ Is Set to ‘No’ (CIS)(Manual)",
+            "name" : "Ensure That ‘Users Can Register Applications’ Is Set to ‘No’ (CIS)(Manual)(1.13)",
             "affected": [],
             "analysis" : [],
             "description" : "Require administrators or appropriately delegated users to register third-party applications. \nIt is recommended to only allow an administrator to register custom-developed applications. This ensures that the application undergoes a formal security review and approval process prior to exposing Microsoft Entra ID data. Certain users like developers or other high-request users may also be delegated permissions to prevent them from waiting on an administrative user. Your organization should review your policies and decide your needs. \nEnforcing this setting will create additional requests for approval that will need to be addressed by an administrator. If permissions are delegated, a user may approve a malevolent third party application, potentially giving it access to your data.",
@@ -844,7 +871,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure That 'Guest users access restrictions' is set to 'Guest user access is restricted to properties and memberships of their own directory objects' (CIS)(Manual)",
+            "name" : "Ensure That 'Guest users access restrictions' is set to 'Guest user access is restricted to properties and memberships of their own directory objects' (CIS)(Manual)(1.14)",
             "affected": [],
             "analysis" : [],
             "description" : "Limiting guest access ensures that guest accounts do not have permission for certain directory tasks, such as enumerating users, groups or other directory resources, and cannot be assigned to administrative roles in your directory. Guest access has three levels of restriction.\n1. Guest users have the same access as members (most inclusive),\n2. Guest users have limited access to properties and memberships of directory objects (default value),\n3. Guest user access is restricted to properties and memberships of their own directory objects (most restrictive).\nThe recommended option is the 3rd, most restrictive: 'Guest user access is restricted to their own directory object'.",
@@ -902,7 +929,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure That 'Restrict access to Microsoft Entra admin center' is Set to 'Yes' (CIS)(Manual)",
+            "name" : "Ensure That 'Restrict access to Microsoft Entra admin center' is Set to 'Yes' (CIS)(Manual)(1.16)",
             "affected": [],
             "analysis" : [],
             "description" : "Restrict access to the Microsoft Entra ID administration center to administrators only. NOTE: This only affects access to the Entra ID administrator's web portal. This setting does not prohibit privileged users from using other methods such as Rest API or Powershell to obtain sensitive information from Microsoft Entra ID. \nThe Microsoft Entra ID administrative center has sensitive data and permission settings. All non-administrators should be prohibited from accessing any Microsoft Entra ID data in the administration center to avoid exposure. \nAll administrative tasks will need to be done by Administrators, causing additional overhead in management of users and resources.",
@@ -931,7 +958,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure that 'Restrict user ability to access groups features in the Access Pane' is Set to 'Yes' (CIS)(Manual)",
+            "name" : "Ensure that 'Restrict user ability to access groups features in the Access Pane' is Set to 'Yes' (CIS)(Manual)(1.17)",
             "affected": [],
             "analysis" : [],
             "description" : "Restrict access to group web interface in the Access Panel portal. \nSelf-service group management enables users to create and manage security groups or Office 365 groups in Microsoft Entra ID. Unless a business requires this day-to-day delegation for some users, self-service group management should be disabled. Any user can access the Access Panel, where they can reset their passwords, view their information, etc. By default, users are also allowed to access the Group feature, which shows groups, members, related resources (SharePoint URL, Group email address, Yammer URL, and Teams URL). By setting this feature to 'Yes', users will no longer have access to the web interface, but still have access to the data using the API. This is useful to prevent non-technical users from enumerating groups-related information, but technical users will still be able to access this information using APIs. \nSetting to Yes could create administrative overhead by customers seeking certain group memberships that will have to be manually managed by administrators with appropriate permissions.",
@@ -960,7 +987,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure that 'Users can create security groups in Azure portals, API or PowerShell' is set to 'No' (CIS)(Manual)",
+            "name" : "Ensure that 'Users can create security groups in Azure portals, API or PowerShell' is set to 'No' (CIS)(Manual)(1.18)",
             "affected": [],
             "analysis" : [],
             "description" : "Restrict security group creation to administrators only. \nWhen creating security groups is enabled, all users in the directory are allowed to create new security groups and add members to those groups. Unless a business requires this day-to-day delegation, security group creation should be restricted to administrators only. \nEnabling this setting could create a number of requests that would need to be managed by an administrator.",
@@ -989,7 +1016,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure that 'Owners can manage group membership requests in the Access Panel' is set to 'No' (CIS)(Manual)",
+            "name" : "Ensure that 'Owners can manage group membership requests in the Access Panel' is set to 'No' (CIS)(Manual)(1.19)",
             "affected": [],
             "analysis" : [],
             "description" : "Restrict security group management to administrators only. \nRestricting security group management to administrators only prohibits users from making changes to security groups. This ensures that security groups are appropriately managed and their management is not delegated to non-administrators. \nGroup Membership for user accounts will need to be handled by Admins and cause administrative overhead.",
@@ -1018,7 +1045,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure that 'Users can create Microsoft 365 groups in Azure portals, API or PowerShell' is set to 'No' (CIS)(Manual)",
+            "name" : "Ensure that 'Users can create Microsoft 365 groups in Azure portals, API or PowerShell' is set to 'No' (CIS)(Manual)(1.20)",
             "affected": [],
             "analysis" : [],
             "description" : "Restricting Microsoft 365 group creation to administrators only ensures that creation of Microsoft 365 groups is controlled by the administrator. Appropriate groups should be created and managed by the administrator and group creation rights should not be delegated to any other user.\nEnabling this setting could create a number of requests that would need to be managed by an administrator.",
@@ -1047,7 +1074,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that 'Require Multi-Factor Authentication to register or join devices with Microsoft Entra ID' is set to 'Yes' (CIS)(Manual)",
+            "name" : "Ensure that 'Require Multi-Factor Authentication to register or join devices with Microsoft Entra ID' is set to 'Yes' (CIS)(Manual)(1.21)",
             "affected": [],
             "analysis" : [],
             "description" : "Joining or registering devices to Microsoft Entra ID should require Multi-factor authentication.\nMulti-factor authentication is recommended when adding devices to Microsoft Entra ID. When set to Yes, users who are adding devices from the internet must first use the second method of authentication before their device is successfully added to the directory. This ensures that rogue devices are not added to the domain using a compromised user account. Note: Some Microsoft documentation suggests to use conditional access policies for joining a domain from certain whitelisted networks or devices. Even with these in place, using Multi-Factor Authentication is still recommended, as it creates a process for review before joining the domain.\nA slight impact of additional overhead, as Administrators will now have to approve every access to the domain.",
@@ -1076,7 +1103,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure That No Custom Subscription Administrator Roles Exist (CIS)(Manual)",
+            "name" : "Ensure That No Custom Subscription Administrator Roles Exist (CIS)(Manual)(1.22)",
             "affected": [],
             "analysis" : [],
             "description" : "The principle of least privilege should be followed and only necessary privileges should be assigned instead of allowing full administrative access. \nClassic subscription admin roles offer basic access management and include Account Administrator, Service Administrator, and Co-Administrators. It is recommended the least necessary permissions be given initially. Permissions can be added as needed by the account holder. This ensures the account holder cannot perform actions which were not intended.",
@@ -1105,7 +1132,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure a Custom Role is Assigned Permissions for Administering Resource Locks (CIS)(Manual)",
+            "name" : "Ensure a Custom Role is Assigned Permissions for Administering Resource Locks (CIS)(Manual)(1.23)",
             "affected": [],
             "analysis" : [],
             "description" : "Resource locking is a powerful protection mechanism that can prevent inadvertent modification/deletion of resources within Azure subscriptions/Resource Groups and is a recommended NIST configuration.\nGiven the resource lock functionality is outside of standard Role Based Access Control(RBAC), it would be prudent to create a resource lock administrator role to prevent inadvertent unlocking of resources.\nBy adding this role, specific permissions may be granted for managing just resource locks rather than needing to provide the wide Owner or User Access Administrator role, reducing the risk of the user being able to do unintentional damage.",
@@ -1134,7 +1161,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure That `Subscription leaving Microsoft Entra ID directory` and `Subscription entering Microsoft Entra ID directory` Is Set To ‘Permit No One’ (CIS)(Manual)",
+            "name" : "Ensure That `Subscription leaving Microsoft Entra ID directory` and `Subscription entering Microsoft Entra ID directory` Is Set To ‘Permit No One’ (CIS)(Manual)(1.24)",
             "affected": [],
             "analysis" : [],
             "description" : "Users who are set as subscription owners are able to make administrative changes to the subscriptions and move them into and out of Microsoft Entra ID.\nPermissions to move subscriptions in and out of Microsoft Entra ID directory must only be given to appropriate administrative personnel. A subscription that is moved into an Microsoft Entra ID directory may be within a folder to which other users have elevated permissions. This prevents loss of data or unapproved changes of the objects within by potential bad actors.\nSubscriptions will need to have these settings turned off to be moved.",
@@ -1155,7 +1182,7 @@ class graph(object):
         return results
 
     def graph_28(self):
-        # Ensure fewer than 5 users have global administrator assignment (CIS)
+        # Privileged Identity Management
 
         results = {
             "id" : "graph_28",
@@ -1163,11 +1190,11 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure fewer than 5 users have global administrator assignment (CIS)",
+            "name" : "Privileged Identity Management (Manual)",
             "affected": [],
-            "analysis" : {},
-            "description" : "This recommendation aims to maintain a balance between security and operational efficiency by ensuring that a minimum of 2 and a maximum of 4 users are assigned the Global Administrator role in Microsoft Entra ID. Having at least two Global Administrators ensures redundancy, while limiting the number to four reduces the risk of excessive privileged access.\nThe Global Administrator role has extensive privileges across all services in Microsoft Entra ID. The Global Administrator role should never be used in regular daily activities; administrators should have a regular user account for daily activities, and a separate account for administrative responsibilities. Limiting the number of Global Administrators helps mitigate the risk of unauthorized access, reduces the potential impact of human error, and aligns with the principle of least privilege to reduce the attack surface of an Azure tenant. Conversely, having at least two Global Administrators ensures that administrative functions can be performed without interruption in case of unavailability of a single admin.\nImplementing this recommendation may require changes in administrative workflows or the redistribution of roles and responsibilities. Adequate training and awareness should be provided to all Global Administrators.",
-            "remediation" : "If more 4 users are assigned:\n1. Remove Global Administrator role for users which do not or no longer require the role.\n2. Assign Global Administrator role via PIM which can be activated when required.\n3. Assign more granular roles to users to conduct their duties.\nIf only one user is assigned:\n1. Provide the Global Administrator role to a trusted user or create a break glass admin account.",
+            "analysis" : "",
+            "description" : "Several weaknesses relating to Privileged Identity Management (PIM) were observed throughout the Tenant which increased the attack surface of the environment. Azure/M365 administration should typically be performed by a small number of trusted & approved employees and securing privileged access should be a top priority in any organisation, ensuring membership of administrative roles is strictly audited and controlled.\nDedicated Admin Accounts\nIt is recommended that users do not use their day-to-day accounts to perform administrative tasks. Using the same account for both general web browsing, and email increases the risk that a privileged account will be compromised by Phishing or related social engineering techniques, which could ultimately lead to compromise of the cloud service. Dedicated cloud only accounts should be created for users to administer Azure and Microsoft 365 environments which do not have mailboxes and are not synched with an on-premise Active Directory controller. \nBreak Glass Access\nAdditionally, it is recommended that organisations follow Azure best practice guidance by creating at least two emergency access accounts, with permanently assigned administrator rights, in both on-premises AD and Azure AD environments. These accounts should not be assigned to individual users and should only be accessed in the event of a security incident or when traditional administrator accounts are unable to perform a required task, such as disaster recovery. Additional care should be taken to monitor and audit break glass account activity.\nMulti-Factor authentication\nMFA should be enforced for all users or at a minimum those users which hold privileged roles. Where possible, Conditional Access Policies should be implemented to enforce MFA and/or password-less authentication for all administrative accounts to reduce the risk of password disclosure. For organisations without the required licences for Conditional Access, Security defaults should be considered to enforce MFA for all users and restrict legacy authentication protocols.\nFurther Hardening\nWhere possible, to maintain security in-depth, authentication mechanisms should be further hardened by implementing further Conditional Access Policies which require logons to be completed from managed and compliant devices, trusted geo locations and trusted network locations as deemed appropriate. It is also recommended that no more than 2-4 users should be permanently assigned to the highest-privileged Global Administrators role within Azure AD to reduce the risk of privileged account compromise. Administrator delegation should be implemented by using non-global administrative roles assigned according to the principle of least privilege, e.g., use Azure AD roles, SharePoint Administrator, Exchange Administrator and Teams Administrator roles. Accounts with the Global Administrator role that are from different domains (external/guest accounts), should not be used. As these accounts do not fall directly under the control of the primary domain it is increasingly difficult to secure and monitor the accounts for indications of account compromise. Where the applicable licences are held, Microsoft Privileged Identity Management (PIM) and Just-in-time (JIT) authentication services should also be implemented to reduce standing access to privileged roles, and provide an increased auditing capability for privileged access by monitoring role usage and assignment changes. Further controls such as Azure AD Identity Protection should be considered to monitor, report on and investigate risky user and sign-in activities which could provide an increased detection response for compromised accounts. Finally, where applicable organisations should make use of secure Privileged Access Workstations (PAW) to reduce the risk of a compromised internal workstation resulting in the exposure of privileged credentials.\nFurther Information\nAzure Identity Management Best Practice - https://docs.microsoft.com/en-us/azure/security/fundamentals/identity-management-best-practices\nAzure Securing Privileged Access - https://docs.microsoft.com/en-gb/security/compass/overview\nAzure Emergency Access - https://docs.microsoft.com/en-us/azure/active-directory/users-groups-roles/directory-emergency-access\nOffice 365 Secure Configuration Alignment - https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWBft1\nAzure Building Conditional Access Policies - https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/concept-conditional-access-policies",
+            "remediation" : "To comply with Azure security best practice and implement a defence in-depth approach to securing identity management, it is recommended that the following security controls are implemented throughout the Tenant:\n•	Create separate dedicated cloud identity, “.onmicrosoft.com” accounts for all privileged users which are not synced with on premise Domain Controllers.\n•	Create two “break glass” emergency access accounts\n•	Enforce MFA for all privileged accounts\n•	Where licencing permits - Secure the logon process with conditional access policies\n•	Restrict access to the highly privileged Global Administrator role to between 2-4 separate users\n•	Apply the principle of least privilege for role assignments using non-Global Administrator roles\n•	Do not assigned external users privileged roles within Azure AD\n•	Make use of Privileged Identity Management (PIM) and Just-in-time (JIT) authentication where possible\n•	Make use of Azure AD Identity Protection where possible\n•	Use secure Privileged Access Workstations (PAW) if possible\n•	Delegated Administrator Privileges (DAP) should be using the Granular Delegated Admin Privileges (GDAP) model which supports least-privileged access.\n",
             "impact" : "medium",
             "probability" : "medium",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L",
@@ -1182,7 +1209,7 @@ class graph(object):
             results["analysis"] = f"there are currently { len(self.global_admins) } global admins in the tenancy"
             results["pass_fail"] = "FAIL"
         else:
-            results["pass_fail"] = "PASS"
+            results["pass_fail"] = "INFO"
             results["analysis"] = f"there are only { len(self.global_admins) } global admins in the tenancy"
 
         return results
@@ -1307,7 +1334,7 @@ class graph(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "graph",
-            "name" : "Service Principals with Directory Roles",
+            "name" : "Service Principals with Directory Roles (Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "The affected service principals have been assigned roles in Azure AD.",
@@ -1331,7 +1358,7 @@ class graph(object):
         return results
 
     def graph_32(self):
-        # service principal roles
+        # Cloud Application And Application Administrators
 
         results = {
             "id" : "graph_32",
@@ -1361,3 +1388,4 @@ class graph(object):
             results["analysis"] = "no users have the cloud application of application administrator roles assigned"
 
         return results
+
