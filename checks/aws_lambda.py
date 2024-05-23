@@ -408,6 +408,8 @@ class aws_lambda(object):
                                 pass
                             except TypeError:
                                 pass
+                            except AttributeError:
+                                pass
                             else:
                                 if account_id != self.account_id:
                                     results["affected"].append(function)

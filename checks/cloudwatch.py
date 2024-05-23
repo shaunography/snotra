@@ -1783,7 +1783,8 @@ class cloudwatch(object):
                 logging.error("Error getting alarms - %s" % e.response["Error"]["Code"])
             except boto3.exceptions.botocore.exceptions.EndpointConnectionError as e:
                 logging.error("Error getting alarms - %s" % e)
-
+            except boto3.exceptions.botocore.exceptions.SSLError as e:
+                app.logger.error("Error getting alarms - %s" % e)
             else:
                 for alarm in metric_alarms:
                     alarm_name = alarm["AlarmName"]
