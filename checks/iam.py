@@ -600,8 +600,8 @@ class iam(object):
             "name" : "Do not setup access keys during initial user setup for all IAM users that have a console password (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "AWS console defaults to no check boxes selected when creating a new IAM user. When cerating the IAM User credentials you have to determine what type of access they require. Programmatic access: The IAM user might need to make API calls, use the AWS CLI, or use the Tools for Windows PowerShell. In that case, create an access key (access key ID and a secret access key) for that user. AWS Management Console access: If the user needs to access the AWS Management Console, create a password for the user. Requiring the additional steps be taken by the user for programmatic access after their profile has been created will give a stronger indication of intent that access keys are [a] necessary for their work and [b] once the access key is established on an account that the keys may be in use somewhere in the organization.",
-            "remediation" : "Do not setup access keys during initial user setup. Remoe any access keys that are no longer required.",
+            "description" : "AWS console defaults to no check boxes selected when creating a new IAM user. When creating the IAM User credentials you have to determine what type of access they require. Programmatic access: The IAM user might need to make API calls, use the AWS CLI, or use the Tools for Windows PowerShell. In that case, create an access key (access key ID and a secret access key) for that user. AWS Management Console access: If the user needs to access the AWS Management Console, create a password for the user. Requiring the additional steps be taken by the user for programmatic access after their profile has been created will give a stronger indication of intent that access keys are [a] necessary for their work and [b] once the access key is established on an account that the keys may be in use somewhere in the organization.",
+            "remediation" : "Do not setup access keys during initial user setup. Remove any access keys that are no longer required.",
             "impact" : "medium",
             "probability" : "medium",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
@@ -1024,9 +1024,6 @@ class iam(object):
 
         server_certificates = self.client.list_server_certificates()["ServerCertificateMetadataList"]
 
-        if not server_certificates:
-            results["analysis"] = "No server certificates found"
-            results["affected"].append(self.account_id)
         
         for cert in server_certificates:
             expiration = cert["Expiration"]
@@ -1042,6 +1039,11 @@ class iam(object):
             results["analysis"] = "No expired server certificates found."
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
+
+        if not server_certificates:
+            results["analysis"] = "No server certificates found"
+            results["affected"].append(self.account_id)
+            results["pass_fail"] = "INFO"
 
         return results
 
@@ -1389,8 +1391,9 @@ class iam(object):
                     if "AWS" in statement["Principal"]:
                         if "sts:AssumeRole" in statement["Action"]:
                             if re.match("arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
-                                results["affected"].append(role["RoleName"])
-                                affected_statements[role["RoleName"]] = statement
+                                if "AWSServiceRoleFor" not in role["RoleName"]:
+                                    results["affected"].append(role["RoleName"])
+                                    affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
             results["analysis"] = affected_statements
@@ -1706,7 +1709,7 @@ class iam(object):
             "name" : "Ensure Access Keys are Protected with MFA",
             "affected": [],
             "analysis" : "",
-            "description" : 'The account does not appear to enforce the use of MFA when authenticating with Access Keys. AWS Access Keys are often exposed to unauthorised parties in source code or via and other poor key management practices, once an attacker has obtained the plain text keys these can be used to acces the AWS account without restriction. For greater defence in depth it is recomended to configure an IAM policy which enforces the use of MFA before any administrative actions can be performed.',
+            "description" : 'The account does not appear to enforce the use of MFA when authenticating with Access Keys. AWS Access Keys are often exposed to unauthorised parties in source code or via and other poor key management practices, once an attacker has obtained the plain text keys these can be used to access the AWS account without restriction. For greater defence in depth it is recommended to configure an IAM policy which enforces the use of MFA before any administrative actions can be performed.',
             "remediation" : 'Create an IAM policy for all users which enforces the use of MFA to perform any administrative actions.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_users-self-manage-mfa-and-creds.html',
             "impact" : "high",
             "probability" : "medium",
@@ -1790,7 +1793,7 @@ class iam(object):
             results["analysis"] = "MFA Policy Found"
             results["pass_fail"] = "PASS"
         else:
-            results["analysis"] = "Acces Keys are not secured with MFA, no policy enforcing MFA usage was found."
+            results["analysis"] = "Access Keys are not secured with MFA, no policy enforcing MFA usage was found."
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 
