@@ -91,7 +91,7 @@ class efs(object):
             "id" : "efs_2",
             "ref" : "2.4.1",
             "compliance" : "cis",
-            "level" : "N/A",
+            "level" : 1,
             "service" : "efs",
             "name" : "Ensure that encryption is enabled for EFS file systems (CIS)",
             "affected": [],
