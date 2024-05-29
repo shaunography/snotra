@@ -1003,7 +1003,7 @@ class ec2(object):
             "id" : "ec2_16",
             "ref" : "2.10",
             "compliance" : "cis_compute",
-            "level" : "N/A",
+            "level" : 1,
             "service" : "ec2",
             "name" : "Unused Network Interfaces (CIS)",
             "affected": [],
