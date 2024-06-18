@@ -130,7 +130,7 @@ class cloudtrail(object):
             results["affected"].append(self.account_id)
         
         if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
+            results["analysis"] = "No CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 
@@ -212,7 +212,7 @@ class cloudtrail(object):
             results["affected"].append(self.account_id)
         
         if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
+            results["analysis"] = "No CloudTrail Trails in use"
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
         
@@ -234,10 +234,10 @@ class cloudtrail(object):
             "analysis" : "",
             "description" : "AWS CloudTrail is a web service that records AWS API calls made in a given AWS account. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, the request parameters, and the response elements returned by the AWS service. CloudTrail uses Amazon S3 for log file storage and delivery, so log files are stored durably. In addition to capturing CloudTrail logs within a specified S3 bucket for long term analysis, realtime analysis can be performed by configuring CloudTrail to send logs to CloudWatch Logs. For a trail that is enabled in all regions in an account, CloudTrail sends log files from all those regions to a CloudWatch Logs log group. It is recommended that CloudTrail logs be sent to CloudWatch Logs. Note: The intent of this recommendation is to ensure AWS account activity is being captured, monitored, and appropriately alarmed on. CloudWatch Logs is a native way to accomplish this using AWS services but does not preclude the use of an alternate solution. Sending CloudTrail logs to CloudWatch Logs will facilitate real-time and historic activity logging based on user, API, resource, and IP address, and provides opportunity to establish alarms and notifications for anomalous or sensitivity account activity. ",
             "remediation" : "Ensure CloudTrail trails are integrated with CloudWatch Logs",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+            "cvss_score" : "5.3",
             "pass_fail" : ""
         }
 
@@ -258,7 +258,7 @@ class cloudtrail(object):
             results["affected"].append(self.account_id)
 
         if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
+            results["analysis"] = "No CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 
@@ -300,7 +300,7 @@ class cloudtrail(object):
                         logging.error("Error getting logging for bucket %s - %s" % (trail["S3BucketName"], e.response["Error"]["Code"]))
 
         if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail trails in use"
+            results["analysis"] = "No CloudTrail trails in use"
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
         
@@ -353,7 +353,7 @@ class cloudtrail(object):
             results["affected"].append(self.account_id)
         
         if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
+            results["analysis"] = "No CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 
@@ -410,7 +410,7 @@ class cloudtrail(object):
             results["pass_fail"] = "FAIL"
 
         if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
+            results["analysis"] = "No CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 
@@ -468,7 +468,7 @@ class cloudtrail(object):
             results["pass_fail"] = "FAIL"
 
         if not [ i for i in self.trails.values() if i ]:
-            results["analysis"] = "no CloudTrail Trails in use"
+            results["analysis"] = "No CloudTrail Trails in use"
             results["pass_fail"] = "FAIL"
             results["affected"].append(self.account_id)
 

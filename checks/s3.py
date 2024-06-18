@@ -207,7 +207,7 @@ class s3(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "s3",
-            "name" : "Ensure all data in Amazon S3 has been discovered classified and secured when required (CIS)",
+            "name" : "Ensure all data in Amazon S3 has been discovered classified and secured when required (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "Amazon S3 buckets can contain sensitive data, that for security purposes should be discovered, monitored, classified and protected. Macie along with other 3rd party tools can automatically provide an inventory of Amazon S3 buckets. Using a Cloud service or 3rd Party software to continuously monitor and automate the process of data discovery and classification for S3 buckets using machine learning and pattern matching is a strong defense in protecting that information. Amazon Macie is a fully managed data security and data privacy service that uses machine learning and pattern matching to discover and protect your sensitive data in AWS. ",
