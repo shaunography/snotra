@@ -60,10 +60,10 @@ class cloudtrail(object):
             "analysis" : "",
             "description" : "AWS CloudTrail is a web service that records AWS API calls for your account and delivers log files to you. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, the request parameters, and the response elements returned by the AWS service. CloudTrail provides a history of AWS API calls for an account, including API calls made via the Management Console, SDKs, command line tools, and higher-level AWS services (such as CloudFormation).",
             "remediation" : "Enable CloudTrail in all regions",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+            "cvss_score" : "5.3",
             "pass_fail" : ""
         }
 
