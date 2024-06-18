@@ -1289,11 +1289,11 @@ class ec2(object):
             "affected": [],
             "analysis" : "",
             "description" : "Default VPCs created by AWS can be considered overly permissive and it is recommended to create your own VPCs instead. Default VPCs include an internet gateway, default security groups and default allow all NACLs which could result in accidental exposure of EC2 instances and data to the internet.",
-            "remediation" : "Create you own VPCs as required applying the principle of least privilege to network access controls",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
+            "remediation" : "Create your own VPCs as required applying the principle of least privilege to network access controls",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
             "pass_fail" : ""
         }
 
@@ -1601,7 +1601,7 @@ class ec2(object):
             "service" : "ec2",
             "name" : "EC2 Instances with a Public IP Address",
             "affected": [],
-            "analysis" : "",
+            "analysis" : []
             "description" : "Affected Instances have a Public IP Address Attached",
             "remediation" : "Review Public IPs to ensure an appropriate Security Group has been applied applying the principle of least privilege.",
             "impact" : "info",
@@ -1618,12 +1618,12 @@ class ec2(object):
                 for instance in reservation["Instances"]:
                     try:
                         if instance["PublicIpAddress"]:
-                            results["affected"].append("{}({})({})".format(instance["ImageId"], region, instance["PublicIpAddress"]))
+                            results["analysis"].append("{}({})({})".format(instance["ImageId"], region, instance["PublicIpAddress"]))
+                            results["affected"].append("{}({})".format(instance["ImageId"], region))
                     except KeyError:
                         pass
 
         if results["affected"]:
-            results["analysis"] = "The affected instances have a public IP Address attached"
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "No Public IPs found"
@@ -1782,7 +1782,7 @@ class ec2(object):
         for region, volumes in self.volumes.items():
             for volume in volumes:
                 if volume["State"] == "available":
-                    results["affected"].append(volume["Name"])
+                    results["affected"].append(volume["VolumeId"])
 
         if results["affected"]:
             results["analysis"] = "The affected volumes are not attached"

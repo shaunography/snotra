@@ -29,7 +29,8 @@ class resourcegroupstaggingapi(object):
         return findings
 
     def get_tag_keys(self):
-        tag_keys = []
+        # create unique list
+        tag_keys = set()
         logging.info("getting tag keys")
 
         for region in self.regions:
@@ -38,14 +39,15 @@ class resourcegroupstaggingapi(object):
                 response = client.get_tag_keys()
                 while True:
                     pagination_token = response["PaginationToken"]
-                    tag_keys = tag_keys + response["TagKeys"]
+                    for i in response["TagKeys"]:
+                        tag_keys.add(i)
                     if pagination_token:
                         response = client.get_tag_keys(PaginationToken=pagination_token)
                     else:
                         break
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting tag keys - %s" % e.response["Error"]["Code"])
-        return tag_keys
+        return list(tag_keys)
 
     def get_tag_values(self):
         tag_values = {}
@@ -55,12 +57,16 @@ class resourcegroupstaggingapi(object):
             client = self.session.client('resourcegroupstaggingapi', region_name=region)
 
             for key in self.tag_keys:
-                tag_values[key] = []
+                if key not in tag_values:
+                    tag_values[key] = []
+
                 try:
                     response = client.get_tag_values(Key=key)
                     while True:
                         pagination_token = response["PaginationToken"]
-                        tag_values[key] = tag_values[key] + response["TagValues"]
+                        if response["TagValues"]:
+                            for i in response["TagValues"]:
+                                tag_values[key].append(i)
                         if pagination_token:
                             response = client.get_tag_values(Key=key, PaginationToken=pagination_token)
                         else:
@@ -97,10 +103,10 @@ class resourcegroupstaggingapi(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "resourcegroupstaggingapi",
-            "name" : "Ensure Tags Do Not Contain Sensitive or PII Data",
+            "name" : "Ensure Tags Do Not Contain Sensitive or PII Data (Manual)",
             "affected": [],
             "analysis" : "",
-            "description" : "This check lists all the tags being used in your account. It is possible to attackers to enumerate valid Tag keys and their corresponding values, therefore tags should not be used to store PII, confidential or otherwise sensitive information.",
+            "description" : "This check lists all the tags being used in your account. It is possible for attackers to enumerate valid Tag keys and their corresponding values, therefore tags should not be used to store PII, confidential or otherwise sensitive information.",
             "remediation" : "Review the in use tags and remove any that contain sensitive information",
             "impact" : "medium",
             "probability" : "low",

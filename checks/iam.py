@@ -290,7 +290,7 @@ class iam(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "iam",
-            "name" : "Ensure security questions are registered in the AWS account (CIS)",
+            "name" : "Ensure security questions are registered in the AWS account (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "The AWS support portal allows account owners to establish security questions that can be used to authenticate individuals calling AWS customer service for support. It is recommended that security questions be established. When creating a new AWS account, a default super user is automatically created. This account is referred to as the root user or root account. It is recommended that the use of this account be limited and highly controlled. During events in which the root password is no longer accessible or the MFA token associated with root is lost/destroyed it is possible, through authentication using secret questions and associated answers, to recover root user login access.",
@@ -490,6 +490,7 @@ class iam(object):
                 results["pass_fail"] = "FAIL"
             else:
                 results["pass_fail"] = "PASS"
+                results["affected"].append(self.account_id)
         else:
             results["analysis"] = "No password policy configured"
             results["affected"].append(self.account_id)
@@ -1043,7 +1044,7 @@ class iam(object):
         if not server_certificates:
             results["analysis"] = "No server certificates found"
             results["affected"].append(self.account_id)
-            results["pass_fail"] = "INFO"
+            results["pass_fail"] = "PASS"
 
         return results
 
@@ -1609,9 +1610,10 @@ class iam(object):
                     if "sts:AssumeRole" in statement["Action"]:
                         try:
                             if re.match("^.*\.amazonaws\.com", str(statement["Principal"]["Service"])):
-                                if "Condition" not in statement:
-                                    results["affected"].append(role["RoleName"])
-                                    affected_statements[role["RoleName"]] = statement
+                                if "AWSServiceRoleFor" not in role["RoleName"]:
+                                    if "Condition" not in statement:
+                                        results["affected"].append(role["RoleName"])
+                                        affected_statements[role["RoleName"]] = statement
                         except KeyError:
                             pass
 

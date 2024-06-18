@@ -213,7 +213,7 @@ class cloudtrail(object):
         
         if not [ i for i in self.trails.values() if i ]:
             results["analysis"] = "no CloudTrail Trails in use"
-            results["pass_fail"] = "FAIL"
+            results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
         
         return results
