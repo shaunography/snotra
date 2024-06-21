@@ -85,7 +85,7 @@ class efs(object):
         return results
 
     def efs_2(self):
-        # Ensure that encryption is enabled for EFS file systems (Manual)
+        # Ensure that encryption is enabled for EFS file systems
         
         results = {
             "id" : "efs_2",

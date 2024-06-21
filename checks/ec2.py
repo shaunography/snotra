@@ -188,7 +188,7 @@ class ec2(object):
         return images
 
     def ec2_1(self):
-        # Ensure IAM instance roles are used for AWS resource access from instances (Manual)
+        # Ensure IAM instance roles are used for AWS resource access from instances
 
         results = {
             "id" : "ec2_1",
@@ -232,7 +232,7 @@ class ec2(object):
 
 
     def ec2_2(self):
-        # Ensure EBS volume encryption is enabled in all regions (Manual)
+        # Ensure EBS volume encryption is enabled in all regions
 
         results = {
             "id" : "ec2_2",
@@ -498,7 +498,7 @@ class ec2(object):
         return results
     
     def ec2_7(self):
-        # Ensure routing tables for VPC peering are "least access" (Manual)
+        # Ensure routing tables for VPC peering are "least access"
 
         results = {
             "id" : "ec2_7",

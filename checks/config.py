@@ -90,7 +90,7 @@ class config(object):
         return results
 
     def config_2(self):
-        # Ensure AWS Config is Enabled for Lambda and Serverless (CIS)(Manual)
+        # Ensure AWS Config is Enabled for Lambda and Serverless (CIS)
 
         results = {
             "id" : "config_2",

@@ -48,7 +48,7 @@ class s3(object):
         return self.session.client('s3')
 
     def s3_1(self):
-        # Ensure all S3 buckets employ encryption-at-rest (Manual)
+        # Ensure all S3 buckets employ encryption-at-rest
 
         results = {
             "id" : "s3_1",
@@ -88,7 +88,7 @@ class s3(object):
             return results
     
     def s3_2(self):
-        # Ensure S3 Bucket Policy is set to deny HTTP requests (Manual)
+        # Ensure S3 Bucket Policy is set to deny HTTP requests
 
         results = {
             "id" : "s3_2",
@@ -199,7 +199,7 @@ class s3(object):
 
 
     def s3_4(self):
-        # Ensure all data in Amazon S3 has been discovered, classified and secured when required. (Manual)
+        # Ensure all data in Amazon S3 has been discovered, classified and secured when required.
 
         results = {
             "id" : "s3_4",

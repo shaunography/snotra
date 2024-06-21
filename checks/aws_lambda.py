@@ -293,7 +293,7 @@ class aws_lambda(object):
         return results
 
     def lambda_5(self):
-        # Lambda Functions With Resource Based Policies Configured (Manual)
+        # Lambda Functions With Resource Based Policies Configured
 
         results = {
             "id" : "lambda_5",

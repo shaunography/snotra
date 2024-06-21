@@ -226,14 +226,14 @@ class iam(object):
         return roles
 
     def iam_1(self):
-        # Maintain current contact details (Manual)
+        # Maintain current contact details
         results = {
             "id" : "iam_1",
             "ref" : "1.1",
             "compliance" : "cis",
             "level" : 1,
             "service" : "iam",
-            "name" : "Maintain current contact details (CIS)",
+            "name" : "Maintain current contact details (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "Ensure contact email and telephone details for AWS accounts are current and map to more than one individual in your organization. An AWS account supports a number of contact details, and AWS will use these to contact the account owner if activity judged to be in breach of Acceptable Use Policy or indicative of likely security compromise is observed by the AWS Abuse team. Contact details should not be for a single individual, as circumstances may arise where that individual is unavailable. Email contact details should point to a mail alias which forwards email to multiple individuals within the organization; where feasible, phone contact details should point to a PABX hunt group or other call-forwarding system. If an AWS account is observed to be behaving in a prohibited or suspicious manner, AWS will attempt to contact the account owner by email and phone using the contact details listed. If this is unsuccessful and the account behavior needs urgent mitigation, proactive measures may be taken, including throttling of traffic between the account exhibiting suspicious behavior and the AWS API endpoints and the Internet. This will result in impaired service to and from the account in question, so it is in both the customers' and AWS' best interests that prompt contact can be established. This is best achieved by setting AWS account contact details to point to resources which have multiple individuals as recipients, such as email aliases and PABX hunt groups.",
@@ -255,14 +255,14 @@ class iam(object):
 
 
     def iam_2(self):
-        # Ensure security contact information is registered (Manual)
+        # Ensure security contact information is registered
         results = {
             "id" : "iam_2",
             "ref" : "1.2",
             "compliance" : "cis",
             "level" : 1,
             "service" : "iam",
-            "name" : "Ensure security contact information is registered (CIS)",
+            "name" : "Ensure security contact information is registered (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "AWS provides customers with the option of specifying the contact information for account's security team. It is recommended that this information be provided. Specifying security-specific contact information will help ensure that security advisories sent by AWS reach the team in your organization that is best equipped to respond to them.",
@@ -283,7 +283,7 @@ class iam(object):
         return results
 
     def iam_3(self):
-        # Ensure security questions are registered in the AWS account (Manual)
+        # Ensure security questions are registered in the AWS account
         results = {
             "id" : "iam_3",
             "ref" : "1.3",
@@ -590,7 +590,7 @@ class iam(object):
 
 
     def iam_11(self):
-        # Do not setup access keys during initial user setup for all IAM users that have a console password (Manual)
+        # Do not setup access keys during initial user setup for all IAM users that have a console password
         
         results = {
             "id" : "iam_11",
@@ -1049,7 +1049,7 @@ class iam(object):
         return results
 
     def iam_19(self):
-        # Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments (Manual)
+        # Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments
 
         # could list identity providers and local iam users for comparison
 
@@ -1059,7 +1059,7 @@ class iam(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "iam",
-            "name" : "Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments (CIS)",
+            "name" : "Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "In multi-account environments, IAM user centralization facilitates greater user control. User access beyond the initial account is then provided via role assumption. Centralization of users can be accomplished through federation with an external identity provider or through the use of AWS Organizations. Centralizing IAM user management to a single identity store reduces complexity and thus the likelihood of access management errors.",

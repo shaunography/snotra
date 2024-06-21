@@ -86,7 +86,7 @@ class organizations(object):
         return results
     
     def organizations_2(self):
-        # Ensure an Organizational EC2 Tag Policy has been Created (CIS)(Manual)
+        # Ensure an Organizational EC2 Tag Policy has been Created (CIS)
 
         results = {
             "id" : "organizations_2",

@@ -41,7 +41,7 @@ class secretsmanager(object):
         return secrets
 
     def secretsmanager_1(self):
-        # Ensure AWS Secrets manager is configured and being used by Lambda for databases (CIS)(Manual)
+        # Ensure AWS Secrets manager is configured and being used by Lambda for databases (CIS)
 
         results = {
             "id" : "secretsmanager_1",
