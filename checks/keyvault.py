@@ -101,7 +101,8 @@ class keyvault(object):
         for subscription, key_vaults in self.vaults.items():
             for key_vault in key_vaults:
                 if key_vault.properties.public_network_access == "Enabled":
-                    results["affected"].append(key_vault.name)
+                    if not key_vault.properties.network_acls:
+                        results["affected"].append(key_vault.name)
 
         if results["affected"]:
             results["analysis"] = "the affected key vaults have public network access enabled"
