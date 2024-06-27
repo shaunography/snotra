@@ -1601,7 +1601,7 @@ class ec2(object):
             "service" : "ec2",
             "name" : "EC2 Instances with a Public IP Address",
             "affected": [],
-            "analysis" : []
+            "analysis" : [],
             "description" : "Affected Instances have a Public IP Address Attached",
             "remediation" : "Review Public IPs to ensure an appropriate Security Group has been applied applying the principle of least privilege.",
             "impact" : "info",
