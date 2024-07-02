@@ -133,9 +133,13 @@ class app_service(object):
             client = WebSiteManagementClient(credential=self.credential, subscription_id=subscription)
 
             for web_app in web_apps:
-                auth_settings = client.web_apps.get_auth_settings(web_app.resource_group, web_app.name)
-                if auth_settings.enabled == False:
-                    results["affected"].append(web_app.name)
+                try:
+                    auth_settings = client.web_apps.get_auth_settings(web_app.resource_group, web_app.name)
+                except Exception as e:
+                    logging.error(f'error getting web app auth settings: { web_app.name }, error: { e }')
+                else:
+                    if auth_settings.enabled == False:
+                        results["affected"].append(web_app.name)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"

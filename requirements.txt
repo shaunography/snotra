@@ -10,3 +10,10 @@ azure-mgmt-monitor
 azure-mgmt-rdbms
 azure-mgmt-cosmosdb
 azure-mgmt-security
+azure-storage-blob
+azure-storage-file-share
+azure-storage-queue
+azure-mgmt-containerservice
+azure-mgmt-containerregistry
+azure-mgmt-eventhub
+azure-mgmt-graphservices
