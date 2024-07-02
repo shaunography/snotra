@@ -57,7 +57,7 @@ class eventhub(object):
     def run(self):
         findings = []
         findings += [ self.eventhub_1() ]
-        #findings += [ self.eventhub_2() ]
+        findings += [ self.eventhub_2() ]
         return findings
 
     def eventhub_1(self):
@@ -104,6 +104,37 @@ class eventhub(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no event hubs found"
+
+        return results
+
+    def eventhub_2(self):
+        # Event Hubs Without Entra ID Authentication
+
+        results = {
+            "id" : "eventhub_2",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "eventhubs",
+            "name" : "Event Hubs Without Entra ID Authentication (Manual)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The affected Event Hubs are using Shared Access Signatures (SAS) or Policies for access control. A shared access signature (SAS) provides you with a way to grant limited access to resources in your Event Hubs namespace. SAS guards access to Event Hubs resources based on authorization rules. These rules are configured either on a namespace, or an event hub. Howevere, Azure Event Hubs also supports authorizing to Event Hubs resources using Microsoft Entra ID. Authorizing users or applications using OAuth 2.0 token returned by Microsoft Entra ID provides superior security and ease of use over shared access signatures (SAS). With Microsoft Entra ID, there is no need to store the tokens in your code and risk potential security vulnerabilities. Microsoft recommends using Microsoft Entra ID with your Azure Event Hubs applications when possible. Azure Event Hubs supports using Microsoft Entra ID to authorize requests to Event Hubs resources. With Microsoft Entra ID, you can use Azure role-based access control (RBAC) to grant permissions to a security principal, which can be a user, or an application service principal.",
+            "remediation" : "It is recomended to use Microsoft Entra ID for Event Hub authentication in place of SAS. Existing SAS should also be removed to minimise the risk of exposure and unauthorised access to data.\nMore Information:\nhttps://learn.microsoft.com/en-us/azure/event-hubs/authorize-access-azure-active-directory\nhttps://learn.microsoft.com/en-us/azure/event-hubs/authenticate-shared-access-signature\nhttps://learn.microsoft.com/en-us/azure/event-hubs/authorize-access-shared-access-signature",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        if self.name_spaces:
+            results["pass_fail"] = "info"
+            results["analysis"] = "select event hub > settings > SAS"
+        else:
+            results["analysis"] = "No event hubs in use"
 
         return results
 
