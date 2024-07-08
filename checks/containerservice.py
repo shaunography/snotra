@@ -105,7 +105,6 @@ class containerservice(object):
         for subscription, resource_groups in self.clusters.items():
             for resource_group, clusters in resource_groups.items():
                 for cluster in clusters:
-                    print(cluster.azure_monitor_profile.metrics)
                     if cluster.current_kubernetes_version == "1.26" or cluster.current_kubernetes_version == "1.25":
                         results["affected"].append(cluster.name)
 
