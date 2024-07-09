@@ -435,7 +435,7 @@ class postgresql(object):
                     if configuration.name == "log_retention_days":
                         print("-------------------")
                         print(configuration.value)
-                        if configuration.value < 3:
+                        if int(configuration.value) < 3:
                             results["affected"].append(server)
 
         for subscription, servers in self.flexible_configurations.items():
@@ -443,7 +443,7 @@ class postgresql(object):
                 for configuration in configurations:
                     if configuration.name == "log_retention_days":
                         print(configuration.value)
-                        if configuration.value < 3:
+                        if int(configuration.value) < 3:
                             results["affected"].append(server)
 
         if results["affected"]:
@@ -489,6 +489,8 @@ class postgresql(object):
         for subscription, resource_groups in self.flexible_servers.items():
             for resource_group, servers in resource_groups.items():
                 for server in servers:
+                    print("SERVER!!!!!")
+                    print(server)
                     if server.network.public_network_access != "Disabled":
                         results["affected"].append(server.name)
 
