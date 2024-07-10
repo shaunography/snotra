@@ -165,11 +165,11 @@ class postgresql(object):
 
     def run(self):
         findings = []
-        #findings += [ self.postgresql_1() ]
-        #findings += [ self.postgresql_2() ]
-        #findings += [ self.postgresql_3() ]
-        #findings += [ self.postgresql_4() ]
-        #findings += [ self.postgresql_5() ]
+        findings += [ self.postgresql_1() ]
+        findings += [ self.postgresql_2() ]
+        findings += [ self.postgresql_3() ]
+        findings += [ self.postgresql_4() ]
+        findings += [ self.postgresql_5() ]
         findings += [ self.postgresql_6() ]
         findings += [ self.postgresql_7() ]
         return findings
@@ -433,8 +433,6 @@ class postgresql(object):
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_retention_days":
-                        print("-------------------")
-                        print(configuration.value)
                         if int(configuration.value) < 3:
                             results["affected"].append(server)
 
@@ -442,7 +440,6 @@ class postgresql(object):
             for server, configurations in servers.items():
                 for configuration in configurations:
                     if configuration.name == "log_retention_days":
-                        print(configuration.value)
                         if int(configuration.value) < 3:
                             results["affected"].append(server)
 
@@ -489,9 +486,7 @@ class postgresql(object):
         for subscription, resource_groups in self.flexible_servers.items():
             for resource_group, servers in resource_groups.items():
                 for server in servers:
-                    print("SERVER!!!!!")
-                    print(server)
-                    if server.network.public_network_access != "Disabled":
+                    if server.public_network_access != "Disabled":
                         results["affected"].append(server.name)
 
         if results["affected"]:
