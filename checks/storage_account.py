@@ -570,10 +570,14 @@ class storage_account(object):
                 vulnerable = []
                 if storage_account.allow_blob_public_access == True:
                     containers = self.containers[subscription][storage_account.name]
-                    for container in containers:
-                        if container.public_access == "container":
-                            results["affected"].append(storage_account.name)
-                            vulnerable.append(container.name)
+                    try:
+                        for container in containers:
+                            if container.public_access == "container":
+                                results["affected"].append(storage_account.name)
+                                vulnerable.append(container.name)
+                    except Exception as e:
+                        logging.error(f'error getting containers for account: { storage_account.name }, error: { e }')
+
 
                     if vulnerable:
                         results["analysis"][storage_account.name] = vulnerable
@@ -616,10 +620,13 @@ class storage_account(object):
                 vulnerable = []
                 if storage_account.allow_blob_public_access == True:
                     containers = self.containers[subscription][storage_account.name]
-                    for container in containers:
-                        if container.public_access == "blob":
-                            results["affected"].append(storage_account.name)
-                            vulnerable.append(container.name)
+                    try:
+                        for container in containers:
+                            if container.public_access == "blob":
+                                results["affected"].append(storage_account.name)
+                                vulnerable.append(container.name)
+                    except Exception as e:
+                        logging.error(f'error getting containers for account: { storage_account.name }, error: { e }')
 
                     if vulnerable:
                         results["analysis"][storage_account.name] = vulnerable
