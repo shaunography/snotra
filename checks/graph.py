@@ -283,8 +283,8 @@ class graph(object):
         findings += [ self.graph_11() ]
         findings += [ self.graph_12() ]
         findings += [ self.graph_13() ]
-        findings += [ self.graph_14() ]
-            #findings += [ self.graph_15() ]
+        #findings += [ self.graph_14() ] # aggregated with 13
+            #findings += [ self.graph_15() ] # no longer applicaple
         findings += [ self.graph_16() ]
         findings += [ self.graph_17() ]
         findings += [ self.graph_18() ]
@@ -299,7 +299,7 @@ class graph(object):
         findings += [ self.graph_27() ]
         findings += [ self.graph_28() ]
         findings += [ self.graph_29() ]
-            #findings += [ self.graph_30() ]
+        findings += [ self.graph_30() ]
         findings += [ self.graph_31() ]
         findings += [ self.graph_32() ]
         return findings
@@ -751,19 +751,19 @@ class graph(object):
 
         results = {
             "id" : "graph_13",
-            "ref" : "1.10",
+            "ref" : "1.10-11",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)(1.10)",
+            "name" : "Application Consent and Admin consent workflow (CIS)(Manual)",
             "affected": [],
             "analysis" : [],
-            "description" : "Require administrators to provide consent for applications before use.\nIf Microsoft Entra ID is running as an identity provider for third-party applications, permissions and consent should be limited to administrators or pre-approved. Malicious applications may attempt to exfiltrate data or abuse privileged user accounts. \nEnforcing this setting may create additional requests that administrators need to review.",
+            "description" : "It is recommended that users are not allowed to grant consent to external applications as this can make users vulnerable to “illicit consent grant” attacks. This can grant external attackers access to user profiles and other Azure resources that contain private information such as phone numbers and email addresses which could then be used to launch more targeted attacks against the tenant. If users requires access to genuine applications then it is recommended that the admin consent workflow is enabled to ensure all consent requests are approved by an admin before becoming active.",
             "remediation" : "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Enterprise Applications\n4. Select Consent and permissions\n5. Select User consent settings\n6. Set User consent for applications to Do not allow user consent\n7. Click save",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+            "cvss_score" : "5.3",
             "pass_fail" : ""
         }
 
@@ -805,7 +805,7 @@ class graph(object):
         return results
 
     def graph_15(self):
-        # Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)
+        # Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (CIS)(Manual)
 
         results = {
             "id" : "graph_15",
