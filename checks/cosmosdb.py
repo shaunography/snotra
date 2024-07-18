@@ -12,10 +12,8 @@ class cosmosdb(object):
         self.resource_groups = resource_groups
         self.resources = resources
         self.accounts = self.get_accounts()
-        #self.configurations = self.get_configurations()
-        #self.flexible_servers = self.get_flexible_servers()
-        #self.databases = self.get_databases()
-        #self.flexible_databases = self.get_flexible_databases()
+        self.mongo_db_databases = self.get_mongo_db_databases()
+        #self.mongo_db_collections = self.get_mongo_db_collections()
 
     def get_accounts(self):
         accounts = {}
@@ -23,131 +21,122 @@ class cosmosdb(object):
             accounts[subscription.subscription_id] = ""
             client = CosmosDBManagementClient(credential=self.credential, subscription_id=subscription.subscription_id)
             try:
-                accounts[subscription.subscription_id] = client.database_accounts.list()
+                accounts[subscription.subscription_id] = [account for account in client.database_accounts.list()]
             except Exception as e:
-                logging.error(f'error cosmosdb accounts: { resource.name }, error: { e }')
+                logging.error(f'error cosmosdb accounts: { subscription.subscription_id }, error: { e }')
         return accounts
 
-    def get_configurations(self):
-        configurations = {}
-        for subscription, resource_groups in self.servers.items():
-            results = {}
-            client = Mysql.MySQLManagementClient(credential=self.credential, subscription_id=subscription)
-            for resource_group, servers in resource_groups.items():
-                for server in servers:
-                    configurations_on_server = []
-                    logging.info(f'getting mysql configurations for server: { server.name }')
-                    try:
-                        configuration_list = list(client.configurations.list_by_server(server_name=server.name, resource_group_name=resource_group))
-                    except Exception as e:
-                        logging.error(f'error getting mysql configurations for server: { server.name }, error: { e }')
-                    else:
-                        for configuration in configuration_list:
-                            try:
-                                configurations_on_server.append(client.configurations.get(configuration_name=configuration.name, server_name=server.name, resource_group_name=resource_group))
-                            except Exception as e:
-                                logging.error(f'error getting mysql configuration: { configuration.name }, error: { e }')
-                        if configurations_on_server:
-                            results[server.name] = configurations_on_server
-            if results:
-                configurations[subscription] = results
-        return configurations
 
-    def get_flexible_servers(self):
-        servers = {}
+    def get_mongo_db_databases(self):
+        mongo_db_databases = {}
         for subscription, resource_groups in self.resources.items():
-            results = {}
-            client = Mysql_flexible.MySQLManagementClient(credential=self.credential, subscription_id=subscription)
+            results = []
+            client = CosmosDBManagementClient(credential=self.credential, subscription_id=subscription)
             for resource_group, resources in resource_groups.items():
-                servers_in_group = []
                 for resource in resources:
-                    if resource.type == "Microsoft.DBforMySQL/flexibleServers":
-                        logging.info(f'getting mysql flexible server { resource.name }')
+                    if resource.type == "Microsoft.DocumentDB/databaseAccounts":
+                        logging.info(f'getting mongo db databases { resource.name }')
                         try:
-                            servers_in_group.append(client.servers.get(server_name=resource.name, resource_group_name=resource_group))
+                            databases = client.mongo_db_resources.list_mongo_db_databases(account_name=resource.name, resource_group_name=resource_group)
+                            for database in databases:
+                                results.append(client.mongo_db_resources.get_mongo_db_database(database_name=database.name, account_name=resource.name, resource_group_name=resource_group))
                         except Exception as e:
-                            logging.error(f'error getting mysql flexible server: { resource.name }, error: { e }')
-                if servers_in_group:
-                    results[resource_group] = servers_in_group
+                            logging.error(f'error getting mongo db databases: { resource.name }, error: { e }')
             if results:
-                servers[subscription] = results
-        return servers
+                mongo_db_databases[subscription] = results
+        return mongo_db_databases
 
-    def get_databases(self):
-        databases = {}
-        for subscription, resource_groups in self.servers.items():
-            results = {}
-            client = Mysql.MySQLManagementClient(credential=self.credential, subscription_id=subscription)
-            for resource_group, servers in resource_groups.items():
-                for server in servers:
-                    databases_on_server = []
-                    logging.info(f'getting mysql databases for server: { server.name }')
-                    try:
-                        database_list = list(client.databases.list_by_server(server_name=server.name, resource_group_name=resource_group))
-                    except Exception as e:
-                        logging.error(f'error getting mysql databases for server: { server.name }, error: { e }')
-                    else:
-                        for database in database_list:
-                            try:
-                                databases_on_server.append(client.databases.get(database_name=database.name, server_name=server.name, resource_group_name=resource_group))
-                            except Exception as e:
-                                logging.error(f'error getting mysql database: { database.name }, error: { e }')
-
-                        if databases_on_server:
-                            results[server.name] = databases_on_server
+    def get_mongo_db_collections(self):
+        mongo_db_collections = {}
+        for subscription, resource_groups in self.resources.items():
+            results = []
+            client = CosmosDBManagementClient(credential=self.credential, subscription_id=subscription)
+            for resource_group, resources in resource_groups.items():
+                for resource in resources:
+                    if resource.type == "Microsoft.DocumentDB/databaseAccounts":
+                        logging.info(f'getting mongodb { resource.name }')
+                        try:
+                            collections = client.mongo_db_resources.list_mongo_db_collections(account_name=resource.name, resource_group_name=resource_group)
+                            for collection in collections:
+                                results.append(client.mongo_db_resources.get_mongo_db_collection(collection_name=collection.name, account_name=resource.name, resource_group_name=resource_group))
+                        except Exception as e:
+                            logging.error(f'error getting mongo db collections: { resource.name }, error: { e }')
             if results:
-                databases[subscription] = results
-        return databases
+                mongo_db_collections[subscription] = results
+        return mongo_db_collections
 
-    def get_flexible_databases(self):
-        databases = {}
-        for subscription, resource_groups in self.flexible_servers.items():
-            results = {}
-            client = Mysql_flexible.MySQLManagementClient(credential=self.credential, subscription_id=subscription)
-            for resource_group, servers in resource_groups.items():
-                for server in servers:
-                    databases_on_server = []
-                    logging.info(f'getting mysql databases for flexible server: { server.name }')
-                    try:
-                        database_list = list(client.databases.list_by_server(server_name=server.name, resource_group_name=resource_group))
-                    except Exception as e:
-                        logging.error(f'error getting mysql databases for flexible server: { server.name }, error: { e }')
-                    else:
-                        for database in database_list:
-                            try:
-                                databases_on_server.append(client.databases.get(database_name=database.name, server_name=server.name, resource_group_name=resource_group))
-                            except Exception as e:
-                                logging.error(f'error getting mysql database: { database.name }, error: { e }')
-
-                        if databases_on_server:
-                            results[server.name] = databases_on_server
-            if results:
-                databases[subscription] = results
-        return databases
 
     def run(self):
         findings = []
         findings += [ self.cosmosdb_1() ]
-        #findings += [ self.mysql_2() ]
-        #findings += [ self.mysql_3() ]
-        #findings += [ self.mysql_4() ]
-        #findings += [ self.mysql_5() ]
+        findings += [ self.cosmosdb_2() ]
+        #findings += [ self.cosmosdb_3() ] # WIP
+        findings += [ self.cosmosdb_4() ]
         return findings
 
     def cosmosdb_1(self):
-        # Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server (CIS)
+        # Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead of All Networks (CIS)
 
         results = {
             "id" : "cosmosdb_1",
-            "ref" : "4.4.1",
+            "ref" : "4.5.1",
             "compliance" : "cis_v2.1.0",
-            "level" : 1,
-            "service" : "mysql",
-            "name" : "Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server (CIS)",
+            "level" : 2,
+            "service" : "cosmosdb",
+            "name" : "Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead of All Networks (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "Enable SSL connection on MYSQL Servers. SSL connectivity helps to provide a new layer of security by connecting database server to client applications using Secure Sockets Layer (SSL). Enforcing SSL connections between database server and client applications helps protect against 'man in the middle' attacks by encrypting the data stream between the server and application.",
-            "remediation" : "From Azure Portal\n1. Login to Azure Portal using https://portal.azure.com\n2. Go to Azure Database for MySQL servers\n3. For each database, click on Connection security\n4. In SSL settings, click on ENABLED to Enforce SSL connections",
+            "description" : "Limiting your Cosmos DB to only communicate on whitelisted networks lowers its attack footprint. Selecting certain networks for your Cosmos DB to communicate restricts the number of networks including the internet that can interact with what is stored within the database",
+            "remediation" : "From Azure Portal\n1. Open the portal menu.\n2. Select the Azure Cosmos DB blade.\n3. Select a Cosmos DB account to audit.\n4. Select Networking.\n5. Under Public network access, select Selected networks.\n6. Under Virtual networks, select + Add existing virtual network or + Add a new virtual network.\n7. For existing networks, select subscription, virtual network, subnet and click Add. For new networks, provide a name, update the default values if required, and click Create.\n8. Click Save.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        azure_services = False
+
+        for subscription, accounts in self.accounts.items():
+            for account in accounts:
+                if account.public_network_access == "Enabled":
+                    if not account.ip_rules:
+                        if not account.virtual_network_rules:
+                            results["affected"].append(account.name)
+
+                if account.network_acl_bypass == "AzureServices":
+                    azure_services = True
+                    results["affected"].append(account.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected cosmos db accounts allow public network access."
+            if azure_services:
+                results["analysis"] = "the affected cosmos db accounts allow public network access including azure services"
+        elif self.accounts:
+            results["analysis"] = "public network access is not allowed"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no cosmos db accounts in use"
+
+        return results
+
+    def cosmosdb_2(self):
+        # Ensure the Minimum TLS version for Cosmos DB Accounts is set to Version 1.2
+
+        results = {
+            "id" : "cosmosdb_2",
+            "ref" : "snotra",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "cosmosdb",
+            "name" : "Ensure the Minimum TLS version for Cosmos DB Accounts is set to Version 1.2",
+            "affected": [],
+            "analysis" : "",
+            "description" : "TLS 1.0 is a legacy version and has known vulnerabilities. This minimum TLS\nversion can be configured to be later protocols such as TLS 1.2.\nRationale:\nTLS 1.0 has known vulnerabilities and has been replaced by later versions of the TLS\nprotocol. Continued use of this legacy protocol affects the security of data in transit.\nImpact:\nWhen set to TLS 1.2 all requests must leverage this version of the protocol. Applications\nleveraging legacy versions of the protocol will fail.",
+            "remediation" : "Ensure Cosmos DB Accounts are using a minimum TLS version of 1.2",
             "impact" : "low",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
@@ -158,115 +147,74 @@ class cosmosdb(object):
         logging.info(results["name"]) 
 
         for subscription, accounts in self.accounts.items():
-            print(subscription)
             for account in accounts:
-                print(account)
+                if account.minimal_tls_version != "Tls12":
+                    results["affected"].append(account.name)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
-            results["analysis"] = "the affected Mysql servers do enforce the use of SSL."
+            results["analysis"] = "the affected cosmos db accounts do not enforce TLS version 1.2."
         elif self.accounts:
-            results["analysis"] = "Mysql servers are enforcing SSL connections"
+            results["analysis"] = "cosmos db accounts are using TLS version 1.2"
             results["pass_fail"] = "PASS"
         else:
-            results["analysis"] = "no Mysql servers found"
+            results["analysis"] = "no cosmos db accounts in use"
 
         return results
 
-    def mysql_2(self):
-        # Ensure 'TLS Version' is set to 'TLSV1.2' (or higher) for MySQL flexible Database Server (CIS)
+    def cosmosdb_3(self):
+        # Ensure That Private Endpoints Are Used Where Possible (CIS)
 
         results = {
-            "id" : "mysql_2",
-            "ref" : "4.4.2",
+            "id" : "cosmosdb_3",
+            "ref" : "4.5.2",
+            "compliance" : "cis_v2.1.0",
+            "level" : 2,
+            "service" : "cosmosdb",
+            "name" : "Ensure That Private Endpoints Are Used Where Possible (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Private endpoints limit network traffic to approved sources. For sensitive data, private endpoints allow granular control of which services can communicate with Cosmos DB and ensure that this network traffic is private. You set this up on a case by case basis for each service you wish to be connected.",
+            "remediation" : "From Azure Portal\n1. Open the portal menu.\n2. Select the Azure Cosmos DB blade.\n3. Select the Azure Cosmos DB account.\n4. Select Networking.\n5. Select Private access.\n6. Click + Private Endpoint.\n7. Provide a Name.\n8. Click Next.\n9. From the Resource type drop down, select Microsoft.AzureCosmosDB/databaseAccounts.\n10. From the Resource drop down, select the Cosmos DB account.\n11. Click Next.\n12. Provide appropriate Virtual Network details.\n13. Click Next.\n14. Provide appropriate DNS details.\n15. Click Next.\n16. Optionally provide Tags.\n17. Click Next : Review + create.\n18. Click Create.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, accounts in self.accounts.items():
+            for account in accounts:
+                if account.public_network_access == "Enabled":
+                    results["affected"].append(account.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected cosmos db accounts allow public network access."
+        elif self.accounts:
+            results["analysis"] = "public network access is not allowed"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no cosmos db accounts in use"
+
+        return results
+
+    def cosmosdb_4(self):
+        # Use Entra ID Client Authentication and Azure RBAC where possible (CIS)
+
+        results = {
+            "id" : "cosmosdb_4",
+            "ref" : "4.5.3",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
-            "service" : "mysql",
-            "name" : "Ensure 'TLS Version' is set to 'TLSV1.2' (or higher) for MySQL flexible Database Server (CIS)",
+            "service" : "cosmosdb",
+            "name" : "Use Entra ID Client Authentication and Azure RBAC where possible (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "Ensure TLS version on MySQL flexible servers is set to use TLS version 1.2 or higher. TLS connectivity helps to provide a new layer of security by connecting database server to client applications using Transport Layer Security (TLS). Enforcing TLS connections between database server and client applications helps protect against 'man in the middle' attacks by encrypting the data stream between the server and application.",
-            "remediation" : "From Azure Portal\n1. Login to Azure Portal using https://portal.azure.com\n2. Go to Azure Database for MySQL flexible servers\n3. For each database, click on Server parameters under Settings\n4. In the search box, type in tls_version\n5. Click on the VALUE dropdown, and ensure only TLSV1.2 (or higher) is selected\nfor tls_version",
-            "impact" : "low",
-            "probability" : "low",
-            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
-            "cvss_score" : "5.4",
-            "pass_fail" : ""
-        }
-
-        logging.info(results["name"]) 
-
-        for subscription, resource_groups in self.servers.items():
-            for resource_group, servers in resource_groups.items():
-                for server in servers:
-                    if server.minimal_tls_version != "TLS1_2":
-                        results["affected"].append(server.name)
-
-        if results["affected"]:
-            results["pass_fail"] = "FAIL"
-            results["analysis"] = "the affected Mysql servers do enforce the use of SSL."
-        elif self.servers:
-            results["analysis"] = "Mysql servers are enforcing SSL connections"
-            results["pass_fail"] = "PASS"
-        else:
-            results["analysis"] = "no Mysql servers found"
-
-        return results
-
-    def mysql_3(self):
-        # Ensure that 'Public Network Access' is `Disabled' for MySQL servers
-
-        results = {
-            "id" : "mysql_3",
-            "ref" : "snotra",
-            "compliance" : "N/A",
-            "level" : "N/A",
-            "service" : "mysql",
-            "name" : "Ensure that 'Public Network Access' is `Disabled' for MySQL servers",
-            "affected": [],
-            "analysis" : "",
-            "description" : "Disallowing public network access for a storage account overrides the public access\nsettings for individual containers in that storage account for Azure Resource Manager\nDeployment Model storage accounts. Azure Storage accounts that use the classic\ndeployment model will be retired on August 31, 2024.\nRationale:\nThe default network configuration for a storage account permits a user with appropriate\npermissions to configure public network access to containers and blobs in a storage\naccount. Keep in mind that public access to a container is always turned off by default\nand must be explicitly configured to permit anonymous requests. It grants read-only\naccess to these resources without sharing the account key, and without requiring a\nshared access signature. It is recommended not to provide public network access to\nstorage accounts until, and unless, it is strongly desired. A shared access signature\ntoken or Azure AD RBAC should be used for providing controlled and timed access to\nblob containers.",
-            "remediation" : "Ensure public network access is disabled",
-            "impact" : "low",
-            "probability" : "low",
-            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
-            "cvss_score" : "5.4",
-            "pass_fail" : ""
-        }
-
-        logging.info(results["name"]) 
-
-        for subscription, resource_groups in self.servers.items():
-            for resource_group, servers in resource_groups.items():
-                for server in servers:
-                    if server.public_network_access != "Disabled":
-                        results["affected"].append(server.name)
-
-        if results["affected"]:
-            results["pass_fail"] = "FAIL"
-            results["analysis"] = "the affected Mysql servers do enforce the use of SSL."
-        elif self.servers:
-            results["analysis"] = "Mysql servers are enforcing SSL connections"
-            results["pass_fail"] = "PASS"
-        else:
-            results["analysis"] = "no Mysql servers found"
-
-        return results
-
-    def mysql_4(self):
-        # Ensure server parameter 'audit_log_enabled' is set to 'ON' for MySQL Database Server (CIS)
-
-        results = {
-            "id" : "mysql_4",
-            "ref" : "4.4.3",
-            "compliance" : "cis_v2.1.0",
-            "level" : "N/A",
-            "service" : "mysql",
-            "name" : "Ensure server parameter 'audit_log_enabled' is set to 'ON' for MySQL Database Server (CIS)",
-            "affected": [],
-            "analysis" : "",
-            "description" : "Enable audit_log_enabled on MySQL Servers. Enabling audit_log_enabled helps MySQL Database to log items such as connection attempts to the server, DDL/DML access, and more. Log data can be used to identify, troubleshoot, and repair configuration errors and suboptimal performance. \nThere are further costs incurred for storage of logs. For high traffic databases these logs will be significant. Determine your organization's needs before enabling",
-            "remediation" : "From Azure Portal\n1. Login to Azure Portal using https://portal.azure.com.\n2. Select Azure Database for MySQL Servers.\n3. Select a database.\n4. Under Settings, select Server parameters.\n5. Update audit_log_enabled parameter to ON\n6. Under Monitoring, select Diagnostic settings.\n7. Select + Add diagnostic setting.\n8. Provide a diagnostic setting name.\n9. Under Categories, select MySQL Audit Logs.\n10. Specify destination details.\n11. Click Save.",
+            "description" : "Cosmos DB can use tokens or Entra ID for client authentication which in turn will use Azure RBAC for authorization. Using Entra ID is significantly more secure because Entra ID handles the credentials and allows for MFA and centralized management, and the Azure RBAC better integrated with the rest of Azure.\nEntra ID client authentication is considerably more secure than token-based authentication because the tokens must be persistent at the client. Entra ID does not require this.",
+            "remediation" : "Map all the resources that currently access to the Azure Cosmos DB account with keys or access tokens. Create an Entra ID identity for each of these resources: \n- For Azure resources, you can create a managed identity. You may choose between system-assigned and user-assigned managed identities. \n- For non-Azure resources, create an Entra ID identity. Grant each Entra ID identity the minimum permission it requires. When possible, we recommend you use one of the 2 built-in role definitions: Cosmos DB Built-in Data Reader or Cosmos DB Built-in Data Contributor. Validate that the new resource is functioning correctly. After new permissions are granted to identities, it may take a few hours until they propagate. When all resources are working correctly with the new identities, continue to the next step",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "N/A",
@@ -276,61 +224,18 @@ class cosmosdb(object):
 
         logging.info(results["name"]) 
 
-        for subscription, servers in self.configurations.items():
-            for server, configurations in servers.items():
-                for configuration in configurations:
-                    if configuration.name == "audit_log_enabled":
-                        if configuration.value != "ON":
-                            results["affected"].append(server)
+        for subscription, accounts in self.accounts.items():
+            for account in accounts:
+                if account.disable_local_auth != "Enabled":
+                    results["affected"].append(account.name)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
-            results["analysis"] = "the affected Mysql servers do not have the 'audit_log_enabled' parameter set to 'ON'."
-        elif self.servers:
-            results["analysis"] = "Mysql servers have the 'audit_log_enabled' parameter set to 'ON'."
+            results["analysis"] = "the affected cosmos db accounts allow local authentication."
+        elif self.accounts:
+            results["analysis"] = "local authentication is not allowed"
             results["pass_fail"] = "PASS"
         else:
-            results["analysis"] = "no Mysql servers found"
-
-        return results
-
-    def mysql_5(self):
-        # Ensure server parameter 'audit_log_events' has 'CONNECTION' set for MySQL Database Server (CIS)
-
-        results = {
-            "id" : "mysql_4",
-            "ref" : "4.4.3",
-            "compliance" : "cis_v2.1.0",
-            "level" : "N/A",
-            "service" : "mysql",
-            "name" : "Ensure server parameter 'audit_log_events' has 'CONNECTION' set for MySQL Database Server (CIS)",
-            "affected": [],
-            "analysis" : "",
-            "description" : "Set audit_log_enabled to include CONNECTION on MySQL Servers. Enabling CONNECTION helps MySQL Database to log items such as successful and failed connection attempts to the server. Log data can be used to identify, troubleshoot, and repair configuration errors and suboptimal performance. \nThere are further costs incurred for storage of logs. For high traffic databases these logs will be significant. Determine your organization's needs before enabling.",
-            "remediation" : "From Azure Portal\n1. From Azure Home select the Portal Menu.\n2. Select Azure Database for MySQL servers.\n3. Select a database.\n4. Under Settings, select Server parameters.\n5. Update audit_log_enabled parameter to ON.\n6. Update audit_log_events parameter to have at least CONNECTION checked.\n7. Click Save.\n8. Under Monitoring, select Diagnostic settings.\n9. Select + Add diagnostic setting.\n10. Provide a diagnostic setting name.\n11. Under Categories, select MySQL Audit Logs.\n12. Specify destination details.\n13. Click Save.",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
-            "pass_fail" : ""
-        }
-
-        logging.info(results["name"]) 
-
-        for subscription, servers in self.configurations.items():
-            for server, configurations in servers.items():
-                for configuration in configurations:
-                    if configuration.name == "audit_log_events":
-                        if configuration.value != "CONNECTION":
-                            results["affected"].append(server)
-
-        if results["affected"]:
-            results["pass_fail"] = "FAIL"
-            results["analysis"] = "the affected Mysql servers do not have the 'audit_log_events' parameter set to 'SESSION'."
-        elif self.servers:
-            results["analysis"] = "Mysql servers have the 'audit_log_events' parameter set to 'SESSION'."
-            results["pass_fail"] = "PASS"
-        else:
-            results["analysis"] = "no Mysql servers found"
+            results["analysis"] = "no cosmos db accounts in use"
 
         return results

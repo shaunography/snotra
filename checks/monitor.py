@@ -108,6 +108,7 @@ class monitor(object):
                 results["affected"].append(subscription)
                 results["analysis"] = "the subscription does not have diagnostic settings configured for any resource"
             else:
+                subscription_settings = False
                 for diagnostic_setting in diagnostic_settings:
                     if diagnostic_setting.additional_properties["location"] == "global":
                         subscription_settings = True

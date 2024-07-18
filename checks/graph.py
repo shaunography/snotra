@@ -491,6 +491,19 @@ class graph(object):
 
         logging.info(results["name"]) 
 
+        url = f"https://graph.microsoft.com/v1.0/identity/b2xUserFlows"
+        try:
+            response = requests.get(url, headers=self.headers)
+        except Exception as e:
+            logging.error(f'error getting mfa policies: , error: { e }')
+        else:
+            if response.status_code == 200:
+                print(response)
+            elif response.status_code == 403:
+                logging.error(f'error getting mfa policies: , access denied. Policy.Read.All, IdentityUserFlow.Read.All required.')
+            else:
+                logging.error(f'error getting mfs polcies: { response.status_code }')
+
         results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check -From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Registration\n6. Ensure that Number of days before users are asked to re-confirm their\nauthentication information is not set to 0 "
         results["pass_fail"] = "INFO"
@@ -624,6 +637,20 @@ class graph(object):
 
         logging.info(results["name"]) 
 
+        #url = f"https://graph.microsoft.com/v1.0/policies/authenticationMethodsPolicy"
+        #try:
+            #response = requests.get(url, headers=self.headers)
+        #except Exception as e:
+            #logging.error(f'error getting authentication methods policy: , error: { e }')
+        #else:
+            #if response.status_code == 200:
+                #for config in response.json()["authenticationMethodConfigurations"]:
+                    #print(config)
+            #elif response.status_code == 403:
+                #logging.error(f'error getting authentication methods policy: , access denied. Policy.Read.All required')
+            #else:
+                #logging.error(f'error getting mfs polcies: { response.status_code }')
+
         results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check\nFrom Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Authentication methods\n6. Ensure that Number of methods required to reset is set to 2"
         results["pass_fail"] = "INFO"
@@ -747,7 +774,7 @@ class graph(object):
         return results
 
     def graph_13(self):
-        # Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)
+        # Application Consent and Admin consent workflow (CIS)(Manual)(1.10-11)
 
         results = {
             "id" : "graph_13",
@@ -755,7 +782,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Application Consent and Admin consent workflow (CIS)(Manual)",
+            "name" : "Application Consent and Admin consent workflow (CIS)(Manual)(1.10-11)",
             "affected": [],
             "analysis" : [],
             "description" : "It is recommended that users are not allowed to grant consent to external applications as this can make users vulnerable to “illicit consent grant” attacks. This can grant external attackers access to user profiles and other Azure resources that contain private information such as phone numbers and email addresses which could then be used to launch more targeted attacks against the tenant. If users requires access to genuine applications then it is recommended that the admin consent workflow is enabled to ensure all consent requests are approved by an admin before becoming active.",
@@ -775,63 +802,34 @@ class graph(object):
 
         return results
 
-    def graph_14(self):
-        # Ensure `User consent for applications` is set to `Do not allow user consent` (CIS)(Manual)
-
-        results = {
-            "id" : "graph_14",
-            "ref" : "1.11",
-            "compliance" : "cis_v2.1.0",
-            "level" : 2,
-            "service" : "graph",
-            "name" : "Ensure ‘User consent for applications’ Is Set To ‘Allow for Verified Publishers’ (CIS)(Manual)(1.11)",
-            "affected": [],
-            "analysis" : [],
-            "description" : "Allow users to provide consent for selected permissions when a request is coming from a verified publisher. \nIf Microsoft Entra ID is running as an identity provider for third-party applications, permissions and consent should be limited to administrators or pre-approved. Malicious applications may attempt to exfiltrate data or abuse privileged user accounts.\nEnforcing this setting may create additional requests that administrators need to review.",
-            "remediation" : "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Enterprise Applications\n4. Select Consent and permissions\n5. Select User consent settings\n6. Under User consent for applications, select Allow user consent for apps from verified publishers, for selected permissions\n7. Select Save",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
-            "pass_fail" : ""
-        }
-
-        logging.info(results["name"]) 
-
-        results["affected"].append(self.tenant)
-        results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Enterprise Applications\n4. Select Consent and permissions\n5. Select User consent settings\n6. Under User consent for applications, ensure Allow user consent for apps\nfrom verified publishers, for selected permissions is selected"
-        results["pass_fail"] = "INFO"
-
-        return results
-
-    def graph_15(self):
-        # Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (CIS)(Manual)
-
-        results = {
-            "id" : "graph_15",
-            "ref" : "1.12",
-            "compliance" : "cis_v2.1.0",
-            "level" : 1,
-            "service" : "graph",
-            "name" : "Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (CIS)(Manual)(1.12)",
-            "affected": [],
-            "analysis" : [],
-            "description" : "Require administrators to provide consent for the apps before use. \nUnless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user.\nImpact:\n Can cause additional requests to administrators that need to be fulfilled quite often",
-            "remediation" : "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Enterprise applications\n4. Select User settings\n5. Set Users can add gallery apps to My Apps to No",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
-            "pass_fail" : ""
-        }
-
-        logging.info(results["name"]) 
-
-        results["affected"].append(self.tenant)
-        results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Enterprise applications\n4. Select User settings\n5. Ensure that Users can add gallery apps to My Apps is set to No"
-        results["pass_fail"] = "INFO"
-
-        return results
+    #def graph_15(self):
+        ## Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (CIS)(Manual)
+#
+        #results = {
+            #"id" : "graph_15",
+            #"ref" : "1.12",
+            #"compliance" : "cis_v2.1.0",
+            #"level" : 1,
+            #"service" : "graph",
+            #"name" : "Ensure that 'Users can add gallery apps to My Apps' is set to 'No' (CIS)(Manual)(1.12)",
+            #"affected": [],
+            #"analysis" : [],
+            #"description" : "Require administrators to provide consent for the apps before use. \nUnless Microsoft Entra ID is running as an identity provider for third-party applications, do not allow users to use their identity outside of your cloud environment. User profiles contain private information such as phone numbers and email addresses which could then be sold off to other third parties without requiring any further consent from the user.\nImpact:\n Can cause additional requests to administrators that need to be fulfilled quite often",
+            #"remediation" : "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Enterprise applications\n4. Select User settings\n5. Set Users can add gallery apps to My Apps to No",
+            #"impact" : "info",
+            #"probability" : "info",
+            #"cvss_vector" : "N/A",
+            #"cvss_score" : "N/A",
+            #"pass_fail" : ""
+        #}
+#
+        #logging.info(results["name"]) 
+#
+        #results["affected"].append(self.tenant)
+        #results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Enterprise applications\n4. Select User settings\n5. Ensure that Users can add gallery apps to My Apps is set to No"
+        #results["pass_fail"] = "INFO"
+#
+        #return results
 
     def graph_16(self):
         # Ensure That ‘Users Can Register Applications’ Is Set to ‘No’ (CIS)(Manual)

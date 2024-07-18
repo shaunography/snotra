@@ -27,7 +27,6 @@ from checks.containerservice import containerservice
 from checks.containerregistry import containerregistry
 from checks.eventhub import eventhub
 from checks.security import security
-from checks.graph_services import graph_services
 from checks.graph import graph
 
 def main():
@@ -101,9 +100,7 @@ def main():
     results["findings"] += storage_account(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += keyvault(credential, subscriptions, resource_groups, resources).run()
     results["findings"] += sql(credential, subscriptions, resource_groups, resources).run()
-
-    #results["findings"] += cosmosdb(credential, subscriptions, resource_groups, resources).run()
-    #results["findings"] += graph_services(credential, subscriptions, resource_groups, resources).run()
+    results["findings"] += cosmosdb(credential, subscriptions, resource_groups, resources).run()
 
     if not os.path.exists(args.results_dir):
         logging.info("results dir does not exist, creating it for you")
