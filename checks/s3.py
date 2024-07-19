@@ -28,7 +28,6 @@ class s3(object):
 
     def cis(self):
         findings = []
-        findings += [ self.s3_1() ]
         findings += [ self.s3_2() ]
         findings += [ self.s3_3() ]
         findings += [ self.s3_4() ]
@@ -49,15 +48,15 @@ class s3(object):
         return self.session.client('s3')
 
     def s3_1(self):
-        # Ensure all S3 buckets employ encryption-at-rest (Manual)
+        # Ensure all S3 buckets employ encryption-at-rest
 
         results = {
             "id" : "s3_1",
-            "ref" : "2.1.1",
-            "compliance" : "cis",
-            "level" : 2,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "s3",
-            "name" : "Ensure all S3 buckets employ encryption-at-rest (CIS)",
+            "name" : "Ensure all S3 buckets employ encryption-at-rest",
             "affected": [],
             "analysis" : "",
             "description" : "Amazon S3 provides a variety of no, or low, cost encryption options to protect data at rest. Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.",
@@ -89,11 +88,11 @@ class s3(object):
             return results
     
     def s3_2(self):
-        # Ensure S3 Bucket Policy is set to deny HTTP requests (Manual)
+        # Ensure S3 Bucket Policy is set to deny HTTP requests
 
         results = {
             "id" : "s3_2",
-            "ref" : "2.1.2",
+            "ref" : "2.1.1",
             "compliance" : "cis",
             "level" : 2,
             "service" : "s3",
@@ -155,9 +154,9 @@ class s3(object):
 
         results = {
             "id" : "s3_3",
-            "ref" : "2.1.3",
+            "ref" : "2.1.2",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "s3",
             "name" : "Ensure MFA Delete is enable on S3 buckets (CIS)",
             "affected": [],
@@ -200,15 +199,15 @@ class s3(object):
 
 
     def s3_4(self):
-        # Ensure all data in Amazon S3 has been discovered, classified and secured when required. (Manual)
+        # Ensure all data in Amazon S3 has been discovered, classified and secured when required.
 
         results = {
             "id" : "s3_4",
-            "ref" : "2.1.4",
+            "ref" : "2.1.3",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 2,
             "service" : "s3",
-            "name" : "Ensure all data in Amazon S3 has been discovered classified and secured when required (CIS)",
+            "name" : "Ensure all data in Amazon S3 has been discovered classified and secured when required (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "Amazon S3 buckets can contain sensitive data, that for security purposes should be discovered, monitored, classified and protected. Macie along with other 3rd party tools can automatically provide an inventory of Amazon S3 buckets. Using a Cloud service or 3rd Party software to continuously monitor and automate the process of data discovery and classification for S3 buckets using machine learning and pattern matching is a strong defense in protecting that information. Amazon Macie is a fully managed data security and data privacy service that uses machine learning and pattern matching to discover and protect your sensitive data in AWS. ",
@@ -234,7 +233,7 @@ class s3(object):
 
         results = {
             "id" : "s3_5",
-            "ref" : "2.1.5",
+            "ref" : "2.1.4",
             "compliance" : "cis",
             "level" : 1,
             "service" : "s3",

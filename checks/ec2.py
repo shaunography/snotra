@@ -22,6 +22,7 @@ class ec2(object):
         self.snapshots = self.get_snapshots()
         self.vpcs = self.get_vpcs()
         self.vpc_endpoints = self.get_vpc_endpoints()
+        self.images = self.get_images()
 
     def run(self):
         findings = []
@@ -55,18 +56,35 @@ class ec2(object):
         findings += [ self.ec2_28() ]
         findings += [ self.ec2_29() ]
         findings += [ self.ec2_30() ]
+        findings += [ self.ec2_31() ]
+        findings += [ self.ec2_32() ]
+        findings += [ self.ec2_33() ]
+        findings += [ self.ec2_34() ]
+        findings += [ self.ec2_35() ]
         return findings
 
     def cis(self):
         findings = []
-        findings += [ self.ec2_1() ]
         findings += [ self.ec2_2() ]
-        findings += [ self.ec2_3() ]
         findings += [ self.ec2_4() ]
         findings += [ self.ec2_5() ]
         findings += [ self.ec2_6() ]
         findings += [ self.ec2_7() ]
+        findings += [ self.ec2_10() ]
+        findings += [ self.ec2_16() ]
+        findings += [ self.ec2_17() ]
+        findings += [ self.ec2_18() ]
+        findings += [ self.ec2_19() ]
+        findings += [ self.ec2_21() ]
         findings += [ self.ec2_25() ]
+        findings += [ self.ec2_26() ]
+        findings += [ self.ec2_28() ]
+        findings += [ self.ec2_30() ]
+        findings += [ self.ec2_31() ]
+        findings += [ self.ec2_32() ]
+        findings += [ self.ec2_33() ]
+        findings += [ self.ec2_34() ]
+        findings += [ self.ec2_35() ]
         return findings
 
     def get_security_groups(self):
@@ -157,16 +175,28 @@ class ec2(object):
                 logging.error("Error getting vpc endpoints - %s" % e.response["Error"]["Code"])
         return vpc_endpoints
     
+
+    def get_images(self):
+        images = {}
+        logging.info("getting ami images")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            try:
+                images[region] = client.describe_images(Owners=["self"])["Images"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting images - %s" % e.response["Error"]["Code"])
+        return images
+
     def ec2_1(self):
-        # Ensure IAM instance roles are used for AWS resource access from instances (Manual)
+        # Ensure IAM instance roles are used for AWS resource access from instances
 
         results = {
             "id" : "ec2_1",
-            "ref" : "1.18",
-            "compliance" : "cis",
-            "level" : 2,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "ec2",
-            "name" : "Ensure IAM instance roles are used for AWS resource access from instances (CIS)",
+            "name" : "Ensure IAM instance roles are used for AWS resource access from instances",
             "affected": [],
             "analysis" : "",
             "description" : "AWS access from within AWS instances can be done by either encoding AWS keys into AWS API calls or by assigning the instance to a role which has an appropriate permissions policy for the required access. AWS Access means accessing the APIs of AWS in order to access AWS resources or manage AWS account resources. AWS IAM roles reduce the risks associated with sharing and rotating credentials that can be used outside of AWS itself. If credentials are compromised, they can be used from outside of the AWS account they give access to. In contrast, in order to leverage role permissions an attacker would need to gain and maintain access to a specific instance to use the privileges associated with it. Additionally, if credentials are encoded into compiled applications or other hard to change mechanisms, then they are even more unlikely to be properly rotated due to service disruption risks. As time goes on, credentials that cannot be rotated are more likely to be known by an increasing number of individuals who no longer work for the organization owning the credentials",
@@ -202,7 +232,7 @@ class ec2(object):
 
 
     def ec2_2(self):
-        # Ensure EBS volume encryption is enabled (Manual)
+        # Ensure EBS volume encryption is enabled in all regions
 
         results = {
             "id" : "ec2_2",
@@ -210,7 +240,7 @@ class ec2(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "ec2",
-            "name" : "Ensure EBS volume encryption is enabled (CIS)",
+            "name" : "Ensure EBS Volume Encryption is Enabled in all Regions (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Elastic Compute Cloud (EC2) supports encryption at rest when using the Elastic Block Store (EBS) service. While disabled by default, forcing encryption at EBS volume creation is supported. Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.",
@@ -251,11 +281,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_3",
-            "ref" : "3.9",
-            "compliance" : "cis",
-            "level" : 2,
+            "ref" : "",
+            "compliance" : "",
+            "level" : "",
             "service" : "ec2",
-            "name" : "Ensure VPC flow logging is enabled in all VPCs (CIS)",
+            "name" : "Ensure VPC flow logging is enabled in all VPCs",
             "affected": [],
             "analysis" : "",
             "description" : "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs. It is recommended that VPC Flow Logs be enabled for packet Rejects for VPCs. VPC Flow Logs provide visibility into network traffic that traverses the VPC and can be used to detect anomalous traffic or insight during security workflows.",
@@ -361,7 +391,7 @@ class ec2(object):
             "id" : "ec2_5",
             "ref" : "5.2",
             "compliance" : "cis",
-            "level" : 1,
+            "level" : 1, 
             "service" : "ec2",
             "name" : "Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports (CIS)",
             "affected": [],
@@ -468,7 +498,7 @@ class ec2(object):
         return results
     
     def ec2_7(self):
-        # Ensure routing tables for VPC peering are "least access" (Manual)
+        # Ensure routing tables for VPC peering are "least access"
 
         results = {
             "id" : "ec2_7",
@@ -476,7 +506,7 @@ class ec2(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "ec2",
-            "name" : "Ensure routing tables for VPC peering are least access (CIS)",
+            "name" : "Ensure routing tables for VPC peering are least access (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "Once a VPC peering connection is established, routing tables must be updated to establish any connections between the peered VPCs. These routes can be as specific as desired - even peering a VPC to only a single host on the other side of the connection. Being highly selective in peering routing tables is a very effective way of minimizing the impact of breach as resources outside of these routes are inaccessible to the peered VPC.",
@@ -620,11 +650,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_10",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.2.2",
+            "compliance" : "cis_compute",
+            "level" : 1,
             "service" : "ec2",
-            "name" : "Ensure there are no Public EBS Snapshots",
+            "name" : "Ensure there are no Public EBS Snapshots (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "EBS Snapshots that are public are accessible by all AWS principals, and therefore anyone with an AWS account. To reduce the risk of sensitive data being exposed to unauthorised bearers only share EBS snapshots with trusted accounts.",
@@ -687,14 +717,8 @@ class ec2(object):
 
         logging.info(results["name"])
             
-        for region in self.regions:
-            client = self.session.client('ec2', region_name=region)
-            try:
-                images = client.describe_images(Owners=["self"])["Images"]
-            except boto3.exceptions.botocore.exceptions.ClientError as e:
-                logging.error("Error getting images - %s" % e.response["Error"]["Code"])
-            else:
-                results["affected"] += [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
+        for region, images in self.images.items():
+            results["affected"] += [ "{}({})".format(image["ImageId"], region) for image in images if image["Public"] == True ]
 
         if results["affected"]:
             results["analysis"] = "the affected EC2 AMIs are public."
@@ -977,11 +1001,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_16",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.10",
+            "compliance" : "cis_compute",
+            "level" : 1,
             "service" : "ec2",
-            "name" : "Unused Network Interfaces",
+            "name" : "Unused Network Interfaces (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "The affected Network Interfaces, are not attached to any instances and therefore are not being used. To maintain the hygiene of the environment, make maintenance and auditing easier and reduce cost, all old and temporary network interfaces should be removed.",
@@ -1012,18 +1036,18 @@ class ec2(object):
 
 
     def ec2_17(self):
-        # Ensure running instances are not more than 365 days old
+        # Ensure running instances are not more than 180 days old
 
         results = {
             "id" : "ec2_17",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.5",
+            "compliance" : "cis_compute",
+            "level" : 2,
             "service" : "ec2",
-            "name" : "Ensure running instances are not more than 365 days old",
+            "name" : "Ensure running instances are not more than 180 days old (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "The account under review contains running EC2 instances that were launched more than 365 days ago. One of the biggest benefits of cloud based infrastructure is to have mutable and short lived infrastructure that can scale and shrink with demand. Instances should be reprovisioned and rebooted periodically to ensure software and hardware resources are up to date and subject to the latest security patches. Additionally, long lived instances may no longer be adequately sized or no longer required, consuming resources and generating a cost to the company.",
+            "description" : "The account under review contains running EC2 instances that were launched more than 180 days ago. One of the biggest benefits of cloud based infrastructure is to have mutable and short lived infrastructure that can scale and shrink with demand. Instances should be reprovisioned and rebooted periodically to ensure software and hardware resources are up to date and subject to the latest security patches. Additionally, long lived instances may no longer be adequately sized or no longer required, consuming resources and generating a cost to the company.",
             "remediation" : "Review the list of instances and ensure they subject to a regular patching policy and lifecycle management.",
             "impact" : "info",
             "probability" : "info",
@@ -1040,7 +1064,7 @@ class ec2(object):
                     if instance["State"]["Name"] == "running":
                         year, month, day = str(instance["LaunchTime"]).split(" ")[0].split("-") #convert datetime to string so it can be converted to date and compare with time delta
                         launch_date = date(int(year), int(month), int(day)) # extract date, ignore time
-                        if launch_date < (date.today() - timedelta(days=365)):
+                        if launch_date < (date.today() - timedelta(days=180)):
                             results["affected"].append("{}({})".format(instance["InstanceId"], region))
 
         if results["affected"]:
@@ -1058,11 +1082,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_18",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.8",
+            "compliance" : "cis_compute",
+            "level" : 2,
             "service" : "ec2",
-            "name" : "Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required",
+            "name" : "Ensure EC2 Instance Metadata Service Version 2 (IMDSv2) is Enabled and Required (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "The account under review contains EC2 instances that do not enforce the use of IMDSv2.\nTo help protect against Server Side Request Forgery (SSRF) and related vulnerabilities, which could be leveraged by an attacker to query the metadata service to steal the AWS API credentials associated with the instance profile for the running EC2 instance, AWS introduced IMDSv2 which now protects all requests with additional session authentication.",
@@ -1098,11 +1122,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_19",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.9",
+            "compliance" : "cis_compute",
+            "level" : 2,
             "service" : "ec2",
-            "name" : "EC2 Instances Not Managed By AWS Systems Manager",
+            "name" : "EC2 Instances Not Managed By AWS Systems Manager (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "The account under review contains running EC2 instances that are not managed by AWS Systems Manager. Systems Manager simplifies resource and application management, shortens the time to detect and resolve operational problems, and makes it easier to operate and manage your infrastructure at scale.\nAWS Systems Manager helps maintain security and compliance by scanning your instances against your patch, configuration, and custom policies. You can define patch baselines, maintain up-to-date anti-virus definitions, and enforce firewall policies. You can also remotely manage your servers at scale without manually logging in to each server. Systems Manager also provides a centralized store to manage your configuration data, whether it's plain text, such as database strings, or secrets, such as passwords. This allows you to separate your secrets and configuration data from code.",
@@ -1181,11 +1205,11 @@ class ec2(object):
 
         results = {
             "id" : "ec2_21",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.2.3",
+            "compliance" : "cis_compute",
+            "level" : 1,
             "service" : "ec2",
-            "name" : "Unencrypted EBS Snapshots",
+            "name" : "Unencrypted EBS Snapshots (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "To ensure the privacy of any data stored and processed by your EC2 instances it is recommended to enable encryption on EBS volumes. When you create an encrypted EBS volume and attach it to a supported instance type, the following types of data are encrypted:\n\n- Data at rest inside the volume\n- All data moving between the volume and the instance\n- All snapshots created from the volume\n- All volumes created from those snapshots ",
@@ -1265,11 +1289,11 @@ class ec2(object):
             "affected": [],
             "analysis" : "",
             "description" : "Default VPCs created by AWS can be considered overly permissive and it is recommended to create your own VPCs instead. Default VPCs include an internet gateway, default security groups and default allow all NACLs which could result in accidental exposure of EC2 instances and data to the internet.",
-            "remediation" : "Create you own VPCs as required applying the principle of least privilege to network access controls",
-            "impact" : "info",
-            "probability" : "info",
-            "cvss_vector" : "N/A",
-            "cvss_score" : "N/A",
+            "remediation" : "Create your own VPCs as required applying the principle of least privilege to network access controls",
+            "impact" : "medium",
+            "probability" : "medium",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
             "pass_fail" : ""
         }
 
@@ -1360,7 +1384,7 @@ class ec2(object):
             "compliance" : "cis",
             "level" : 1,
             "service" : "ec2",
-            "name" : "Ensure no security groups allow ingress from ::/0 to remote server administration ports",
+            "name" : "Ensure no security groups allow ingress from ::/0 to remote server administration ports (CIS)",
             "affected": [],
             "analysis" : "",
             "description" : "Security groups provide stateful filtering of ingress and egress network traffic to AWS resources. It is recommended that no security group allows unrestricted ingress access to remote server administration ports, such as SSH to port 22 and RDP to port 3389 . Public access to remote server administration ports, such as 22 and 3389, increases resource attack surface and unnecessarily raises the risk of resource compromise.",
@@ -1426,15 +1450,15 @@ class ec2(object):
 
         results = {
             "id" : "ec2_26",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.13",
+            "compliance" : "cis_compute",
+            "level" : 1,
             "service" : "ec2",
-            "name" : "EC2 Instance User Data (Check For Secrets)",
+            "name" : "Ensure Secrets and Sensitive Data are not stored directly in EC2 User Data (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
-            "description" : "",
-            "remediation" : "",
+            "description" : "User Data can be specified when launching an ec2 instance. Examples include specifying parameters for configuring the instance or including a simple script. The user data is not protected by authentication or cryptographic methods. Therefore, sensitive data, such as passwords or long-lived encryption keys should not be stored as user data.",
+            "remediation" : "From the Console\n1. Login to AWS Console using https://console.aws.amazon.com\n2. Click All services and click EC2 under Compute.\n3. Click on Instances.\n4. If the instance is currently running, stop the instance first.\nNote: ensure there is no negative impact from stopping the instance prior to stopping\nthe instance.\n5. For each instance, click Actions -> Instance Settings -> Edit user data\n6. For each instance, edit the user data to ensure there are no secrets or sensitive data stored. A Secret Management solution such as AWS Secrets Manager can be used here as a more secure mechanism of storing necessary sensitive data.\n7. Repeat this remediation for all the other AWS regions.\nNote: If the ec2 instances are created via automation or infrastructure-as-code, edit the user data in those pipelines and code.",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "N/A",
@@ -1461,7 +1485,7 @@ class ec2(object):
 
         if results["affected"]:
             results["analysis"] = user_data
-            results["pass_fail"] = "FAIL"
+            results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "No user data found"
             results["pass_fail"] = "PASS"
@@ -1473,7 +1497,7 @@ class ec2(object):
         # Ensure all security groups rules have a description
 
         results = {
-            "id" : "ec2_6",
+            "id" : "ec2_27",
             "ref" : "N/A",
             "compliance" : "N/A",
             "level" : "N/A",
@@ -1532,14 +1556,14 @@ class ec2(object):
 
         results = {
             "id" : "ec2_28",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.6",
+            "compliance" : "cis_compute",
+            "level" : 2,
             "service" : "ec2",
-            "name" : "EC2 Instances Without Detailed Monitoring Enabled",
+            "name" : "EC2 Instances Without Detailed Monitoring Enabled (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "Enabling detailed monitoring provides enhanced monitoring and granular insights into EC2 instance metrics. Not having detailed monitoring enabled may limit the ability to troubleshoot performance and security related issues effectively.",
+            "description" : "Enabling detailed monitoring provides enhanced monitoring and granular insights into EC2 instance metrics. Not having detailed monitoring enabled may limit the ability to troubleshoot performance and security related issues effectively. Data is available in 1-minute periods. For the instances where you've enabled detailed monitoring, you can also get aggregated data across groups of similar instances. You are charged per metric that is sent to CloudWatch. You are not charged for data storage. Due to this added cost it is recommended that you only enable this on critical instances.",
             "remediation" : "Enable detailed monitoring for appropriate instances.\nNOTE: Additional costs are incurred when detailed monitoring is enabled.",
             "impact" : "info",
             "probability" : "info",
@@ -1577,7 +1601,7 @@ class ec2(object):
             "service" : "ec2",
             "name" : "EC2 Instances with a Public IP Address",
             "affected": [],
-            "analysis" : "",
+            "analysis" : [],
             "description" : "Affected Instances have a Public IP Address Attached",
             "remediation" : "Review Public IPs to ensure an appropriate Security Group has been applied applying the principle of least privilege.",
             "impact" : "info",
@@ -1594,12 +1618,12 @@ class ec2(object):
                 for instance in reservation["Instances"]:
                     try:
                         if instance["PublicIpAddress"]:
-                            results["affected"].append("{}({})({})".format(instance["ImageId"], region, instance["PublicIpAddress"]))
+                            results["analysis"].append("{}({})({})".format(instance["ImageId"], region, instance["PublicIpAddress"]))
+                            results["affected"].append("{}({})".format(instance["ImageId"], region))
                     except KeyError:
                         pass
 
         if results["affected"]:
-            results["analysis"] = "The affected instances have a public IP Address attached"
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "No Public IPs found"
@@ -1613,14 +1637,14 @@ class ec2(object):
 
         results = {
             "id" : "ec2_30",
-            "ref" : "N/A",
-            "compliance" : "N/A",
-            "level" : "N/A",
+            "ref" : "2.11",
+            "compliance" : "cis_compute",
+            "level" : 1,
             "service" : "ec2",
-            "name" : "Stopped EC2 Instances",
+            "name" : "Stopped EC2 Instances (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "The affected EC2 Instances are currently in a stopped state. To maintain account hygiene and reduce potential storage and Elastic IP costs is recommended to terminate all stopped instances that are no longer required.",
+            "description" : "The affected EC2 Instances are currently in a stopped state. To maintain account hygiene and reduce potential storage and Elastic IP costs is recommended to terminate all stopped instances that are no longer required. the CIS benchmark recommends that all instances stopped for 90 days are deleted.",
             "remediation" : "Terminate the affected instances if no longer requried.",
             "impact" : "info",
             "probability" : "info",
@@ -1647,6 +1671,204 @@ class ec2(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No stopped instances found."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_31(self):
+        # Ensure Consistent Naming Convention is used for Organizational AMI (CIS)
+
+        results = {
+            "id" : "ec2_31",
+            "ref" : "2.1.1",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "ec2",
+            "name" : "Ensure Consistent Naming Convention is used for Organizational AMI (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "The naming convention for AMI (Amazon Machine Images) should be documented and followed for any AMI's created. The majority of AWS resources can be named and tagged. Most organizations have already created standardize naming conventions, and have existing rules in effect. They simply need to extend that for all AWS cloud resources to include Amazon Machine Images (AMI)",
+            "remediation" : "If the AMI Name for an AMI doesn't follow Organization policy Perform the following to copy and rename the AMI: From the Console:\n1. Login to the EC2 console at https://console.aws.amazon.com/ec2/.\n2. In the left pane click Images, click AMIs.\n3. Select the AMI that does not comply to the naming policy.\n4. Click on Actions.\n5. Click on Copy AMI",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for region, images in self.images.items():
+            for image in images:
+                results["affected"].append(image["Name"])
+
+        if results["affected"]:
+            results["analysis"] = "The affected images were found in your account, review them to ensure a consistent naming convention is in use"
+            results["pass_fail"] = "INFO"
+        else:
+            results["analysis"] = "No AMI images found."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_32(self):
+        # Ensure Images (AMI's) are encrypted (CIS)
+
+        results = {
+            "id" : "ec2_32",
+            "ref" : "2.1.2",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "ec2",
+            "name" : "Ensure Images (AMI's) are encrypted (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Amazon Machine Images should utilize EBS Encrypted snapshots AMIs backed by EBS snapshots should use EBS encryption. Snapshot volumes can be encrypted and attached to an AMI.",
+            "remediation" : "Perform the following to encrypt AMI EBS Snapshots: From the Console:\n1. Login to the EC2 console at https://console.aws.amazon.com/ec2/.\n2. In the left pane click on AMIs.\n3. Select the AMI that does not comply to the encryption policy.\n4. Click on Actions.\n5. Click on Copy AMI.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        analysis = {}
+
+        for region, images in self.images.items():
+            for image in images:
+                analysis[image["Name"]] = []
+                for mapping in image["BlockDeviceMappings"]:
+                    if mapping["Ebs"]["Encrypted"] == False:
+                        results["affected"].append(image["Name"])
+                        analysis[image["Name"]].append(mapping["Ebs"]["SnapshotId"])
+
+        if results["affected"]:
+            results["analysis"] = analysis
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No unencrpyted AMI image snapshots found."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_33(self):
+        # Ensure unused EBS volumes are removed (CIS)
+
+        results = {
+            "id" : "ec2_33",
+            "ref" : "2.2.4",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "ec2",
+            "name" : "Ensure unused EBS volumes are removed (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Identify any unused Elastic Block Store (EBS) volumes in your AWS account and remove them. Any Elastic Block Store volume created in your AWS account contains data, regardless of being used or not. If you have EBS volumes (other than root volumes) that are unattached to an EC2 instance they should be removed to prevent unauthorized access or data leak to any sensitive data on these volumes. Once a EBS volume is deleted, the data will be lost. If this is data that you need to archive, create an encrypted EBS snapshot before deleting them.",
+            "remediation" : "From Console:\n1. Login to the EC2 console using https://console.aws.amazon.com/ec2/\n2. Under Elastic Block Store, click Volumes.\n3. Find the State column\n4. Sort by Available\n5. Select the Volume that you want to delete.\n6. Click Actions, Delete volume, Yes, Delete\nNote: EBS volumes can be in different regions. Make sure to review all the regions being utilized.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for region, volumes in self.volumes.items():
+            for volume in volumes:
+                if volume["State"] == "available":
+                    results["affected"].append(volume["VolumeId"])
+
+        if results["affected"]:
+            results["analysis"] = "The affected volumes are not attached"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No unused volumes found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_34(self):
+        # Ensure Default EC2 Security groups are not being used (CIS)
+
+        results = {
+            "id" : "ec2_34",
+            "ref" : "2.7",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "ec2",
+            "name" : "Ensure Default EC2 Security groups are not being used (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "When an EC2 instance is launched a specified custom security group should be assigned to the instance. When an EC2 Instance is launched the default security group is automatically assigned. In error a lot of instances are launched in this way, and if the default security group is configured to allow unrestricted access, it will increase the attack footprint allowing the opportunity for malicious activity.",
+            "remediation" : "From the Console:\n1. Login to EC2 using https://console.aws.amazon.com/ec2/\n2. On the left Click Network & Security, click Security Groups.\n3. Select Security Groups\n4. Click on the default Security Group you want to review.\n5. Click Actions, View details.\n6. Select the Inbound rules tab\n7. Click on Edit inbound rules\n8. Click on Delete for all the rules listed\n9. Once there are no rules listed click on 'Save rules`\n10. Repeat steps no. 3 – 8 for any other default security groups listed.",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "cvss_score" : "5.3",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    for group in instance["SecurityGroups"]:
+                        if group["GroupName"] == "default":
+                            results["affected"].append(instance["InstanceId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected EC2 instances have default security groups attached"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "Default security groups are not in use"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_35(self):
+        # Ensure EBS volumes attached to an EC2 instance is marked for deletion upon instance termination (CIS)
+
+        results = {
+            "id" : "ec2_35",
+            "ref" : "2.12",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "ec2",
+            "name" : "Ensure EBS volumes attached to an EC2 instance is marked for deletion upon instance termination (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This rule ensures that Amazon Elastic Block Store volumes that are attached to Amazon Elastic Compute Cloud (Amazon EC2) instances are marked for deletion when an instance is terminated. If an Amazon EBS volume isn’t deleted when the instance that it’s attached to is terminated, it may violate the concept of least functionality.",
+            "remediation" : 'From the CLI\n1. Run the modify-instance-attribute command using the list of instances collected in the audit.\n<code>aws ec2 modify-instance-attribute --instance-id i-123456abcdefghi0 --block-device-mappings "[{\"DeviceName\":\"/dev/sda\",\"Ebs\":{\"DeleteOnTermination\":true}}]"</code>\n2. Repeat steps no. 1 with the other instances discovered in all AWS regions.',
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    for mapping in instance["BlockDeviceMappings"]:
+                        if mapping["Ebs"]["DeleteOnTermination"] == False:
+                            results["affected"].append(instance["InstanceId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected EC2 instances have EBS volumes attached that do not have delete on termination enabled"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No EBS volumes without Delete on termination enabled found"
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 

@@ -38,7 +38,7 @@ class kms(object):
 
         results = {
             "id" : "kms_1",
-            "ref" : "3.8",
+            "ref" : "3.6",
             "compliance" : "cis",
             "level" : 2,
             "service" : "kms",

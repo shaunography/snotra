@@ -64,7 +64,7 @@ class resource_explorer(object):
                 results["affected"].append(region)
 
         if results["affected"]:
-            results["analysis"] = "The affected regions do no have any active resource explorer indexes"
+            results["analysis"] = "The affected regions do not have any active resource explorer indexes"
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "Indexes are enabled in all regions"

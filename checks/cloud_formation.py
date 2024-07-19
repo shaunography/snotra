@@ -93,8 +93,8 @@ class cloud_formation(object):
             "name" : "CloudFormation Stacks Do Not Have Termination Protection Enabled",
             "affected": [],
             "analysis" : "",
-            "description" : "The affected Cloudformation stacks do not have termination protection enabled. Without termination protection critical cloudformation stacks can be accidently deleted resulting in potential loss of data integrity and availability",
-            "remediation" : "Ensure termination protection is enabled for the cloudformation stacks.\nMore Informaiton\nhttps://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-protect-stacks.html",
+            "description" : "The affected CloudFormation stacks do not have termination protection enabled. Without termination protection critical cloudformation stacks can be accidently deleted resulting in potential loss of data integrity and availability",
+            "remediation" : "Ensure termination protection is enabled for the cloudFormation stacks.\nMore Information\nhttps://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-protect-stacks.html",
             "impact" : "info",
             "probability" : "info",
             "cvss_vector" : "N/A",
@@ -110,7 +110,8 @@ class cloud_formation(object):
                     parent_id = stack["ParentId"]
                 except KeyError:
                     try:
-                        termination_protection = stack["EnableTerminationProtection"]
+                        if stack["EnableTerminationProtection"] == False:
+                            results["affected"].append("{} ({})". format(stack["StackName"], region))
                     except KeyError:
                         results["affected"].append("{} ({})". format(stack["StackName"], region))
 

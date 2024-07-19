@@ -9,11 +9,13 @@ from datetime import date
 from datetime import timedelta
 
 from utils.utils import get_account_id
+from utils.utils import describe_regions
 
 class iam(object):
 
     def __init__(self, session):
         self.session = session
+        self.regions = describe_regions(session)
         self.account_id = get_account_id(session)
         self.client = self.get_client()
         self.account_summary = self.get_account_summary()
@@ -60,6 +62,8 @@ class iam(object):
         findings += [ self.iam_29() ]
         findings += [ self.iam_30() ]
         findings += [ self.iam_31() ]
+        findings += [ self.iam_32() ]
+        findings += [ self.iam_33() ]
         return findings
     
     def cis(self):
@@ -83,6 +87,8 @@ class iam(object):
         findings += [ self.iam_17() ]
         findings += [ self.iam_18() ]
         findings += [ self.iam_19() ]
+        findings += [ self.iam_32() ]
+        findings += [ self.iam_33() ]
         return findings
 
     def get_client(self):
@@ -220,14 +226,14 @@ class iam(object):
         return roles
 
     def iam_1(self):
-        # Maintain current contact details (Manual)
+        # Maintain current contact details
         results = {
             "id" : "iam_1",
             "ref" : "1.1",
             "compliance" : "cis",
             "level" : 1,
             "service" : "iam",
-            "name" : "Maintain current contact details (CIS)",
+            "name" : "Maintain current contact details (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "Ensure contact email and telephone details for AWS accounts are current and map to more than one individual in your organization. An AWS account supports a number of contact details, and AWS will use these to contact the account owner if activity judged to be in breach of Acceptable Use Policy or indicative of likely security compromise is observed by the AWS Abuse team. Contact details should not be for a single individual, as circumstances may arise where that individual is unavailable. Email contact details should point to a mail alias which forwards email to multiple individuals within the organization; where feasible, phone contact details should point to a PABX hunt group or other call-forwarding system. If an AWS account is observed to be behaving in a prohibited or suspicious manner, AWS will attempt to contact the account owner by email and phone using the contact details listed. If this is unsuccessful and the account behavior needs urgent mitigation, proactive measures may be taken, including throttling of traffic between the account exhibiting suspicious behavior and the AWS API endpoints and the Internet. This will result in impaired service to and from the account in question, so it is in both the customers' and AWS' best interests that prompt contact can be established. This is best achieved by setting AWS account contact details to point to resources which have multiple individuals as recipients, such as email aliases and PABX hunt groups.",
@@ -249,14 +255,14 @@ class iam(object):
 
 
     def iam_2(self):
-        # Ensure security contact information is registered (Manual)
+        # Ensure security contact information is registered
         results = {
             "id" : "iam_2",
             "ref" : "1.2",
             "compliance" : "cis",
             "level" : 1,
             "service" : "iam",
-            "name" : "Ensure security contact information is registered (CIS)",
+            "name" : "Ensure security contact information is registered (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "AWS provides customers with the option of specifying the contact information for account's security team. It is recommended that this information be provided. Specifying security-specific contact information will help ensure that security advisories sent by AWS reach the team in your organization that is best equipped to respond to them.",
@@ -277,14 +283,14 @@ class iam(object):
         return results
 
     def iam_3(self):
-        # Ensure security questions are registered in the AWS account (Manual)
+        # Ensure security questions are registered in the AWS account
         results = {
             "id" : "iam_3",
             "ref" : "1.3",
             "compliance" : "cis",
             "level" : 1,
             "service" : "iam",
-            "name" : "Ensure security questions are registered in the AWS account (CIS)",
+            "name" : "Ensure security questions are registered in the AWS account (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "The AWS support portal allows account owners to establish security questions that can be used to authenticate individuals calling AWS customer service for support. It is recommended that security questions be established. When creating a new AWS account, a default super user is automatically created. This account is referred to as the root user or root account. It is recommended that the use of this account be limited and highly controlled. During events in which the root password is no longer accessible or the MFA token associated with root is lost/destroyed it is possible, through authentication using secret questions and associated answers, to recover root user login access.",
@@ -484,6 +490,7 @@ class iam(object):
                 results["pass_fail"] = "FAIL"
             else:
                 results["pass_fail"] = "PASS"
+                results["affected"].append(self.account_id)
         else:
             results["analysis"] = "No password policy configured"
             results["affected"].append(self.account_id)
@@ -583,7 +590,7 @@ class iam(object):
 
 
     def iam_11(self):
-        # Do not setup access keys during initial user setup for all IAM users that have a console password (Manual)
+        # Do not setup access keys during initial user setup for all IAM users that have a console password
         
         results = {
             "id" : "iam_11",
@@ -594,8 +601,8 @@ class iam(object):
             "name" : "Do not setup access keys during initial user setup for all IAM users that have a console password (CIS)",
             "affected": [],
             "analysis" : "",
-            "description" : "AWS console defaults to no check boxes selected when creating a new IAM user. When cerating the IAM User credentials you have to determine what type of access they require. Programmatic access: The IAM user might need to make API calls, use the AWS CLI, or use the Tools for Windows PowerShell. In that case, create an access key (access key ID and a secret access key) for that user. AWS Management Console access: If the user needs to access the AWS Management Console, create a password for the user. Requiring the additional steps be taken by the user for programmatic access after their profile has been created will give a stronger indication of intent that access keys are [a] necessary for their work and [b] once the access key is established on an account that the keys may be in use somewhere in the organization.",
-            "remediation" : "Do not setup access keys during initial user setup. Remoe any access keys that are no longer required.",
+            "description" : "AWS console defaults to no check boxes selected when creating a new IAM user. When creating the IAM User credentials you have to determine what type of access they require. Programmatic access: The IAM user might need to make API calls, use the AWS CLI, or use the Tools for Windows PowerShell. In that case, create an access key (access key ID and a secret access key) for that user. AWS Management Console access: If the user needs to access the AWS Management Console, create a password for the user. Requiring the additional steps be taken by the user for programmatic access after their profile has been created will give a stronger indication of intent that access keys are [a] necessary for their work and [b] once the access key is established on an account that the keys may be in use somewhere in the organization.",
+            "remediation" : "Do not setup access keys during initial user setup. Remove any access keys that are no longer required.",
             "impact" : "medium",
             "probability" : "medium",
             "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
@@ -863,65 +870,79 @@ class iam(object):
         logging.info(results["name"])
 
         # Customer Managed Policies
+        logging.info("getting customer managed policies")
         for policy in self.customer_attached_policies:
-
             arn = policy["Arn"]
             policy_name = policy["PolicyName"]
             #policy_id = policy["PolicyId"]
             version_id = policy["DefaultVersionId"]        
-
-            statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
-            
-            if type(statements) is not list:
-                statements = [ statements ]
-
-            for statement in statements:
-                try:
-                    if statement["Effect"] == "Allow":
-                        if statement["Action"] == "*":
-                            if statement["Resource"] == "*":
-                                results["affected"].append(policy_name)
-                except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                    pass
+            try:
+                statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+            else:
+                if type(statements) is not list:
+                    statements = [ statements ]
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    results["affected"].append(policy_name)
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
 
         # Inline User Policies
+        logging.info("getting inline user policies")
         for user in self.users:
-            inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
-            for policy_name in inline_policies:
-                policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
-                statements = policy["PolicyDocument"]["Statement"]
-
-                if type(statements) is not list:
-                    statements = [ statements ]
-
-                for statement in statements:
+            try:
+                inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
                     try:
-                        if statement["Effect"] == "Allow":
-                            if statement["Action"] == "*":
-                                if statement["Resource"] == "*":
-                                    results["affected"].append(policy["PolicyName"])
-                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                        pass
+                        policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            results["affected"].append(policy["PolicyName"])
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
 
         # Inline Group Policeis
+        logging.info("getting inline group policies")
         for group in self.groups:
-            inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
-            for policy_name in inline_policies:
-                policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
-                statements = policy["PolicyDocument"]["Statement"]
-
-                if type(statements) is not list:
-                    statements = [ statements ]
-
-                for statement in statements:
+            try:
+                inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
                     try:
-                        if statement["Effect"] == "Allow":
-                            if statement["Action"] == "*":
-                                if statement["Resource"] == "*":
-                                    results["affected"].append(policy["PolicyName"])
-                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
-                        pass
-
+                        policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            results["affected"].append(policy["PolicyName"])
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
 
         if results["affected"]:
             results["analysis"] = "The affected custom policies grant full * and remove administrator access from anyone that doesnt require it.:* privileges."
@@ -1004,9 +1025,6 @@ class iam(object):
 
         server_certificates = self.client.list_server_certificates()["ServerCertificateMetadataList"]
 
-        if not server_certificates:
-            results["analysis"] = "No server certificates found"
-            results["affected"].append(self.account_id)
         
         for cert in server_certificates:
             expiration = cert["Expiration"]
@@ -1023,10 +1041,15 @@ class iam(object):
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 
+        if not server_certificates:
+            results["analysis"] = "No server certificates found"
+            results["affected"].append(self.account_id)
+            results["pass_fail"] = "PASS"
+
         return results
 
     def iam_19(self):
-        # Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments (Manual)
+        # Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments
 
         # could list identity providers and local iam users for comparison
 
@@ -1036,7 +1059,7 @@ class iam(object):
             "compliance" : "cis",
             "level" : 2,
             "service" : "iam",
-            "name" : "Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments (CIS)",
+            "name" : "Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments (CIS)(Manual)",
             "affected": [],
             "analysis" : "",
             "description" : "In multi-account environments, IAM user centralization facilitates greater user control. User access beyond the initial account is then provided via role assumption. Centralization of users can be accomplished through federation with an external identity provider or through the use of AWS Organizations. Centralizing IAM user management to a single identity store reduces complexity and thus the likelihood of access management errors.",
@@ -1369,8 +1392,9 @@ class iam(object):
                     if "AWS" in statement["Principal"]:
                         if "sts:AssumeRole" in statement["Action"]:
                             if re.match("arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
-                                results["affected"].append(role["RoleName"])
-                                affected_statements[role["RoleName"]] = statement
+                                if "AWSServiceRoleFor" not in role["RoleName"]:
+                                    results["affected"].append(role["RoleName"])
+                                    affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
             results["analysis"] = affected_statements
@@ -1454,8 +1478,8 @@ class iam(object):
             "name" : "AmazonEC2RoleforSSM Managed Policy In Use",
             "affected": [],
             "analysis" : "",
-            "description" : "The AWS managed policy AmazonEC2RoleforSSM is considered overly permissive.",
-            "remediation" : "Use AmazonSSMManagedInstanceCore instead and add privs as needed.\nMore Information:\nhttps://www.tripwire.com/state-of-security/security-data-protection/cloud/aws-system-manager-default-permissions/",
+            "description" : "The AWS managed policy AmazonEC2RoleforSSM is in use and is considered overly permissive. By default, this role grants access to all S3 buckets in the account. It is recommended that the role is adjusted by applying the principal of least privilege.",
+            "remediation" : "It is recommended that the AmazonSSMManagedInstanceCore policy is used instead and privileges are added as needed.\nMore Information:\nhttps://www.tripwire.com/state-of-security/security-data-protection/cloud/aws-system-manager-default-permissions/",
             "impact" : "Medium",
             "probability" : "low",
             "cvss_vector" : "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
@@ -1572,8 +1596,8 @@ class iam(object):
             "remediation" : 'To prevent attackers from leveraging permissive service role trust to access unauthorised resources it is recommended that role trust policies for services contain conditional access statements. Using conditions and specifying the full ARN of the allowed resources would restrict access to only legitimate resources and reduce the potential for abuse. Specifying the full ARN, including region and resource name, could prevent attackers from creating similar resources in other regions to leverage in attacks.\nAs an example, the following role trust policy could be used to restrict access to a Lambda execution role to only a specific lambda function within an AWS account:\n{\n  "Version": "2012-10-17",\n  "Statement": {\n    "Effect": "Allow",\n    "Principal": {\n      "Service": "lambda.amazonaws.com"\n    },\n    "Action": "sts:AssumeRole",\n    "Condition": {\n      "ArnLike": {\n        "aws:SourceArn": "arn:aws:lambda:us-east-2:111122223333:function:my-function”\n      }\n    }\n  }\n}\nThe above policy makes use of the aws:SourceArn global condition context key using the full ARN of an example lambda function. In this example, only the lambda function my-function within the us-east-2 region would have permission to assume the execution policy and access the privileges assigned to it. This would prevent malicious users from creating other lambda functions to gain access to additional privileges.\nWhere appropriate other conditional contexts could also be used following the principal of least privilege to effectively limit the scope of trust policies and prevent unintended access opportunities. Common conditional restrictions for services include,\nSourceArn\nSourceAccount\nPrincipalOrgID\nFurther Information\nAWS Confused Deputy - https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html#cross-service-confused-deputy-prevention\n\n',
             "impact" : "medium",
             "probability" : "low",
-            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N",
-            "cvss_score" : "6.8",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "4.8",
             "pass_fail" : ""
         }
 
@@ -1586,9 +1610,10 @@ class iam(object):
                     if "sts:AssumeRole" in statement["Action"]:
                         try:
                             if re.match("^.*\.amazonaws\.com", str(statement["Principal"]["Service"])):
-                                if "Condition" not in statement:
-                                    results["affected"].append(role["RoleName"])
-                                    affected_statements[role["RoleName"]] = statement
+                                if "AWSServiceRoleFor" not in role["RoleName"]:
+                                    if "Condition" not in statement:
+                                        results["affected"].append(role["RoleName"])
+                                        affected_statements[role["RoleName"]] = statement
                         except KeyError:
                             pass
 
@@ -1686,7 +1711,7 @@ class iam(object):
             "name" : "Ensure Access Keys are Protected with MFA",
             "affected": [],
             "analysis" : "",
-            "description" : 'The account does not appear to enforce the use of MFA when authenticating with Access Keys. AWS Access Keys are often exposed to unauthorised parties in source code or via and other poor key management practices, once an attacker has obtained the plain text keys these can be used to acces the AWS account without restriction. For greater defence in depth it is recomended to configure an IAM policy which enforces the use of MFA before any administrative actions can be performed.',
+            "description" : 'The account does not appear to enforce the use of MFA when authenticating with Access Keys. AWS Access Keys are often exposed to unauthorised parties in source code or via and other poor key management practices, once an attacker has obtained the plain text keys these can be used to access the AWS account without restriction. For greater defence in depth it is recommended to configure an IAM policy which enforces the use of MFA before any administrative actions can be performed.',
             "remediation" : 'Create an IAM policy for all users which enforces the use of MFA to perform any administrative actions.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_users-self-manage-mfa-and-creds.html',
             "impact" : "high",
             "probability" : "medium",
@@ -1770,8 +1795,208 @@ class iam(object):
             results["analysis"] = "MFA Policy Found"
             results["pass_fail"] = "PASS"
         else:
-            results["analysis"] = "Acces Keys are not secured with MFA, no policy enforcing MFA usage was found."
+            results["analysis"] = "Access Keys are not secured with MFA, no policy enforcing MFA usage was found."
             results["pass_fail"] = "FAIL"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def iam_32(self):
+        # Ensure access to AWSCloudShellFullAccess is restricted (CIS)
+
+        results = {
+            "id" : "iam_32",
+            "ref" : "1.22",
+            "compliance" : "cis",
+            "level" : 1,
+            "service" : "iam",
+            "name" : "Ensure access to AWSCloudShellFullAccess is restricted (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "AWS CloudShell is a convenient way of running CLI commands against AWS services; a managed IAM policy ('AWSCloudShellFullAccess') provides full access to CloudShell, which allows file upload and download capability between a user's local system and the CloudShell environment. Within the CloudShell environment a user has sudo permissions, and can access the internet. So it is feasible to install file transfer software (for example) and move data from CloudShell to external internet servers.\nAccess to this policy should be restricted as it presents a potential channel for data exfiltration by malicious cloud admins that are given full permissions to the service. AWS documentation describes how to create a more restrictive IAM policy which denies file transfer permissions.",
+            "remediation" : "From Console\n1. Open the IAM console at https://console.aws.amazon.com/iam/\n2. In the left pane, select Policies\n3. Search for and select AWSCloudShellFullAccess\n4. On the Entities attached tab, for each item, check the box and select Detach",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for policy in self.aws_policies:
+            
+            if policy["PolicyName"] == "AWSCloudShellFullAccess":
+
+                if policy["AttachmentCount"] != 0:
+                    results["analysis"] = "AWSCloudShellFullAccess Policy is attached"
+                    results["affected"].append(self.account_id)
+                    results["pass_fail"] = "FAIL"
+                else:
+                    results["analysis"] = "AWSCloudShellFullAccess Policy is not attached to any entities"
+                    results["affected"].append(self.account_id)
+                    results["pass_fail"] = "PASS"
+                
+        return results
+
+
+
+    def iam_33(self):
+        # Ensure there are no Lambda functions with admin privileges within your AWS account (CIS)
+
+        results = {
+            "id" : "iam_33",
+            "ref" : "4.9",
+            "compliance" : "cis_compute",
+            "level" : 1,
+            "service" : "lambda",
+            "name" : "Ensure there are no Lambda functions with admin privileges within your AWS account (CIS)",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Ensure that your Amazon Lambda functions don't have administrative permissions potentially giving the function access to all AWS cloud services and resources. In order to promote the Principle of Least Privilege (POLP) and provide your functions the minimal amount of access required to perform their tasks the right IAM execution role associated with the function should be used. Instead of providing administrative permissions you should grant the role the necessary permissions that the function really needs.",
+            "remediation" : "From the Console\n1. Login in to the AWS Console using https://console.aws.amazon.com/lambda/\n2. In the left column, under AWS Lambda, click Functions.\n3. Under Function name click on the name of the function that you want to remediate\n4. Click the Configuration tab\n5. Click on Permissions in the left column.\n6. In the Execution role section, click the Edit\n7. Edit basic settings configuration page:\n- associate the function with an existing, compliant IAM role\n- click Use an existing role from the Execution role\n- select the required role from the Existing role dropdown\n- click Save\nOR\n- apply a new execution role to your Lambda function\n- click Create a new role from AWS policy templates\n- Provide a name for the new role based on org policy\n- select only the necessary permission set(s) from the Policy templates - optional dropdown list.\n- click Save\n8. Repeat steps for each Lambda function within the current region that failed the Audit.",
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_score" : "8.1",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        function_roles = {}
+        admin_policies = []
+
+        logging.info("getting lambda functions")
+        for region in self.regions:
+            client = self.session.client('lambda', region_name=region)
+            try:
+                functions = client.list_functions()["Functions"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting functions - %s" % e.response["Error"]["Code"])
+            else:
+                for function in functions:
+                    function_roles[function["FunctionName"]] = function["Role"]
+
+
+        # AWS Managed Policies
+        logging.info("getting aws managed policies")
+        for policy in self.aws_attached_policies:
+
+            arn = policy["Arn"]
+            policy_name = policy["PolicyName"]
+            #policy_id = policy["PolicyId"]
+            version_id = policy["DefaultVersionId"]        
+            try:
+                statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+            else:
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    admin_policies.append(arn)
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        # Customer Managed Policies
+        logging.info("getting customer managed policies")
+        for policy in self.customer_attached_policies:
+
+            arn = policy["Arn"]
+            policy_name = policy["PolicyName"]
+            #policy_id = policy["PolicyId"]
+            version_id = policy["DefaultVersionId"]        
+            try:
+                statements = self.client.get_policy_version(PolicyArn=arn, VersionId=version_id)["PolicyVersion"]["Document"]["Statement"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+            else:
+                if type(statements) is not list:
+                    statements = [ statements ]
+
+                for statement in statements:
+                    try:
+                        if statement["Effect"] == "Allow":
+                            if statement["Action"] == "*":
+                                if statement["Resource"] == "*":
+                                    admin_policies.append(arn)
+                    except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                        pass
+
+        # Inline User Policies
+        logging.info("getting inline user policies")
+        for user in self.users:
+            try:
+                inline_policies = self.client.list_user_policies(UserName=user["UserName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
+                    try:
+                        policy = self.client.get_user_policy(PolicyName=policy_name, UserName=user["UserName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline user policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            admin_policies.append(arn)
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
+
+        # Inline Group Policeis
+        logging.info("getting inline group policies")
+        for group in self.groups:
+            try:
+                inline_policies = self.client.list_group_policies(GroupName=group["Group"]["GroupName"])["PolicyNames"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+            else:
+                for policy_name in inline_policies:
+                    try:
+                        policy = self.client.get_group_policy(PolicyName=policy_name, GroupName=group["Group"]["GroupName"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting inline group policies - %s" % e.response["Error"]["Code"])
+                    else:
+                        statements = policy["PolicyDocument"]["Statement"]
+                        if type(statements) is not list:
+                            statements = [ statements ]
+                        for statement in statements:
+                            try:
+                                if statement["Effect"] == "Allow":
+                                    if statement["Action"] == "*":
+                                        if statement["Resource"] == "*":
+                                            admin_policies.append(arn)
+                            except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
+                                pass
+
+        for name in function_roles:
+            try:
+               attached_policies = self.client.list_attached_role_policies(RoleName=function_roles[name].split("/")[-1])["AttachedPolicies"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting attached role policies - %s" % e.response["Error"]["Code"])
+            else:
+                for attached_policy in attached_policies:
+                    if attached_policy["PolicyArn"] in admin_policies:
+                        results["affected"].append(name)
+
+        if results["affected"]:
+            results["analysis"] = "The affected lambda functions are granted admin access."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No Admin Lambda Functions Found."
+            results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 
         return results
