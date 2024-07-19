@@ -2,6 +2,8 @@ Snotra
 ======
 Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS and Azure) Auditing Tool whihc will check your accounts against a list of common issues and compliance standards including the CIS benchmark. Snotra produces a results.json file that can be easily incorporated into existing reporting workflows.
 
+AWS is on the main branch, Azure is on this branch.
+
 permissions
 ===========
 The user account or service principal will need to have the "reader" role in Azure RBAC at the subscription level.
@@ -40,22 +42,47 @@ snotra checks
 -------------
 Additional checks beyond the CIS benchmark
 
-- Resource Groups
-- ALl Resources
-- Resource Types
-- Public IP Addresses
-- Unused Public IP Addresses
-- Virtual Machines
-- Unencrpyted Disks
-- Disks With Public Network Access Enabled
-- Unattached Disks
-- Virtual Machines With User Data
-- Azure App Services
-- App Services Lacking Network Access Restrictions
-- Web Apps With Managed Identity Assigned
-- Web Apps With Remote Debugging Enabled
-- App Services Without Always On Enabled
-- Storage Accounts
+- "Azure App Services",
+- "App Services Lacking Network Access Restrictions",
+- "Web Apps With Managed Identity Assigned",
+- "Web Apps With Remote Debugging Enabled",
+- "App Services Without Always On Enabled",
+- "Virtual Machines",
+- "Unencrpyted Disks",
+- "Disks With Public Network Access Enabled",
+- "Unattached Disks",
+- "Virtual Machines With User Data",
+- "Stopped Virtual Machines",
+- "Snapshots With Public Network Access Enabled",
+- "Old Snapshots",
+- "Unencrypted Snapshots",
+- "Key Based SSH Authentication Not Enforced",
+- "Ensure that 'Public Network Access' is `Disabled' for Container Registries",
+- "Ensure that 'Public Network Access' is `Disabled' for AKS Clusters",
+- "Outdated/Unsuported Version of Kubernetes In Use",
+- "Ensure that 'Public Network Access' is `Disabled' for Event Hub Namespaces",
+- "Event Hubs Without Entra ID Authentication (Manual)",
+- "Privileged Identity Management (Manual)",
+- "Ensure 'Self service password reset enabled' is set to 'All'",
+- "Shadow Admin via Highly Privileged Service Principal (via Role Assignment)",
+- "Service Principals with Directory Roles (Manual)",
+- "Cloud Application And Application Administrators",
+- "Azure Key Vaults",
+- "Key Vault Lacking Network Access Restrictions",
+- "Ensure that 'Public Network Access' is `Disabled' for MySQL servers",
+- "Unused Public IP Addresses",
+- "Unused Network Security Groups",
+- "Ensure that 'Public Network Access' is `Disabled' for postgresql servers",
+- "Resource Groups",
+- "All Resources",
+- "Resource Types",
+- "Secure Score",
+- "Ensure the Minimum TLS version for SQL Servers is set to Version 1.2",
+- "Ensure that 'Public Network Access' is `Disabled' for sql servers",
+- "SQL Servers with Managed Identity Attached",
+- "Storage Account Allows Anonymous/Public Container Access",
+- "Storage Account Allows Anonymous/Public Blob Access",
+- "Ensure the Minimum TLS version for Cosmos DB Accounts is set to Version 1.2",
 
 results JSON
 ============
