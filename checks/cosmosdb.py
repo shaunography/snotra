@@ -70,7 +70,7 @@ class cosmosdb(object):
         findings = []
         findings += [ self.cosmosdb_1() ]
         findings += [ self.cosmosdb_2() ]
-        #findings += [ self.cosmosdb_3() ] # WIP
+        findings += [ self.cosmosdb_3() ]
         findings += [ self.cosmosdb_4() ]
         return findings
 
@@ -187,14 +187,14 @@ class cosmosdb(object):
 
         for subscription, accounts in self.accounts.items():
             for account in accounts:
-                if account.public_network_access == "Enabled":
+                if account.private_endpoint_connections == None:
                     results["affected"].append(account.name)
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
-            results["analysis"] = "the affected cosmos db accounts allow public network access."
+            results["analysis"] = "the affected cosmos db accounts are not using private endpoints."
         elif self.accounts:
-            results["analysis"] = "public network access is not allowed"
+            results["analysis"] = "private endpoints are in use"
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no cosmos db accounts in use"
