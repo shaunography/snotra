@@ -83,6 +83,7 @@ Additional checks beyond the CIS benchmark
 - "Storage Account Allows Anonymous/Public Container Access",
 - "Storage Account Allows Anonymous/Public Blob Access",
 - "Ensure the Minimum TLS version for Cosmos DB Accounts is set to Version 1.2",
+- "Secrets in Resource Group Deployment History (Manual)"
 
 results JSON
 ============
