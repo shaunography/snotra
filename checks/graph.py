@@ -933,7 +933,6 @@ class graph(object):
             logging.error(f'error getting authorization policy: , error: { e }')
         else:
             if response.status_code == 200:
-                print(response.json()["allowInvitesFrom"])
                 if response.json()["allowInvitesFrom"] == "none":
                     results["affected"].append(self.tenant)
                     results["pass_fail"] = "PASS"
