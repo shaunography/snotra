@@ -100,6 +100,7 @@ class app_service(object):
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "no web apps found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -149,6 +150,7 @@ class app_service(object):
             results["analysis"] = "app service authentication is in use"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -188,6 +190,7 @@ class app_service(object):
             results["analysis"] = "web apps have https_only enabled"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
 
         return results
@@ -228,6 +231,7 @@ class app_service(object):
             results["analysis"] = "web apps do not have public network access enabled"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -267,6 +271,7 @@ class app_service(object):
             results["analysis"] = "web apps are using the latest TLS version"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -306,6 +311,7 @@ class app_service(object):
             results["analysis"] = "web apps are using managed identities"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -358,6 +364,7 @@ class app_service(object):
             results["analysis"] = "web apps are using supported runtimes"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -397,6 +404,7 @@ class app_service(object):
             results["analysis"] = "web apps have http 2.0 enabled"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -437,6 +445,7 @@ class app_service(object):
             results["analysis"] = "web apps have FTPS only enabled"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -484,6 +493,7 @@ class app_service(object):
             results["analysis"] = "web apps are not using managed identities"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -523,6 +533,7 @@ class app_service(object):
             results["analysis"] = "remote debugging is not enabled on any web apps"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -562,6 +573,7 @@ class app_service(object):
             results["analysis"] = "web apps have always on enabled"
         else:
             results["analysis"] = "no web apps in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
