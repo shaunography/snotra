@@ -72,6 +72,7 @@ class keyvault(object):
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "no key vaults found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -112,6 +113,7 @@ class keyvault(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no key vaults found"
+            results["pass_fail"] = "N/A"
 
 
         return results
@@ -153,6 +155,7 @@ class keyvault(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no key vaults found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -192,6 +195,7 @@ class keyvault(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no key vaults found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -231,5 +235,6 @@ class keyvault(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no key vaults found"
+            results["pass_fail"] = "N/A"
 
         return results

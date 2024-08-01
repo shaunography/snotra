@@ -181,6 +181,7 @@ class mysql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Mysql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -221,6 +222,7 @@ class mysql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Mysql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -261,6 +263,7 @@ class mysql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Mysql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -302,6 +305,7 @@ class mysql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Mysql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -309,8 +313,8 @@ class mysql(object):
         # Ensure server parameter 'audit_log_events' has 'CONNECTION' set for MySQL Database Server (CIS)
 
         results = {
-            "id" : "mysql_4",
-            "ref" : "4.4.3",
+            "id" : "mysql_5",
+            "ref" : "4.4.4",
             "compliance" : "cis_v2.1.0",
             "level" : "N/A",
             "service" : "mysql",
@@ -343,5 +347,6 @@ class mysql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Mysql servers found"
+            results["pass_fail"] = "N/A"
 
         return results

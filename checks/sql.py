@@ -180,6 +180,7 @@ class sql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no sql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -224,6 +225,7 @@ class sql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no sql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -263,6 +265,7 @@ class sql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no sql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -305,6 +308,7 @@ class sql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no sql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -344,6 +348,7 @@ class sql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no sql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -384,6 +389,7 @@ class sql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no sql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -430,6 +436,7 @@ class sql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no sql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 

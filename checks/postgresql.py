@@ -211,6 +211,7 @@ class postgresql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -259,6 +260,7 @@ class postgresql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -307,6 +309,7 @@ class postgresql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -355,6 +358,7 @@ class postgresql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -403,6 +407,7 @@ class postgresql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -451,6 +456,7 @@ class postgresql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -497,5 +503,6 @@ class postgresql(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no Postgresql servers found"
+            results["pass_fail"] = "N/A"
 
         return results

@@ -122,8 +122,8 @@ class security(object):
 
         results = {
             "id" : "security_1",
-            "ref" : "cis",
-            "compliance" : "2.1.1-11",
+            "ref" : "2.1.1-11",
+            "compliance" : "cis",
             "level" : 1,
             "service" : "security",
             "name" : "Defender For Cloud (CIS)",

@@ -491,19 +491,6 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        url = f"https://graph.microsoft.com/v1.0/identity/b2xUserFlows"
-        try:
-            response = requests.get(url, headers=self.headers)
-        except Exception as e:
-            logging.error(f'error getting mfa policies: , error: { e }')
-        else:
-            if response.status_code == 200:
-                print(response)
-            elif response.status_code == 403:
-                logging.error(f'error getting mfa policies: , access denied. Policy.Read.All, IdentityUserFlow.Read.All required.')
-            else:
-                logging.error(f'error getting mfs polcies: { response.status_code }')
-
         results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check -From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Registration\n6. Ensure that Number of days before users are asked to re-confirm their\nauthentication information is not set to 0 "
         results["pass_fail"] = "INFO"
@@ -538,22 +525,17 @@ class graph(object):
             if not self.conditional_access_policies:
                 results["affected"].append(self.tenant)
                 results["analysis"] = "No conditional access policies in use"
+                results["pass_fail"] = "FAIL"
             else:
-                for policy in self.conditional_access_policies:
-                    results["affected"].append(self.tenant)
-                    print(policy)
+                results["analysis"] = self.conditional_access_policies
         else:
             results["analysis"] = "Azure AD Premium not in use"
-
-
-        if results["affected"]:
-            results["pass_fail"] = "FAIL"
+            results["pass_fail"] = "N/A"
 
         return results
 
-
     def graph_6(self):
-        # Ensure that 'Restrict non-admin users from creating tenants' is set to 'Yes' (Manual)
+        # Ensure that 'Restrict non-admin users from creating tenants' is set to 'Yes' (CIS)
 
         results = {
             "id" : "graph_6",
@@ -561,7 +543,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure that 'Restrict non-admin users from creating tenants' is set to 'Yes' (CIS)(Manual)(1.3)",
+            "name" : "Ensure that 'Restrict non-admin users from creating tenants' is set to 'Yes' (CIS)",
             "affected": [],
             "analysis" : [],
             "description" : "Require administrators or appropriately delegated users to create new tenants. It is recommended to only allow an administrator to create new tenants. This prevent users from creating new Microsoft Entra ID or Azure AD B2C tenants and ensures that only authorized users are able to do so. Enforcing this setting will ensure that only authorized users are able to create new tenants.",
@@ -575,9 +557,32 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"].append(self.tenant)
-        results["analysis"] = "Manual Check\n1. From Azure Home select the Portal Menu \n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Restrict non-admin users from creating tenants is set to Yes"
-        results["pass_fail"] = "INFO"
+        url = f"https://graph.microsoft.com/v1.0/policies/authorizationPolicy"
+        try:
+            response = requests.get(url, headers=self.headers)
+        except Exception as e:
+            logging.error(f'error getting mfa policies: , error: { e }')
+        else:
+            if response.status_code == 200:
+                if response.json()["defaultUserRolePermissions"]["allowedToCreateTenants"] == True:
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "FAIL"
+                    results["analysis"] = "non-admin users are not resitricted from creating tenants"
+                else:
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "PASS"
+                    results["analysis"] = "non-admin users are resitricted from creating tenants"
+
+            elif response.status_code == 403:
+                logging.error(f'error getting mfa policies: , access denied. Policy.Read.All, IdentityUserFlow.Read.All required.')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "Manual Check\n1. From Azure Home select the Portal Menu \n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Restrict non-admin users from creating tenants is set to Yes"
+                results["pass_fail"] = "INFO"
+            else:
+                logging.error(f'error getting mfs polcies: { response.status_code }')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "Manual Check\n1. From Azure Home select the Portal Menu \n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Restrict non-admin users from creating tenants is set to Yes"
+                results["pass_fail"] = "INFO"
 
         return results
 
@@ -636,20 +641,6 @@ class graph(object):
         }
 
         logging.info(results["name"]) 
-
-        #url = f"https://graph.microsoft.com/v1.0/policies/authenticationMethodsPolicy"
-        #try:
-            #response = requests.get(url, headers=self.headers)
-        #except Exception as e:
-            #logging.error(f'error getting authentication methods policy: , error: { e }')
-        #else:
-            #if response.status_code == 200:
-                #for config in response.json()["authenticationMethodConfigurations"]:
-                    #print(config)
-            #elif response.status_code == 403:
-                #logging.error(f'error getting authentication methods policy: , access denied. Policy.Read.All required')
-            #else:
-                #logging.error(f'error getting mfs polcies: { response.status_code }')
 
         results["affected"].append(self.tenant)
         results["analysis"] = "Manual Check\nFrom Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Authentication methods\n6. Ensure that Number of methods required to reset is set to 2"
@@ -840,7 +831,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
-            "name" : "Ensure That ‘Users Can Register Applications’ Is Set to ‘No’ (CIS)(Manual)(1.13)",
+            "name" : "Ensure That ‘Users Can Register Applications’ Is Set to ‘No’ (CIS)",
             "affected": [],
             "analysis" : [],
             "description" : "Require administrators or appropriately delegated users to register third-party applications. \nIt is recommended to only allow an administrator to register custom-developed applications. This ensures that the application undergoes a formal security review and approval process prior to exposing Microsoft Entra ID data. Certain users like developers or other high-request users may also be delegated permissions to prevent them from waiting on an administrative user. Your organization should review your policies and decide your needs. \nEnforcing this setting will create additional requests for approval that will need to be addressed by an administrator. If permissions are delegated, a user may approve a malevolent third party application, potentially giving it access to your data.",
@@ -854,9 +845,32 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"].append(self.tenant)
-        results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Users can register applications is set to No"
-        results["pass_fail"] = "INFO"
+        url = f"https://graph.microsoft.com/v1.0/policies/authorizationPolicy"
+        try:
+            response = requests.get(url, headers=self.headers)
+        except Exception as e:
+            logging.error(f'error getting mfa policies: , error: { e }')
+        else:
+            if response.status_code == 200:
+                if response.json()["defaultUserRolePermissions"]["allowedToCreateApps"] == True:
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "FAIL"
+                    results["analysis"] = "users can register applications"
+                else:
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "PASS"
+                    results["analysis"] = "users can not register applications"
+
+            elif response.status_code == 403:
+                logging.error(f'error getting mfa policies: , access denied. Policy.Read.All, IdentityUserFlow.Read.All required.')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Users can register applications is set to No"
+                results["pass_fail"] = "INFO"
+            else:
+                logging.error(f'error getting mfs polcies: { response.status_code }')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Users can register applications is set to No"
+                results["pass_fail"] = "INFO"
 
         return results
 
@@ -912,14 +926,42 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"].append(self.tenant)
-        results["analysis"] = "From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then External Identities\n4. External collaboration settings\n5. Under Guest invite settings, for Guest invite restrictions, ensure that that Only users assigned to specific admin roles can invite guest users is selected"
-        results["pass_fail"] = "INFO"
+        url = f"https://graph.microsoft.com/v1.0/policies/authorizationPolicy"
+        try:
+            response = requests.get(url, headers=self.headers)
+        except Exception as e:
+            logging.error(f'error getting authorization policy: , error: { e }')
+        else:
+            if response.status_code == 200:
+                print(response.json()["allowInvitesFrom"])
+                if response.json()["allowInvitesFrom"] == "none":
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "PASS"
+                    results["analysis"] = "Guest invitations are not allowed"
+                elif response.json()["allowInvitesFrom"] == "adminsAndGuestInviters":
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "PASS"
+                    results["analysis"] = "only admins can invite guests into the directory"
+                else:
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "FAIL"
+                    results["analysis"] = "guest invitations are not restricted to specific admin roles"
+
+            elif response.status_code == 403:
+                logging.error(f'error getting mfa policies: , access denied. Policy.Read.All, IdentityUserFlow.Read.All required.')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Users can register applications is set to No"
+                results["pass_fail"] = "INFO"
+            else:
+                logging.error(f'error getting mfs polcies: { response.status_code }')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "Manual Check From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Select User settings\n5. Ensure that Users can register applications is set to No"
+                results["pass_fail"] = "INFO"
 
         return results
 
     def graph_19(self):
-        # Ensure that 'Guest invite restrictions' is set to "Only users assigned to specific admin roles can invite guest users" (CIS)
+        # Ensure That 'Restrict access to Microsoft Entra admin center' is Set to 'Yes' (CIS)(Manual)
 
         results = {
             "id" : "graph_19",
@@ -977,7 +1019,7 @@ class graph(object):
         return results
 
     def graph_21(self):
-        # Ensure that 'Guest invite restrictions' is set to "Only users assigned to specific admin roles can invite guest users" (CIS)
+        # Ensure that 'Users can create security groups in Azure portals, API or PowerShell' is set to 'No' (CIS)
 
         results = {
             "id" : "graph_21",
@@ -985,7 +1027,7 @@ class graph(object):
             "compliance" : "cis_v2.1.0",
             "level" : 2,
             "service" : "graph",
-            "name" : "Ensure that 'Users can create security groups in Azure portals, API or PowerShell' is set to 'No' (CIS)(Manual)(1.18)",
+            "name" : "Ensure that 'Users can create security groups in Azure portals, API or PowerShell' is set to 'No' (CIS)",
             "affected": [],
             "analysis" : [],
             "description" : "Restrict security group creation to administrators only. \nWhen creating security groups is enabled, all users in the directory are allowed to create new security groups and add members to those groups. Unless a business requires this day-to-day delegation, security group creation should be restricted to administrators only. \nEnabling this setting could create a number of requests that would need to be managed by an administrator.",
@@ -999,9 +1041,32 @@ class graph(object):
 
         logging.info(results["name"]) 
 
-        results["affected"].append(self.tenant)
-        results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Groups\n4. Select General under Settings\n5. Ensure that Users can create security groups in Azure portals, API or PowerShell is set to No"
-        results["pass_fail"] = "INFO"
+        url = f"https://graph.microsoft.com/v1.0/policies/authorizationPolicy"
+        try:
+            response = requests.get(url, headers=self.headers)
+        except Exception as e:
+            logging.error(f'error getting mfa policies: , error: { e }')
+        else:
+            if response.status_code == 200:
+                if response.json()["defaultUserRolePermissions"]["allowedToCreateSecurityGroups"] == True:
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "FAIL"
+                    results["analysis"] = "users can create security groups"
+                else:
+                    results["affected"].append(self.tenant)
+                    results["pass_fail"] = "PASS"
+                    results["analysis"] = "users can not create security groups"
+
+            elif response.status_code == 403:
+                logging.error(f'error getting mfa policies: , access denied. Policy.Read.All, IdentityUserFlow.Read.All required.')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Groups\n4. Select General under Settings\n5. Ensure that Users can create security groups in Azure portals, API or PowerShell is set to No"
+                results["pass_fail"] = "INFO"
+            else:
+                logging.error(f'error getting mfs polcies: { response.status_code }')
+                results["affected"].append(self.tenant)
+                results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Groups\n4. Select General under Settings\n5. Ensure that Users can create security groups in Azure portals, API or PowerShell is set to No"
+                results["pass_fail"] = "INFO"
 
         return results
 

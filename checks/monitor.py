@@ -106,7 +106,7 @@ class monitor(object):
         for subscription, diagnostic_settings in self.diagnostic_settings.items():
             if not diagnostic_settings:
                 results["affected"].append(subscription)
-                results["analysis"] = "the subscription does not have diagnostic settings configured for any resource"
+                results["analysis"].append(f"the subscription ({ subscription }) does not have diagnostic settings configured for any resource")
             else:
                 subscription_settings = False
                 for diagnostic_setting in diagnostic_settings:
@@ -214,6 +214,7 @@ class monitor(object):
             results["affected"] = list(set(results["affected"]))
         else:
             results["analysis"] = "no issues found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -254,33 +255,37 @@ class monitor(object):
         }
 
         for subscription, activity_log_alerts in self.activity_log_alerts.items():
-            for alert in activity_log_alerts:
-                for condition in alert.condition.all_of:
-                    if condition.equals == "Operationname=Microsoft.Authorization/policyAssignments/write":
-                        rules["network_security_group_write"] = True
-                    if condition.equals == "Operationname=Microsoft.Authorization/policyAssignments/delete":
-                        rules["network_security_group_write"] = True
-                    if condition.equals == "Microsoft.Network/networkSecurityGroups/write":
-                        rules["network_security_group_write"] = True
-                    if condition.equals == "Microsoft.Network/networkSecurityGroups/delete":
-                        rules["network_security_group_delete"] = True
-                    if condition.equals == "Operationname=Microsoft.Security/securitySolutions/write":
-                        rules["network_security_group_delete"] = True
-                    if condition.equals == "Operationname=Microsoft.Security/securitySolutions/delete":
-                        rules["network_security_group_delete"] = True
-                    if condition.equals == "Operationname=Microsoft.Sql/servers/firewallRules/write":
-                        rules["network_security_group_delete"] = True
-                    if condition.equals == "Operationname=Microsoft.Sql/servers/firewallRules/delete":
-                        rules["network_security_group_delete"] = True
-                    if condition.equals == "Operationname=Microsoft.Network/publicIPAddresses/write":
-                        rules["network_security_group_delete"] = True
-                    if condition.equals == "Operationname=Microsoft.Network/publicIPAddresses/delete":
-                        rules["network_security_group_delete"] = True
+            if not activity_log_alerts:
+                results["affected"].append(subscription)
+                results["analysis"].append(f"the subscription ({ subscription }) does not have activity log alerts configured")
+            else:
+                for alert in activity_log_alerts:
+                    for condition in alert.condition.all_of:
+                        if condition.equals == "Operationname=Microsoft.Authorization/policyAssignments/write":
+                            rules["network_security_group_write"] = True
+                        if condition.equals == "Operationname=Microsoft.Authorization/policyAssignments/delete":
+                            rules["network_security_group_write"] = True
+                        if condition.equals == "Microsoft.Network/networkSecurityGroups/write":
+                            rules["network_security_group_write"] = True
+                        if condition.equals == "Microsoft.Network/networkSecurityGroups/delete":
+                            rules["network_security_group_delete"] = True
+                        if condition.equals == "Operationname=Microsoft.Security/securitySolutions/write":
+                            rules["network_security_group_delete"] = True
+                        if condition.equals == "Operationname=Microsoft.Security/securitySolutions/delete":
+                            rules["network_security_group_delete"] = True
+                        if condition.equals == "Operationname=Microsoft.Sql/servers/firewallRules/write":
+                            rules["network_security_group_delete"] = True
+                        if condition.equals == "Operationname=Microsoft.Sql/servers/firewallRules/delete":
+                            rules["network_security_group_delete"] = True
+                        if condition.equals == "Operationname=Microsoft.Network/publicIPAddresses/write":
+                            rules["network_security_group_delete"] = True
+                        if condition.equals == "Operationname=Microsoft.Network/publicIPAddresses/delete":
+                            rules["network_security_group_delete"] = True
 
-            for rule, status in rules.items():
-                if status == False:
-                    results["analysis"].append(f"no activity log alert rules found for { rule }")
-                    results["affected"].append(subscription)
+                for rule, status in rules.items():
+                    if status == False:
+                        results["analysis"].append(f"no activity log alert rules found for { rule }")
+                        results["affected"].append(subscription)
 
                 #Operationname=Microsoft.Authorization/policyAssignments/write
                 #Operationname=Microsoft.Authorization/policyAssignments/delete
@@ -298,5 +303,6 @@ class monitor(object):
             results["affected"] = list(set(results["affected"]))
         else:
             results["analysis"] = "no issues found"
+            results["pass_fail"] = "N/A"
 
         return results

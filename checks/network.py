@@ -164,6 +164,7 @@ class network(object):
                 results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "no virtual machines in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -197,6 +198,7 @@ class network(object):
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "no public ip addresses found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -236,6 +238,7 @@ class network(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no public ip addresses in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -275,6 +278,7 @@ class network(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no network security groups in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -314,6 +318,7 @@ class network(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no network security groups in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -354,6 +359,7 @@ class network(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no flow logs in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -445,5 +451,6 @@ class network(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no network security groups in use"
+            results["pass_fail"] = "N/A"
 
         return results

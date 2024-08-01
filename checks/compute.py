@@ -149,6 +149,7 @@ class compute(object):
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "no virtual machines found"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -195,6 +196,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no virtual machines in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -234,6 +236,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -273,6 +276,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -312,6 +316,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -351,6 +356,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -387,10 +393,11 @@ class compute(object):
             results["analysis"] = "the affected unattached disks are not encrypted with a customer managed key (cmk)"
             results["pass_fail"] = "FAIL"
         elif self.disks:
-            results["analysis"] = "no unenvrypted unattached disks found"
+            results["analysis"] = "no encrypted unattached disks found"
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -428,6 +435,7 @@ class compute(object):
             results["pass_fail"] = "INFO"
         else:
             results["analysis"] = "no virtual machines in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -469,6 +477,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no virtual machines in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -514,10 +523,11 @@ class compute(object):
             results["pass_fail"] = "FAIL"
             results["analysis"] = "the affected virtual machines are in a stopped but not deallocated state"
         elif self.virtual_machines:
-            results["analysis"] = "no virtual machines in use"
+            results["analysis"] = "no stopped virtual machines found"
             results["pass_fail"] = "PASS"
         else:
-            results["analysis"] = "no stopped virtual machines found"
+            results["analysis"] = "no virtual machines in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -557,6 +567,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no snapshots in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -597,6 +608,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no snapshots in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -637,6 +649,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no snapshots in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -676,6 +689,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no disks in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -719,6 +733,7 @@ class compute(object):
             results["pass_fail"] = "PASS"
         else:
             results["analysis"] = "no virtual machines in use"
+            results["pass_fail"] = "N/A"
 
         return results
 

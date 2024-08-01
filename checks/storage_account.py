@@ -114,6 +114,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts enforce secure transfer"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -153,6 +154,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts are using infrastructure encryption"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -200,6 +202,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts are access keys that have been recently rotated"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -239,6 +242,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts do not have public network access enabled"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -280,6 +284,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts do not allow access from all networks"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -319,6 +324,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts allow access from azure services"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -360,6 +366,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts have private endpoint connections configured"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -395,7 +402,7 @@ class storage_account(object):
         return results
 
     def storage_account_10(self):
-        # Ensure that Shared Access Signature Tokens Expire Within an Hour (CIS)(Manual)
+        # Ensure Storage for Critical Data are Encrypted with Customer Managed Keys (CMK) (CIS)(Manual)
 
         results = {
             "id" : "storage_account_10",
@@ -461,6 +468,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts are using TLS version 1.2"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -500,6 +508,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts do not have cross tenant replication enabled"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -539,6 +548,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts do not allow blob public access"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -589,6 +599,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts do not allow container public access"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
 
@@ -638,9 +649,7 @@ class storage_account(object):
             results["analysis"] = "storage acounts do not allow blob public access"
         else:
             results["analysis"] = "no storage accounts in use"
+            results["pass_fail"] = "N/A"
 
         return results
-
-
-
 
