@@ -112,9 +112,12 @@ class iam(object):
         except:
             logging.info("Generating Credential Report")
             while True:
-                if self.client.generate_credential_report()["State"] == "COMPLETE":
-                    return self.client.get_credential_report()
-                time.sleep(3)
+                try:
+                    if self.client.generate_credential_report()["State"] == "COMPLETE":
+                        return self.client.get_credential_report()
+                    time.sleep(3)
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting credential report - %s" % e.response["Error"]["Code"])
 
     def get_password_policy(self):
         try:
