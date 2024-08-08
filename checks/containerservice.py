@@ -37,7 +37,10 @@ class containerservice(object):
         findings = []
         findings += [ self.containerservice_1() ]
         findings += [ self.containerservice_2() ]
+        findings += [ self.containerservice_3() ]
+        #findings += [ self.containerservice_4() ]
         return findings
+
 
     def containerservice_1(self):
         # Ensure that 'Public Network Access' is `Disabled' for EKS clusters
@@ -119,3 +122,84 @@ class containerservice(object):
 
         return results
 
+    def containerservice_3(self):
+        # local accounts
+
+        results = {
+            "id" : "containerservice_3",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "containerservice",
+            "name" : "Local Accounts",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Local account access is enabled on the affected clusters. When you deploy an AKS cluster, local accounts are enabled by default. Even when you enable RBAC or Microsoft Entra integration, --admin access still exists as a non-auditable backdoor option. It is recomended to remove all local account access and use Entra ID RBAC integraton.",
+            "remediation" : "Disable local account cluster access.\nMore information:\nhttps://learn.microsoft.com/en-us/azure/aks/manage-local-accounts-managed-azure-ad",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "5.4",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, resource_groups in self.clusters.items():
+            for resource_group, clusters in resource_groups.items():
+                for cluster in clusters:
+                    if cluster.disable_local_accounts != True:
+                        results["affected"].append(cluster.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = "the affected clusters allow local kubernetes user accounts"
+        elif self.clusters:
+            results["analysis"] = "AKS clusters do not allow local accounts"
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no clusters found"
+
+        return results
+
+    def containerservice_4(self):
+        # local accounts
+
+        results = {
+            "id" : "containerservice_3",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "containerservice",
+            "name" : "RBAC??",
+            "affected": [],
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N",
+            "cvss_score" : "5.4",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        for subscription, resource_groups in self.clusters.items():
+            for resource_group, clusters in resource_groups.items():
+                for cluster in clusters:
+                    print("cluster")
+                    print(cluster)
+                    if cluster.enable_rbac != True: 
+                        results["affected"].append(cluster.name)
+
+        if results["affected"]:
+            results["pass_fail"] = "FAIL"
+            results["analysis"] = ""
+        elif self.clusters:
+            results["analysis"] = ""
+            results["pass_fail"] = "PASS"
+        else:
+            results["analysis"] = "no clusters found"
+
+        return results
