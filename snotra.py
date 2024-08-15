@@ -40,6 +40,7 @@ from checks.autoscaling import autoscaling
 from checks.secretsmanager import secretsmanager
 from checks.elasticbeanstalk import elasticbeanstalk
 from checks.batch import batch
+from checks.autoscaling import autoscaling
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -144,6 +145,7 @@ def main():
         results["findings"] += athena(session).run()
         results["findings"] += resourcegroupstaggingapi(session).run()
         results["findings"] += apigateway(session).run()
+        results["findings"] += autoscaling(session).run()
 
         #results["findings"] += secretsmanager(session).run()
         #results["findings"] += batch(session).run()
