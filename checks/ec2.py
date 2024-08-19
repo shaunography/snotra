@@ -23,6 +23,10 @@ class ec2(object):
         self.vpcs = self.get_vpcs()
         self.vpc_endpoints = self.get_vpc_endpoints()
         self.images = self.get_images()
+        self.subnets = self.get_subnets()
+        self.transit_gateways = self.get_transit_gateways()
+        self.transit_gateway_attachments = self.get_transit_gateway_attachments()
+        self.transit_gateway_route_tables = self.get_transit_gateway_route_tables()
 
     def run(self):
         findings = []
@@ -61,6 +65,13 @@ class ec2(object):
         findings += [ self.ec2_33() ]
         findings += [ self.ec2_34() ]
         findings += [ self.ec2_35() ]
+        findings += [ self.ec2_36() ]
+        findings += [ self.ec2_37() ]
+        findings += [ self.ec2_38() ]
+        findings += [ self.ec2_39() ]
+        findings += [ self.ec2_40() ]
+        findings += [ self.ec2_41() ]
+        findings += [ self.ec2_42() ]
         return findings
 
     def cis(self):
@@ -186,6 +197,50 @@ class ec2(object):
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting images - %s" % e.response["Error"]["Code"])
         return images
+
+    def get_subnets(self):
+        subnets = {}
+        logging.info("getting subnets")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            try:
+                subnets[region] = client.describe_subnets()["Subnets"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting subnets - %s" % e.response["Error"]["Code"])
+        return subnets
+
+    def get_transit_gateways(self):
+        transit_gateways = {}
+        logging.info("getting transit gateways")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            try:
+                transit_gateways[region] = client.describe_transit_gateways()["TransitGateways"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting transit gateways - %s" % e.response["Error"]["Code"])
+        return transit_gateways
+
+    def get_transit_gateway_attachments(self):
+        transit_gateway_attachments = {}
+        logging.info("getting transit gateway attachments")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            try:
+                transit_gateway_attachments[region] = client.describe_transit_gateway_attachments()["TransitGatewayAttachments"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting transit gateway attachments - %s" % e.response["Error"]["Code"])
+        return transit_gateway_attachments
+
+    def get_transit_gateway_route_tables(self):
+        transit_gateway_route_tables = {}
+        logging.info("getting transit gateway route tables")
+        for region in self.regions:
+            client = self.session.client('ec2', region_name=region)
+            try:
+                transit_gateway_route_tables[region] = client.describe_transit_gateway_route_tables()["TransitGatewayRouteTables"]
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting transit gateway route tables - %s" % e.response["Error"]["Code"])
+        return transit_gateway_route_tables
 
     def ec2_1(self):
         # Ensure IAM instance roles are used for AWS resource access from instances
@@ -1869,6 +1924,273 @@ class ec2(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No EBS volumes without Delete on termination enabled found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_36(self):
+        # Amazon EC2 subnets should not automatically assign public IP addresses
+
+        results = {
+            "id" : "ec2_36",
+            "ref" : "ec2.15",
+            "compliance" : "FSBP",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Amazon EC2 subnets should not automatically assign public IP addresses",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether the assignment of public IPs in Amazon Virtual Private Cloud (Amazon VPC) subnets have MapPublicIpOnLaunch set to FALSE. The control passes if the flag is set to FALSE. All subnets have an attribute that determines whether a network interface created in the subnet automatically receives a public IPv4 address. Instances that are launched into subnets that have this attribute enabled have a public IP address assigned to their primary network interface",
+            "remediation" : "To configure a subnet to not assign public IP addresses, see Modify the public IPv4 addressing attribute for your subnet in the Amazon VPC User Guide. Clear the check box for Enable auto-assign public IPv4 address.\nMore Information\nhttps://docs.aws.amazon.com/vpc/latest/userguide/modify-subnets.html#subnet-public-ip",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, subnets in self.subnets.items():
+            for subnet in subnets:
+                if subnet["MapPublicIpOnLaunch"]:
+                    results["affected"].append(subnet["SubnetId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected subnets are configured to assign a public IP on launch."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_37(self):
+        # Unused Network Access Control Lists should be removed
+
+        results = {
+            "id" : "ec2_37",
+            "ref" : "ec2.16",
+            "compliance" : "FSBP",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Unused Network Access Control Lists should be removed",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether there are any unused network access control lists (network ACLs) in your virtual private cloud (VPC). The control fails if the network ACL isn't associated with a subnet. The control doesn't generate findings for an unused default network ACL. The control checks the item configuration of the resource AWS::EC2::NetworkAcl and determines the relationships of the network ACL. If the only relationship is the VPC of the network ACL, the control fails. If other relationships are listed, then the control passes.",
+            "remediation" : "For instructions on deleting an unused network ACL, see Deleting a network ACL in the Amazon VPC User Guide. You can't delete the default network ACL or an ACL that is associated with subnets.\nMore Information\nhttps://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html#DeleteNetworkACL",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, acls in self.network_acls.items():
+            for acl in acls:
+                if not acl["Associations"]:
+                    results["affected"].append(acl["NetworkAclId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected subnets are not associated with any subnets and are therefore not in use"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_38(self):
+        # Amazon EC2 Transit Gateways should not automatically accept VPC attachment requests
+
+        results = {
+            "id" : "ec2_38",
+            "ref" : "ec2.23",
+            "compliance" : "FSBP",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Amazon EC2 Transit Gateways should not automatically accept VPC attachment requests",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks if EC2 transit gateways are automatically accepting shared VPC attachments. This control fails for a transit gateway that automatically accepts shared VPC attachment requests. Turning on AutoAcceptSharedAttachments configures a transit gateway to automatically accept any cross-account VPC attachment requests without verifying the request or the account the attachment is originating from. To follow the best practices of authorization and authentication, we recommended turning off this feature to ensure that only authorized VPC attachment requests are accepted.",
+            "remediation" : "To modify a transit gateway, see Modify a transit gateway in the Amazon VPC Developer Guide.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, gateways in self.transit_gateways.items():
+            for gateway in gateways:
+                if gateway["AutoAcceptSharedAttachments"] == "enable":
+                    results["affected"].append(gateway["TransitGatewayId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected EC2 Transit Gateways are currently configured to allow auto accepts VPC attachment requests"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_39(self):
+        # Amazon EC2 paravirtual instance types should not be used
+
+        results = {
+            "id" : "ec2_39",
+            "ref" : "ec2.24",
+            "compliance" : "FSBP",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "Amazon EC2 paravirtual instance types should not be used",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether the virtualization type of an EC2 instance is paravirtual. The control fails if the virtualizationType of the EC2 instance is set to paravirtual. Linux Amazon Machine Images (AMIs) use one of two types of virtualization: paravirtual (PV) or hardware virtual machine (HVM). The main differences between PV and HVM AMIs are the way in which they boot and whether they can take advantage of special hardware extensions (CPU, network, and storage) for better performance. Historically, PV guests had better performance than HVM guests in many cases, but because of enhancements in HVM virtualization and the availability of PV drivers for HVM AMIs, this is no longer true. For more information, see Linux AMI virtualization types in the Amazon EC2 User Guide.",
+            "remediation" : "To update an EC2 instance to a new instance type, see Change the instance type in the Amazon EC2 User Guide.\nMore Information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, reservations in self.instance_reservations.items():
+            for reservation in reservations:
+                for instance in reservation["Instances"]:
+                    if instance["VirtualizationType"] == "paravirtual":
+                        results["affected"].append(instance["InstanceId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected instances are using the paravirtual instance type"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_40(self):
+        # EC2 transit gateway attachments should be tagged
+
+        results = {
+            "id" : "ec2_40",
+            "ref" : "ec2.33",
+            "compliance" : "FSBP",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "EC2 transit gateway attachments should be tagged",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether an Amazon EC2 transit gateway attachment has tags. The control fails if the transit gateway attachment doesn’t have any tag keys. If the parameter requiredTagKeys isn't provided, the control only checks for the existence of a tag key and fails if the transit gateway attachment isn't tagged with any key. System tags, which are automatically applied and begin with aws:, are ignored. A tag is a label that you assign to an AWS resource, and it consists of a key and an optional value. You can create tags to categorize resources by purpose, owner, environment, or other criteria. Tags can help you identify, organize, search for, and filter resources. Tagging also helps you track accountable resource owners for actions and notifications. When you use tagging, you can implement attribute-based access control (ABAC) as an authorization strategy, which defines permissions based on tags. You can attach tags to IAM entities (users or roles) and to AWS resources. You can create a single ABAC policy or a separate set of policies for your IAM principals. You can design these ABAC policies to allow operations when the principal's tag matches the resource tag. For more information, see What is ABAC for AWS? in the IAM User Guide.",
+            "remediation" : "To add tags to an EC2 transit gateway attachment, see Tag your Amazon EC2 resources in the Amazon EC2 User Guide.\nMore Information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#Using_Tags_Console",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, gateway_attachments in self.transit_gateway_attachments.items():
+            for attachment in gateway_attachments:
+                if not attachment["Tags"]:
+                    results["affected"].append(attachment["TransitGatewayAttachmentId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected transit gateway attachment id does not have any tags attached"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_41(self):
+        # EC2 transit gateway route tables should be tagged
+
+        results = {
+            "id" : "ec2_41",
+            "ref" : "ec2.34",
+            "compliance" : "FSBP",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "EC2 transit gateway route tables should be tagged",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether an Amazon EC2 transit gateway route table has tags with the specific keys defined in the parameter requiredTagKeys. The control fails if the transit gateway route table doesn’t have any tag keys or if it doesn’t have all the keys specified in the parameter requiredTagKeys. If the parameter requiredTagKeys isn't provided, the control only checks for the existence of a tag key and fails if the transit gateway route table isn't tagged with any key. System tags, which are automatically applied and begin with aws:, are ignored. A tag is a label that you assign to an AWS resource, and it consists of a key and an optional value. You can create tags to categorize resources by purpose, owner, environment, or other criteria. Tags can help you identify, organize, search for, and filter resources. Tagging also helps you track accountable resource owners for actions and notifications. When you use tagging, you can implement attribute-based access control (ABAC) as an authorization strategy, which defines permissions based on tags. You can attach tags to IAM entities (users or roles) and to AWS resources. You can create a single ABAC policy or a separate set of policies for your IAM principals. You can design these ABAC policies to allow operations when the principal's tag matches the resource tag. For more information, see What is ABAC for AWS? in the IAM User Guide.",
+            "remediation" : "To add tags to an EC2 transit gateway route table, see Tag your Amazon EC2 resources in the Amazon EC2 User Guide.\nMore Information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#Using_Tags_Console",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, gateway_route_tables in self.transit_gateway_route_tables.items():
+            for table in gateway_route_tables:
+                if not table["Tags"]:
+                    results["affected"].append(table["TransitGatewayRouteTableId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected transit gateway attachment id does not have any tags attached"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ec2_42(self):
+        # EC2 network interfaces should be tagged
+
+        results = {
+            "id" : "ec2_41",
+            "ref" : "ec2.35",
+            "compliance" : "FSBP",
+            "level" : "n/a",
+            "service" : "ec2",
+            "name" : "EC2 network interfaces should be tagged",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether an Amazon EC2 transit gateway route table has tags with the specific keys defined in the parameter requiredTagKeys. The control fails if the transit gateway route table doesn’t have any tag keys or if it doesn’t have all the keys specified in the parameter requiredTagKeys. If the parameter requiredTagKeys isn't provided, the control only checks for the existence of a tag key and fails if the transit gateway route table isn't tagged with any key. System tags, which are automatically applied and begin with aws:, are ignored. A tag is a label that you assign to an AWS resource, and it consists of a key and an optional value. You can create tags to categorize resources by purpose, owner, environment, or other criteria. Tags can help you identify, organize, search for, and filter resources. Tagging also helps you track accountable resource owners for actions and notifications. When you use tagging, you can implement attribute-based access control (ABAC) as an authorization strategy, which defines permissions based on tags. You can attach tags to IAM entities (users or roles) and to AWS resources. You can create a single ABAC policy or a separate set of policies for your IAM principals. You can design these ABAC policies to allow operations when the principal's tag matches the resource tag. For more information, see What is ABAC for AWS? in the IAM User Guide.",
+            "remediation" : "To add tags to an EC2 transit gateway route table, see Tag your Amazon EC2 resources in the Amazon EC2 User Guide.\nMore Information\nhttps://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#Using_Tags_Console",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+            
+        for region, network_interfaces in self.network_interfaces.items():
+            for interface in network_interfaces:
+                if not interface["TagSet"]:
+                    results["affected"].append(interface["NetworkInterfaceId"])
+                    
+        if results["affected"]:
+            results["analysis"] = "The affected interfaces do not have any tags attached"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 

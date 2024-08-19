@@ -222,6 +222,14 @@ Additional checks beyond the CIS benchmark
 - "SNS Topic Allows Actions To All AWS Principals"
 - "Unencrypted SNS Topics"
 - "SSM Parameter Store Parameters (Check For Secrets)"
+- "Amazon EC2 subnets should not automatically assign public IP addresses"
+- Unused Network Access Control Lists should be removed
+- Amazon EC2 Transit Gateways should not automatically accept VPC attachment requests
+- Amazon EC2 paravirtual instance types should not be used
+- EC2 transit gateway attachments should be tagged
+- EC2 transit gateway route tables should be tagged
+- EC2 network interfaces should be tagged
+
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
