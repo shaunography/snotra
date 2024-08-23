@@ -1797,9 +1797,12 @@ class ec2(object):
             for image in images:
                 analysis[image["Name"]] = []
                 for mapping in image["BlockDeviceMappings"]:
-                    if mapping["Ebs"]["Encrypted"] == False:
-                        results["affected"].append(image["Name"])
-                        analysis[image["Name"]].append(mapping["Ebs"]["SnapshotId"])
+                    try:
+                        if mapping["Ebs"]["Encrypted"] == False:
+                            results["affected"].append(image["Name"])
+                            analysis[image["Name"]].append(mapping["Ebs"]["SnapshotId"])
+                    except KeyError:
+                        pass
 
         if results["affected"]:
             results["analysis"] = analysis
