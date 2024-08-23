@@ -30,6 +30,7 @@ class aws_lambda(object):
         findings += [ self.lambda_6() ]
         findings += [ self.lambda_7() ]
         findings += [ self.lambda_8() ]
+        findings += [ self.lambda_9() ]
         return findings
 
     def cis(self):
@@ -429,7 +430,7 @@ class aws_lambda(object):
         # Ensure that the runtime environment versions used for your Lambda functions do not have end of support dates (CIS)
 
         results = {
-            "id" : "lambda_7",
+            "id" : "lambda_8",
             "ref" : "4.10",
             "compliance" : "cis_compute",
             "level" : 1,
@@ -491,3 +492,54 @@ class aws_lambda(object):
 
         return results
 
+    def lambda_9(self):
+        # Ensure that the latest runtime environment versions used for your Lambda functions
+
+        results = {
+            "id" : "lambda_9",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "lambda",
+            "name" : "Ensure that the latest runtime environment versions used for your Lambda functions",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Always using a recent version of the execution environment configured for your Amazon Lambda functions adheres to best practices for the newest software features, the latest security patches and bug fixes, and performance and reliability. When you execute your Lambda functions using recent versions of the implemented runtime environment, you should benefit from new features and enhancements, better security, along with performance and reliability.",
+            "remediation" : "From the Console\n1. Login to the AWS Console using https://console.aws.amazon.com/lambda/.\n2. In the left column, under AWS Lambda, click Functions.\n3. Under Function name click on the name of the function that you want to review\n4. Click Code tab\n5. Go to the Runtime settings section.\n6. Click Edit\n7. On the Edit runtime settings page, select the latest supported version of the runtime environment from the dropdown list.\n**Note - make sure the correct architecture is also selected.\n8. Click Save\n9. Select the Code tab\n10. Click Test from the Code source section.\n11. Once the testing is completed, the execution result of your Lambda function will be listed\n12. Repeat steps for each Lambda function that failed the Audit within the current region.",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        # apr 24
+        # https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html
+        supported_runtimes = [
+            "nodejs20.x",
+            "python3.12",
+            "java21",
+            "dotnet8",
+            "ruby3.3",
+        ]
+
+        logging.info(results["name"])
+
+        for region, functions in self.configurations.items():
+            for function, configurations in functions.items():
+                for config in configurations:
+                    try:
+                        if config["Runtime"] not in supported_runtimes:
+                            results["affected"].append(config["FunctionName"])
+                    except KeyError:
+                        pass
+
+        if results["affected"]:
+            results["analysis"] = "The affected Lambda functions are not using the latest supported runtime."
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No issues found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
