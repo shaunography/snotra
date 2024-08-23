@@ -36,6 +36,12 @@ from checks.dynamo_db import dynamo_db
 from checks.athena import athena
 from checks.resourcegroupstaggingapi import resourcegroupstaggingapi
 from checks.apigateway import apigateway
+from checks.organizations import organizations
+from checks.autoscaling import autoscaling
+from checks.secretsmanager import secretsmanager
+from checks.elasticbeanstalk import elasticbeanstalk
+from checks.batch import batch
+from checks.autoscaling import autoscaling
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -94,8 +100,11 @@ def lambda_handler(event, context):
     
     logging.info("performing full scan")
     results["findings"] += iam(session).run()
+    results["findings"] += elasticbeanstalk(session).run()
     results["findings"] += s3(session).run()
     results["findings"] += ec2(session).run()
+    results["findings"] += autoscaling(session).run()
+    results["findings"] += organizations(session).run()
     results["findings"] += access_analyzer(session).run()
     results["findings"] += rds(session).run()
     results["findings"] += cloudtrail(session).run()
@@ -119,6 +128,8 @@ def lambda_handler(event, context):
     results["findings"] += athena(session).run()
     results["findings"] += resourcegroupstaggingapi(session).run()
     results["findings"] += apigateway(session).run()
+    results["findings"] += autoscaling(session).run()
+    results["findings"] += secretsmanager(session).run()
     
     logging.info("writing results json S3")
 

@@ -114,6 +114,7 @@ def main():
         results["findings"] += cloudwatch(session).cis()
         results["findings"] += efs(session).cis()
         results["findings"] += securityhub(session).cis()
+        results["findings"] += secretsmanager(session).cis()
     else:
         logging.info("performing full scan")
         results["findings"] += iam(session).run()
@@ -146,8 +147,8 @@ def main():
         results["findings"] += resourcegroupstaggingapi(session).run()
         results["findings"] += apigateway(session).run()
         results["findings"] += autoscaling(session).run()
+        results["findings"] += secretsmanager(session).run()
 
-        #results["findings"] += secretsmanager(session).run()
         #results["findings"] += batch(session).run()
 
 

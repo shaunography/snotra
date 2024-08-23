@@ -1,6 +1,9 @@
 # Snotra
 Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it uses boto3 to audit your AWS account against a list of common issues and compliance standards including the CIS benchmark. Snotra produces a results.json file that can be easily incorporated into existing reporting workflows.
 
+## snotra.cloud
+You can now use [https://snorta.cloud/](https://snotra.cloud) to scan your AWS account.
+
 ## requirements
 * Python3
 * boto3
@@ -229,7 +232,10 @@ Additional checks beyond the CIS benchmark
 - EC2 transit gateway attachments should be tagged
 - EC2 transit gateway route tables should be tagged
 - EC2 network interfaces should be tagged
-
+- "Secrets Manager secrets should have automatic rotation enabled",
+- "Secrets Manager secrets configured with automatic rotation should rotate successfully",
+- "Remove unused Secrets Manager secrets",
+- "Secrets Manager secrets should be rotated within a specified number of days",
 
 ## results JSON
 The results JSON file that Snotra produces is in the following format:
