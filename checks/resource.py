@@ -15,8 +15,8 @@ class resource(object):
         self.resource_groups = self.get_resource_groups()
         self.resources = self.get_resources()
         self.deployments = self.get_deployments()
-        #self.policy_definitions = self.get_policy_definitions()
-        #self.policy_assignments = self.get_policy_assignments()
+        self.policy_definitions = self.get_policy_definitions()
+        self.policy_assignments = self.get_policy_assignments()
 
     def get_subscriptions(self):
         return list(SubscriptionClient(self.credential).subscriptions.list())
@@ -57,25 +57,25 @@ class resource(object):
 
         return resources
 
-    #def get_policy_definitions(self):
-        #policy_definitions = {}
-        #for subscription in self.subscriptions:
-            #client = PolicyClient(credential=self.credential, subscription_id=subscription.subscription_id)
-            #try:
-                #policy_definitions[subscription.subscription_id] = client.policy_definitions.list()
-            #except Exception as e:
-                #logging.error(f'error getting policy_definitions: , error: { e }')
-        #return policy_definitions
-#
-    #def get_policy_assignments(self):
-        #policy_assignments = {}
-        #for subscription in self.subscriptions:
-            #client = policyclient(credential=self.credential, subscription_id=subscription.subscription_id)
-            #try:
-                #policy_assignments[subscription.subscription_id] = client.policy_assignments.list()
-            #except exception as e:
-                #logging.error(f'error getting policy_assignments: , error: { e }')
-        #return policy_assignments
+    def get_policy_definitions(self):
+        policy_definitions = {}
+        for subscription in self.subscriptions:
+            client = PolicyClient(credential=self.credential, subscription_id=subscription.subscription_id)
+            try:
+                policy_definitions[subscription.subscription_id] = client.policy_definitions.list()
+            except Exception as e:
+                logging.error(f'error getting policy_definitions: , error: { e }')
+        return policy_definitions
+
+    def get_policy_assignments(self):
+        policy_assignments = {}
+        for subscription in self.subscriptions:
+            client = PolicyClient(credential=self.credential, subscription_id=subscription.subscription_id)
+            try:
+                policy_assignments[subscription.subscription_id] = client.policy_assignments.list()
+            except exception as e:
+                logging.error(f'error getting policy_assignments: , error: { e }')
+        return policy_assignments
 
     def get_deployments(self):
         deployments = {}
@@ -106,6 +106,8 @@ class resource(object):
         findings += [ self.resource_2() ]
         findings += [ self.resource_3() ]
         findings += [ self.resource_4() ]
+        #findings += [ self.resource_5() ]
+        #findings += [ self.resource_6() ]
         return findings
 
 
@@ -264,5 +266,82 @@ class resource(object):
         else:
             results["analysis"] = "no deployments found"
 
+        return results
+
+    def resource_5(self):
+        # 
+
+        results = {
+            "id" : "resource_5",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "resource",
+            "name" : "",
+            "affected": [],
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        results["analysis"]  = {}
+
+        for subscription, policy_definitions in self.policy_definitions.items():
+            for policy_definition in policy_definitions:
+                print(policy_definition)
+
+        #self.policy_assignments = self.get_policy_assignments()
+
+        #if results["analysis"]:
+            #results["affected"] = [ i for i, v in results["analysis"].items() ]
+            #results["pass_fail"] = "INFO"
+        #else:
+            #results["analysis"] = "no deployments found"
+
+        return results
+
+    def resource_6(self):
+        # 
+
+        results = {
+            "id" : "resource_6",
+            "ref" : "snotra",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "resource",
+            "name" : "",
+            "affected": [],
+            "analysis" : "",
+            "description" : "",
+            "remediation" : "",
+            "impact" : "",
+            "probability" : "",
+            "cvss_vector" : "",
+            "cvss_score" : "",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"]) 
+
+        results["analysis"]  = {}
+
+        for subscription, policy_assignments in self.policy_assignments.items():
+            for policy_assignment in policy_assignments:
+                print(policy_assignment)
+
+        #self.policy_assignments = self.get_policy_assignments()
+
+        #if results["analysis"]:
+            #results["affected"] = [ i for i, v in results["analysis"].items() ]
+            #results["pass_fail"] = "INFO"
+        #else:
+            #results["analysis"] = "no deployments found"
 
         return results
