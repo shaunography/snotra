@@ -42,6 +42,7 @@ from checks.secretsmanager import secretsmanager
 from checks.elasticbeanstalk import elasticbeanstalk
 from checks.batch import batch
 from checks.autoscaling import autoscaling
+from checks.cloudfront import cloudfront
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -130,6 +131,7 @@ def lambda_handler(event, context):
     results["findings"] += apigateway(session).run()
     results["findings"] += autoscaling(session).run()
     results["findings"] += secretsmanager(session).run()
+    results["findings"] += cloudfront(session).run()
     
     logging.info("writing results json S3")
 
@@ -138,5 +140,5 @@ def lambda_handler(event, context):
     # session in lambda account to save to bucket
     session = boto3.session.Session()
     client = session.client('s3')
-    client.put_object(Body=json.dumps(results),Bucket="snotra-results",Key="snotra_results_{}_{}.json".format(account_id, str(date.today())))
+    client.put_object(Body=json.dumps(results, default=str),Bucket="snotra-results",Key="snotra_results_{}_{}.json".format(account_id, str(date.today())))
 
