@@ -123,8 +123,8 @@ class ecr(object):
 
         results = {
             "id" : "ecr_3",
-            "ref" : "N/A",
-            "compliance" : "N/A",
+            "ref" : "ECR.2",
+            "compliance" : "FSBP",
             "level" : "N/A",
             "service" : "ecr",
             "name" : "ECR private repositories should have tag immutability configured",
