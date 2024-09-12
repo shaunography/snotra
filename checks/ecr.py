@@ -19,6 +19,7 @@ class ecr(object):
         findings = []
         findings += [ self.ecr_1() ]
         findings += [ self.ecr_2() ]
+        findings += [ self.ecr_3() ]
         return findings
 
     def get_repositories(self):
@@ -109,6 +110,44 @@ class ecr(object):
 
         if results["affected"]:
             results["analysis"] = "The affected repositories do not have a life cycle policy"
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing repositories found"
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def ecr_3(self):
+        # ECR private repositories should have tag immutability configured
+
+        results = {
+            "id" : "ecr_3",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "ecr",
+            "name" : "ECR private repositories should have tag immutability configured",
+            "affected": [],
+            "analysis" : "",
+            "description" : "This control checks whether a private ECR repository has tag immutability enabled. This control fails if a private ECR repository has tag immutability disabled. This rule passes if tag immutability is enabled and has the value IMMUTABLE. Amazon ECR Tag Immutability enables customers to rely on the descriptive tags of an image as a reliable mechanism to track and uniquely identify images. An immutable tag is static, which means each tag refers to a unique image. This improves reliability and scalability as the use of a static tag will always result in the same image being deployed. When configured, tag immutability prevents the tags from being overridden, which reduces the attack surface.",
+            "remediation" : "To create a repository with immutable tags configured or to update the image tag mutability settings for an existing repository, see Image tag mutability in the Amazon Elastic Container Registry User Guide.\nMore Information\nhttps://docs.aws.amazon.com/AmazonECR/latest/userguide/image-tag-mutability.html",
+            "impact" : "info",
+            "probability" : "info",
+            "cvss_vector" : "N/A",
+            "cvss_score" : "N/A",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        for region, repositories in self.repositories.items():
+            for repository in repositories:
+                if repository["imageTagMutability"] != "IMMUTABLE":
+                    results["affected"].append("{} ({})".format(repository["repositoryName"], region))
+
+        if results["affected"]:
+            results["analysis"] = "The affected repositories do not have tag immutability enabled"
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No failing repositories found"
