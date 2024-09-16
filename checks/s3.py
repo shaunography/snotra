@@ -140,7 +140,7 @@ class s3(object):
             results["affected"] = [ i for i in self.buckets if i not in passing_buckets ]
         
         if results["affected"]:
-            results["analysis"] = "The affected buckets do enforce HTTPS only."
+            results["analysis"] = "The affected buckets do not enforce HTTPS only."
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "All buckets enforce HTTPS requests."

@@ -458,7 +458,7 @@ class iam(object):
             results["affected"].append(self.account_id)
             results["analysis"] = "password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
             results["affected"].append(self.account_id)
-            results["pass_fail"] = "INFO"
+            results["pass_fail"] = "PASS"
 
         return results
 
@@ -666,6 +666,7 @@ class iam(object):
         report_content = self.credential_report["Content"].decode('ascii')
 
         for user in report_content.split("\n"):
+            username = user.split(",")[0]
             password_enabled = user.split(",")[3]
             password_last_used = user.split(",")[4]
             access_key_1_active = user.split(",")[8]
@@ -673,26 +674,28 @@ class iam(object):
             access_key_2_active = user.split(",")[13]
             access_key_2_last_used = user.split(",")[15]
 
-            if password_enabled == "true":
-                if password_last_used != "N/A" and password_last_used != "no_information":
-                    year, month, day = password_last_used.split("T")[0].split("-")
-                    password_last_used_date = date(int(year), int(month), int(day))
-                    if password_last_used_date < (date.today() - timedelta(days=45)):
-                        results["affected"].append(user.split(",")[0])
+            if username != "<root_account>": # skip root
 
-            if access_key_1_active == "true":
-                if access_key_1_last_used != "N/A":
-                    year, month, day = access_key_1_last_used.split("T")[0].split("-")
-                    access_key_1_last_used_date = date(int(year), int(month), int(day))
-                    if access_key_1_last_used_date < (date.today() - timedelta(days=45)):
-                        results["affected"].append(user.split(",")[0])
-            
-            if access_key_2_active == "true":
-                if access_key_2_last_used != "N/A":
-                    year, month, day = access_key_2_last_used.split("T")[0].split("-")
-                    access_key_2_last_used_date = date(int(year), int(month), int(day))
-                    if access_key_2_last_used_date < (date.today() - timedelta(days=45)):
-                        results["affected"].append(user.split(",")[0])
+                if password_enabled == "true":
+                    if password_last_used != "N/A" and password_last_used != "no_information":
+                        year, month, day = password_last_used.split("T")[0].split("-")
+                        password_last_used_date = date(int(year), int(month), int(day))
+                        if password_last_used_date < (date.today() - timedelta(days=45)):
+                            results["affected"].append(username)
+
+                if access_key_1_active == "true":
+                    if access_key_1_last_used != "N/A":
+                        year, month, day = access_key_1_last_used.split("T")[0].split("-")
+                        access_key_1_last_used_date = date(int(year), int(month), int(day))
+                        if access_key_1_last_used_date < (date.today() - timedelta(days=45)):
+                            results["affected"].append(username)
+                
+                if access_key_2_active == "true":
+                    if access_key_2_last_used != "N/A":
+                        year, month, day = access_key_2_last_used.split("T")[0].split("-")
+                        access_key_2_last_used_date = date(int(year), int(month), int(day))
+                        if access_key_2_last_used_date < (date.today() - timedelta(days=45)):
+                            results["affected"].append(username)
 
         if results["affected"]:
             results["analysis"] = "The affected users have credentials (password or keys) not used in the last 45 days."
