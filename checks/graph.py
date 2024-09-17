@@ -473,7 +473,7 @@ class graph(object):
 
         results = {
             "id" : "graph_4",
-            "ref" : "1.1.3",
+            "ref" : "1.1.4",
             "compliance" : "cis_v2.1.0",
             "level" : 1,
             "service" : "graph",
@@ -492,7 +492,7 @@ class graph(object):
         logging.info(results["name"]) 
 
         results["affected"].append(self.tenant)
-        results["analysis"] = "Manual Check -From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Then Users\n4. Select Password reset\n5. Then Registration\n6. Ensure that Number of days before users are asked to re-confirm their\nauthentication information is not set to 0 "
+        results["analysis"] = "From Azure Portal\n1. From Azure Home select the Portal Menu\n2. Select Microsoft Entra ID\n3. Select Users\n4. Click the Per-user MFA button on the top bar\n5. Click on service settings\n6. Uncheck the box next to Allow users to remember multi-factor\nauthentication on devices they trust"
         results["pass_fail"] = "INFO"
 
         return results
