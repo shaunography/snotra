@@ -16,6 +16,7 @@ class efs(object):
         findings = []
         findings += [ self.efs_1() ]
         findings += [ self.efs_2() ]
+        findings += [ self.efs_3() ]
         return findings
 
     def cis(self):
@@ -33,7 +34,7 @@ class efs(object):
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting file systems - %s" % e.response["Error"]["Code"])
         return file_systems
-        
+
     def efs_1(self):
         # efs grants access to all clients
         
@@ -128,6 +129,59 @@ class efs(object):
                 results["pass_fail"] = "FAIL"
             else:
                 results["analysis"] = "All file are encrypted."
+                results["pass_fail"] = "PASS"
+                results["affected"].append(self.account_id)
+            
+        return results
+
+    def efs_3(self):
+        # EFS Filesystems Without Automatic Backup Enabled
+        
+        results = {
+            "id" : "efs_3",
+            "ref" : "n/a",
+            "compliance" : "n/a",
+            "level" : "n/a",
+            "service" : "efs",
+            "name" : "EFS Filesystems Without Automatic Backup Enabled",
+            "affected": [],
+            "analysis" : "",
+            "description" : "Amazon EFS is natively integrated with AWS Backup, a fully managed, policy-based service that you can use to create and manage backup policies to protect your data in Amazon EFS. \nUsing AWS Backup for Amazon EFS, you can perform the following actions:\n- Manage automatic backup scheduling and retention by configuring backup plans. You specify the backup frequency, when to back up, how long to retain backups, and a lifecycle policy for backups.\n- Restore backups of Amazon EFS data. You can restore file system data to either a new or existing file system. You also can choose whether to perform a full restore or an item-level restore.\n\nFile systems that you create using the Amazon EFS console are automatically backed up by AWS Backup by default. You can turn on automatic backups after creating your EFS file system using the AWS CLI or API. The default EFS backup plan uses the AWS Backup recommended settings for automatic backups—daily backups with a 35-day retention period. The backups created using the default EFS backup plan are stored in a default EFS backup vault, which is also created by Amazon EFS on your behalf. The default backup plan and backup vault cannot be deleted.\nAll data in an EFS file system is backed up, whatever storage class the data is in. You don't incur data access charges when backing up an EFS file system that has lifecycle management enabled and has data in the Infrequent Access (IA) or Archive storage class. When you restore a recovery point, all files are restored to the Standard storage class.",
+            "remediation" : "Enable automatic backups for the affected EFS filesystems.\nMore Information:\nhttps://docs.aws.amazon.com/aws-backup/latest/devguide/getting-started.html",
+            "impact" : "low",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+            "cvss_score" : "3.7",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+
+        all_file_systems = []
+
+        for region, file_systems in self.file_systems.items():
+            client = self.session.client('efs', region_name=region)
+            for file_system in file_systems:
+                all_file_systems += [file_system["FileSystemId"]]
+                try:
+                    backup_policy = client.describe_backup_policy(FileSystemId=file_system["FileSystemId"])["BackupPolicy"]
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting backup policy - %s" % e.response["Error"]["Code"])
+                    if e.response["Error"]["Code"] == "PolicyNotFound":
+                        results["affected"].append("{}({})".format(file_system["FileSystemId"], region))
+                else:
+                    if backup_policy == "DISABLED":
+                        results["affected"].append("{}({})".format(file_system["FileSystemId"], region))
+
+        if not all_file_systems:
+            results["analysis"] = "No File Systems in use"
+            results["affected"].append(self.account_id)
+        else:
+            if results["affected"]:
+                results["analysis"] = "The affected file systems do not have a backup policy."
+                results["pass_fail"] = "FAIL"
+            else:
+                results["analysis"] = "No issues found"
                 results["pass_fail"] = "PASS"
                 results["affected"].append(self.account_id)
             
