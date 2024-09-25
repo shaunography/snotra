@@ -203,13 +203,19 @@ class apigateway(object):
         for id, items in self.authorizers.items():
             analysis = []
             for authorizer in items:
-                if authorizer["AuthorizerType"] == "REQUEST":
-                    analysis.append(authorizer)
-
+                try:
+                    if authorizer["AuthorizerType"] == "REQUEST":
+                        analysis.append(authorizer)
+                except KeyError:
+                    pass
+                try:
+                    if authorizer["type"] == "REQUEST":
+                        analysis.append(authorizer)
+                except KeyError:
+                    pass
             if analysis:
                 results["affected"].append(id)
                 results["analysis"][id] = analysis
-
 
         if results["affected"]:
             results["pass_fail"] = "INFO"
