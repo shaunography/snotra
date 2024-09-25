@@ -492,7 +492,7 @@ class cloudfront(object):
             try:
                 for origin in distribution["DistributionConfig"]["Origins"]["Items"]:
                     if origin["S3OriginConfig"]:
-                        bucket = re.match("([a-z-]+)\.s3\..*\.amazonaws\.com", origin["DomainName"]).groups()[0]
+                        bucket = re.match("([a-z-.]+)\.s3\.amazonaws\.com", origin["DomainName"]).groups()[0]
                         if not self.check_bucket(bucket):
                             affected_ids.append(distribution["Id"])
             except KeyError:
