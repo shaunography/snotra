@@ -64,6 +64,7 @@ class iam(object):
         findings += [ self.iam_31() ]
         findings += [ self.iam_32() ]
         findings += [ self.iam_33() ]
+        findings += [ self.iam_34() ]
         return findings
     
     def cis(self):
@@ -1151,7 +1152,7 @@ class iam(object):
                     if "AWS" in statement["Principal"]:
                         if "sts:AssumeRole" in statement["Action"]:
                             try:
-                                if not re.match(".*ExternalId.*", str(statement["Condition"])):
+                                if not re.match(r".*ExternalId.*", str(statement["Condition"])):
                                     results["affected"].append(role["RoleName"])
                                     affected_statements[role["RoleName"]] = statement
                             except KeyError: # no conditions defined
@@ -1286,7 +1287,7 @@ class iam(object):
                                 if statement["Effect"] == "Allow":
                                     if statement["Action"] == "*":
                                         if statement["Resource"] == "*":
-                                            if not re.match(".*[Aa][Dd][Mm][Ii][Nn].*", group["Group"]["GroupName"]):
+                                            if not re.match(r".*[Aa][Dd][Mm][Ii][Nn].*", group["Group"]["GroupName"]):
                                                 results["affected"].append(group["Group"]["GroupName"])
                                                 users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                             except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
@@ -1305,7 +1306,7 @@ class iam(object):
                         if statement["Effect"] == "Allow":
                             if statement["Action"] == "*":
                                 if statement["Resource"] == "*":
-                                    if not re.match(".*[Aa][Dd][Mm][Ii][Nn].*", group["Group"]["GroupName"]):
+                                    if not re.match(r".*[Aa][Dd][Mm][Ii][Nn].*", group["Group"]["GroupName"]):
                                         results["affected"].append(group["Group"]["GroupName"])
                                         users[group["Group"]["GroupName"]] = [ user["UserName"] for user in group["Users"] ]
                     except KeyError: # catch statements that dont have "Action" and are using "NotAction" instead
@@ -1397,7 +1398,7 @@ class iam(object):
                 if statement["Effect"] == "Allow":
                     if "AWS" in statement["Principal"]:
                         if "sts:AssumeRole" in statement["Action"]:
-                            if re.match("arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
+                            if re.match(r"arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
                                 if "AWSServiceRoleFor" not in role["RoleName"]:
                                     results["affected"].append(role["RoleName"])
                                     affected_statements[role["RoleName"]] = statement
@@ -1566,7 +1567,7 @@ class iam(object):
             for statement in role["AssumeRolePolicyDocument"]["Statement"]:
                 if statement["Effect"] == "Allow":
                     if "Federated" in statement["Principal"]:
-                        if re.match("^.*oidc-provider/token.actions.githubusercontent.com", statement["Principal"]["Federated"]):
+                        if re.match(r"^.*oidc-provider/token.actions.githubusercontent.com", statement["Principal"]["Federated"]):
                             if "sts:AssumeRoleWithWebIdentity" in statement["Action"]:
                                 safe = False
                                 for condition, values in statement["Condition"].items():
@@ -1615,7 +1616,7 @@ class iam(object):
                 if statement["Effect"] == "Allow":
                     if "sts:AssumeRole" in statement["Action"]:
                         try:
-                            if re.match("^.*\.amazonaws\.com", str(statement["Principal"]["Service"])):
+                            if re.match(r"^.*\.amazonaws\.com", str(statement["Principal"]["Service"])):
                                 if "AWSServiceRoleFor" not in role["RoleName"]:
                                     if "Condition" not in statement:
                                         results["affected"].append(role["RoleName"])
@@ -2002,6 +2003,54 @@ class iam(object):
             results["pass_fail"] = "FAIL"
         else:
             results["analysis"] = "No Admin Lambda Functions Found."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def iam_34(self):
+        # Overly Permissive Cross Account Assume Role Trusts OIDC Provider
+
+        results = {
+            "id" : "iam_34",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Overly permissive Cross Account Assume Role Trust Policy OIDC Provider",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'The affected role is configured to trust an OIDC Identity Provider but does not enorce any subject conditions, This means an external attacker with knowledge of the role ARN could possibly assume the role from any account at the OIDC service provider',
+            "remediation" : 'Configure the role trust policy to include aditional subject conditons which only allows the role be assume by trusted gitHub repositores and branches.\nmore information\nhttps://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/',
+            "impact" : "high",
+            "probability" : "high",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "cvss_score" : "8.1",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        affected_statements = {}
+        safe = True
+        for role in self.roles:
+            for statement in role["AssumeRolePolicyDocument"]["Statement"]:
+                if statement["Effect"] == "Allow":
+                    if "Federated" in statement["Principal"]:
+                        if re.match(r"^.*oidc-provider/.*", statement["Principal"]["Federated"]):
+                            if "sts:AssumeRoleWithWebIdentity" in statement["Action"]:
+                                safe = False
+                                for condition, values in statement["Condition"].items():
+                                    if ":sub" in values:
+                                        safe = True
+            if safe == False:
+                results["affected"].append(role["RoleName"])
+                affected_statements[role["RoleName"]] = statement
+
+        if results["affected"]:
+            results["analysis"] = affected_statements
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing roles found."
             results["pass_fail"] = "PASS"
             results["affected"].append(self.account_id)
 

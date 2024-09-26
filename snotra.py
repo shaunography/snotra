@@ -42,6 +42,8 @@ from checks.elasticbeanstalk import elasticbeanstalk
 from checks.batch import batch
 from checks.autoscaling import autoscaling
 from checks.cloudfront import cloudfront
+from checks.ecs import ecs
+from checks.wafv2 import wafv2
 
 from utils.utils import get_user
 from utils.utils import get_account_id
@@ -150,6 +152,8 @@ def main():
         results["findings"] += autoscaling(session).run()
         results["findings"] += secretsmanager(session).run()
         results["findings"] += cloudfront(session).run()
+        results["findings"] += wafv2(session).run()
+        #results["findings"] += ecs(session).run()
 
         #results["findings"] += batch(session).run()
 
