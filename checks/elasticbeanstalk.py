@@ -40,7 +40,7 @@ class elasticbeanstalk(object):
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting environments - %s" % e.response["Error"]["Code"])
             except boto3.exceptions.botocore.exceptions.EndpointConnectionError as e:
-                logging.error("Error getting environments - %s" % e.response["Error"]["Code"])
+                logging.error("Error getting environments")
             else:
                 if results:
                     environments[region] = results
@@ -56,7 +56,7 @@ class elasticbeanstalk(object):
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting applications - %s" % e.response["Error"]["Code"])
             except boto3.exceptions.botocore.exceptions.EndpointConnectionError as e:
-                logging.error("Error getting environments - %s" % e.response["Error"]["Code"])
+                logging.error("Error getting environments")
             else:
                 if results:
                     applications[region] = results
@@ -74,7 +74,7 @@ class elasticbeanstalk(object):
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting environment configuration settings - %s" % e.response["Error"]["Code"])
                 except boto3.exceptions.botocore.exceptions.EndpointConnectionError as e:
-                    logging.error("Error getting environments - %s" % e.response["Error"]["Code"])
+                    logging.error("Error getting environments")
                 else:
                     if results:
                         configuration_settings[region][environment["EnvironmentName"]] = results
