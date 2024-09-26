@@ -492,7 +492,15 @@ class cloudfront(object):
             try:
                 for origin in distribution["DistributionConfig"]["Origins"]["Items"]:
                     if origin["S3OriginConfig"]:
-                        bucket = re.match("([a-z-.]+)\.s3\.amazonaws\.com", origin["DomainName"]).groups()[0]
+                        print(origin["DomainName"])
+                        try:
+                            bucket = re.match("([a-z-.]+)\.s3\.amazonaws\.com", origin["DomainName"]).groups()[0]
+                        except AttributeError:
+                            pass
+                        try:
+                            bucket = re.match("([a-z-.]+)\.s3\..*amazonaws\.com", origin["DomainName"]).groups()[0]
+                        except AttributeError:
+                            pass
                         if not self.check_bucket(bucket):
                             affected_ids.append(distribution["Id"])
             except KeyError:
