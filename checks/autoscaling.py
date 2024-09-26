@@ -35,6 +35,8 @@ class autoscaling(object):
                     groups[region] = response
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting auto scaling groups - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting auto scaling groups - EndpointConnectionError")
         return groups
 
     def get_launch_configurations(self):
@@ -48,6 +50,8 @@ class autoscaling(object):
                     groups[region] = response
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting launch configurations - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting launch configurations - EndpointConnectionError")
         return groups
 
     def autoscaling_1(self):

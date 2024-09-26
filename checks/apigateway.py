@@ -45,6 +45,8 @@ class apigateway(object):
                     apis[region] = items
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting rest apis - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting rest apis - EndpointConnectionError")
         return apis
 
     def get_apis(self):
@@ -58,6 +60,8 @@ class apigateway(object):
                     apis[region] = items
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting apis - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting apis - EndpointConnectionError")
         return apis
 
 
@@ -74,6 +78,8 @@ class apigateway(object):
                         authorizers[rest_api["id"]] = items
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting authorizers - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting authorizers - EndpointConnectionError")
 
         for region, apis in self.apis.items():
             client = self.session.client('apigatewayv2', region_name=region)
@@ -84,6 +90,8 @@ class apigateway(object):
                         authorizers[api["ApiId"]] = items
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting authorizers - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting authorizers - EndpointConnectionError")
 
         return authorizers
 
@@ -100,6 +108,8 @@ class apigateway(object):
                         stages[rest_api["id"]] = items
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting stages - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting stages - EndpointConnectionError")
 
         return stages
 
@@ -116,6 +126,8 @@ class apigateway(object):
                         stages[api["ApiId"]] = items
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting stages - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting stages - EndpointConnectionError")
 
         return stages
 
@@ -132,6 +144,8 @@ class apigateway(object):
                         routes[api["ApiId"]] = items
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting routes - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting routes - EndpointConnectionError")
 
         return routes
 

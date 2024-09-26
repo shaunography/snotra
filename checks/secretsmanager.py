@@ -41,6 +41,8 @@ class secretsmanager(object):
                 results = client.list_secrets()["SecretList"]
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting secrets - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting secrets - EndpointConnectionError")
             else:
                 if results:
                     secrets[region] = results
@@ -196,7 +198,7 @@ class secretsmanager(object):
                             results["pass_fail"] = "FAIL"
                             results["analysis"] = "The affected secrets has not been accessed in 90 days"
                     except KeyError:
-                        logging.error(f'Error getting last accessed date for secret { secret["Name"] } - { e.response["Error"]["Code"] }')
+                        logging.error(f'Error getting last accessed date for secret { secret["Name"] }')
 
         return results
 

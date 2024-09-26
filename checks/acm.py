@@ -38,6 +38,8 @@ class acm(object):
                     certificates[region] = certificate_summary_list
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting certificate list - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting certificates list - EndpointConnectionError")
         return certificates
 
     def get_descriptions(self):
@@ -54,6 +56,8 @@ class acm(object):
                         descriptions[region].append(description)
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting certificate description - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting certificates description - EndpointConnectionError")
         return descriptions
 
     def get_tags(self):
@@ -71,6 +75,8 @@ class acm(object):
                         tags[region][certificate["CertificateArn"]] = tags_list
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting certificate Tags - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting certificates Tags - EndpointConnectionError")
         return tags
 
     def acm_1(self):

@@ -35,6 +35,8 @@ class batch(object):
                 jobs[region] = client.list_jobs()["jobSummaryList"]
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting jobs - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting jobs - EndpointConnectionError")
         return jobs
     
 

@@ -39,26 +39,38 @@ class cloudfront(object):
         logging.info("Getting Distributions")
         client = self.session.client('cloudfront')
         distributions = []
+        distributions_details = []
+
         try:
             current_distributions = client.list_distributions()["DistributionList"]
         except boto3.exceptions.botocore.exceptions.ClientError as e:
             logging.error("Error getting distributions - %s" % e.response["Error"]["Code"])
-        for i in current_distributions["Items"]:
-            distributions.append(i)
-        is_truncated = current_distributions["IsTruncated"]
-        while is_truncated == True:
-            current_distributions = self.client.list_distributions(Scope="AWS", Marker=current_distributions["Marker"])
+        except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+            logging.error("Error getting distributions - EndpointConnectionError")
+        else:
             for i in current_distributions["Items"]:
                 distributions.append(i)
             is_truncated = current_distributions["IsTruncated"]
+            while is_truncated == True:
+                try:
+                    current_distributions = self.client.list_distributions(Scope="AWS", Marker=current_distributions["Marker"])
+                except boto3.exceptions.botocore.exceptions.ClientError as e:
+                    logging.error("Error getting distributions - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting distributions - EndpointConnectionError")
+                else:
+                    for i in current_distributions["Items"]:
+                        distributions.append(i)
+                    is_truncated = current_distributions["IsTruncated"]
 
-        distributions_details = []
-        try:
-            for distribution in distributions:
-                distributions_details.append(client.get_distribution(Id=distribution["Id"])["Distribution"])
-                    
-        except boto3.exceptions.botocore.exceptions.ClientError as e:
-            logging.error("Error getting distribution - %s" % e.response["Error"]["Code"])
+            try:
+                for distribution in distributions:
+                    distributions_details.append(client.get_distribution(Id=distribution["Id"])["Distribution"])
+                        
+            except boto3.exceptions.botocore.exceptions.ClientError as e:
+                logging.error("Error getting distribution - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting distributions - EndpointConnectionError")
 
         return distributions_details
 
@@ -75,6 +87,8 @@ class cloudfront(object):
             elif error_code == 404:
                 # does not exist
                 return False
+        except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+            logging.error("Error checking bucket - EndpointConnectionError")
 
     def cloudfront_1(self):
         # CloudFront distributions should have a default root object configured

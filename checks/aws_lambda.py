@@ -52,6 +52,9 @@ class aws_lambda(object):
                 functions[region] = client.list_functions()["Functions"]
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting functions - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting functions - EndpointConnectionError")
+
         return functions
 
     def get_functions(self):
@@ -65,6 +68,8 @@ class aws_lambda(object):
                     functions_dict[region].append(client.get_function(FunctionName=function["FunctionName"])["Configuration"])
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting function- %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting function - EndpointConnectionError")
         return functions_dict
 
     def get_policies(self):
@@ -79,6 +84,8 @@ class aws_lambda(object):
                     policies[region][function["FunctionName"]].append(client.get_policy(FunctionName=function["FunctionName"])["Policy"])
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting policy - EndpointConnectionError")
         return policies
     
     def get_configurations(self):
@@ -93,6 +100,8 @@ class aws_lambda(object):
                     configurations[region][function["FunctionName"]].append(client.get_function_configuration(FunctionName=function["FunctionName"]))
                 except boto3.exceptions.botocore.exceptions.ClientError as e:
                     logging.error("Error getting policy - %s" % e.response["Error"]["Code"])
+                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                    logging.error("Error getting policy - EndpointConnectionError")
         return configurations
 
     def lambda_1(self):

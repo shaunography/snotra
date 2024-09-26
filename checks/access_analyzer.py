@@ -51,6 +51,8 @@ class access_analyzer(object):
                     results["affected"].append(region)
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting analyzers - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting analyzers - EndpointConnectionError")
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"

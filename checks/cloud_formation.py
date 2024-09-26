@@ -35,6 +35,8 @@ class cloud_formation(object):
                 stacks[region]= client.describe_stacks()["Stacks"]
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting stacks - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting stacks - EndpointConnectionError")
         return stacks
 
     
@@ -135,7 +137,7 @@ class cloud_formation(object):
             "compliance" : "N/A",
             "level" : "N/A",
             "service" : "cloudformation",
-            "name" : "Role Passed To CLoud Formation Stack",
+            "name" : "Role Passed To Cloud Formation Stack",
             "affected": [],
             "analysis" : "",
             "description" : "Passing a role to CloudFormation stacks may result in privilege escalation because IAM users with privileges within the CloudFormation scope implicitly inherit the stack's role's permissions. Consequently, it should be ensured that the IAM privileges assigned to the stack's role follow the principle of least privilege.",

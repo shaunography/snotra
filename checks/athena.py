@@ -26,6 +26,8 @@ class athena(object):
                 work_groups[region] = client.list_work_groups()["WorkGroups"]
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting work groups - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting work groups - EndpointConnectionError")
         return work_groups
 
 
@@ -69,6 +71,8 @@ class athena(object):
 
             except boto3.exceptions.botocore.exceptions.ClientError as e:
                 logging.error("Error getting work group - %s" % e.response["Error"]["Code"])
+            except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                logging.error("Error getting work groups - EndpointConnectionError")
 
         if results["affected"]:
             results["pass_fail"] = "FAIL"
