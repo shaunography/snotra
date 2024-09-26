@@ -204,8 +204,11 @@ class autoscaling(object):
 
         for region, launch_configurations in self.launch_configurations.items():
             for configuration in launch_configurations:
-                if configuration["AssociatePublicIpAddress"] == True:
-                    results["affected"].append(configuration["LaunchConfigurationName"])
+                try:
+                    if configuration["AssociatePublicIpAddress"] == True:
+                        results["affected"].append(configuration["LaunchConfigurationName"])
+                except KeyError:
+                    pass
 
         if results["affected"]:
             results["analysis"] = "The affected launch configurations are have a public ip address associated"
