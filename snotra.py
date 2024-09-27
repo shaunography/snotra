@@ -153,8 +153,8 @@ def main():
         results["findings"] += secretsmanager(session).run()
         results["findings"] += cloudfront(session).run()
         results["findings"] += wafv2(session).run()
-        #results["findings"] += ecs(session).run()
 
+        #results["findings"] += ecs(session).run()
         #results["findings"] += batch(session).run()
 
 
