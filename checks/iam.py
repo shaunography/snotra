@@ -65,6 +65,7 @@ class iam(object):
         findings += [ self.iam_32() ]
         findings += [ self.iam_33() ]
         findings += [ self.iam_34() ]
+        findings += [ self.iam_35() ]
         return findings
     
     def cis(self):
@@ -1399,9 +1400,10 @@ class iam(object):
                     if "AWS" in statement["Principal"]:
                         if "sts:AssumeRole" in statement["Action"]:
                             if re.match(r"arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
-                                if "AWSServiceRoleFor" not in role["RoleName"]:
-                                    results["affected"].append(role["RoleName"])
-                                    affected_statements[role["RoleName"]] = statement
+                                if self.account_id != re.match(r"arn:aws:iam::([0-9]+):root", str(statement["Principal"]["AWS"])).group(1):
+                                    if "AWSServiceRoleFor" not in role["RoleName"]:
+                                        results["affected"].append(role["RoleName"])
+                                        affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
             results["analysis"] = affected_statements
@@ -2045,6 +2047,51 @@ class iam(object):
             if safe == False:
                 results["affected"].append(role["RoleName"])
                 affected_statements[role["RoleName"]] = statement
+
+        if results["affected"]:
+            results["analysis"] = affected_statements
+            results["pass_fail"] = "FAIL"
+        else:
+            results["analysis"] = "No failing roles found."
+            results["pass_fail"] = "PASS"
+            results["affected"].append(self.account_id)
+
+        return results
+
+    def iam_35(self):
+        # Overly Permissions Assume Role Trust Policy
+
+        results = {
+            "id" : "iam_35",
+            "ref" : "N/A",
+            "compliance" : "N/A",
+            "level" : "N/A",
+            "service" : "iam",
+            "name" : "Overly permissive Assume Role Trust Policy",
+            "affected": [],
+            "analysis" : "",
+            "description" : 'The affected AWS role held a trust policy which was overly permissive and trusted all IAM principals within the account to assume the role and access the privileges it held. The overly permissive role trust policy could be abused by malicious users to escalate privileges and access resources within the AWS Organization.\nWhen creating IAM policies, administrators should follow the standard security advice of implementing least privilege assignments, by granting principals only the permissions required to perform their tasks. It is recommended that administrators determine what users (and roles) need to do and then starting with a default deny,  policies should add the individual permissions that allow them to perform only those tasks. Additional privileges that may be required in future should be implemented through a request system.',
+            "remediation" : 'It is recommended that you review the role trust policy to determine which entities in your account should legitimately be allowed to assume the affected role. The role trust should then be updated to trust only those principals, which would prevent unauthorised individuals from access the highly-privilege policies attached the role.\nMore Information\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html ',
+            "impact" : "medium",
+            "probability" : "low",
+            "cvss_vector" : "CVSS:3.0/AV:N/AC:H/PR:L/UI:R/S:C/C:L/I:L/A:L",
+            "cvss_score" : "5.5",
+            "pass_fail" : ""
+        }
+
+        logging.info(results["name"])
+        affected_statements = {}
+
+        for role in self.roles:
+            for statement in role["AssumeRolePolicyDocument"]["Statement"]:
+                if statement["Effect"] == "Allow":
+                    if "AWS" in statement["Principal"]:
+                        if "sts:AssumeRole" in statement["Action"]:
+                            if re.match(r"arn:aws:iam::[0-9]+:root", str(statement["Principal"]["AWS"])):
+                                if self.account_id == re.match(r"arn:aws:iam::([0-9]+):root", str(statement["Principal"]["AWS"])).group(1):
+                                    if "AWSServiceRoleFor" not in role["RoleName"]:
+                                        results["affected"].append(role["RoleName"])
+                                        affected_statements[role["RoleName"]] = statement
 
         if results["affected"]:
             results["analysis"] = affected_statements
