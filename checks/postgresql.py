@@ -492,7 +492,7 @@ class postgresql(object):
         for subscription, resource_groups in self.flexible_servers.items():
             for resource_group, servers in resource_groups.items():
                 for server in servers:
-                    if server.public_network_access != "Disabled":
+                    if server.network.public_network_access != "Disabled":
                         results["affected"].append(server.name)
 
         if results["affected"]:
