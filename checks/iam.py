@@ -449,18 +449,22 @@ class iam(object):
         accesskey1_last_used = root.split(",")[10]
         accesskey2_last_used = root.split(",")[15]
         # 2023-12-01T09:26:09+00:00 
-        year, month, day = password_last_used.split("T")[0].split("-")
-        password_last_used_date = date(int(year), int(month), int(day))
-        if password_last_used_date > (date.today() - timedelta(days=30)):
-            results["affected"].append(self.account_id)
-            results["analysis"] = "The root account password has been used in the last 30 days, password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
-            results["affected"].append(self.account_id)
-            results["pass_fail"] = "FAIL"
+        if password_last_used != "no_information":
+            year, month, day = password_last_used.split("T")[0].split("-")
+            password_last_used_date = date(int(year), int(month), int(day))
+            if password_last_used_date > (date.today() - timedelta(days=30)):
+                results["affected"].append(self.account_id)
+                results["analysis"] = "The root account password has been used in the last 30 days, password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
+                results["pass_fail"] = "FAIL"
+            else:
+                results["affected"].append(self.account_id)
+                results["analysis"] = "password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
+                results["pass_fail"] = "PASS"
         else:
             results["affected"].append(self.account_id)
-            results["analysis"] = "password last used: {} Access Key 1 last used: {} Access Key 2 last used: {}".format(password_last_used, accesskey1_last_used, accesskey2_last_used)
-            results["affected"].append(self.account_id)
+            results["analysis"] = "There is currently no information on root account usage."
             results["pass_fail"] = "PASS"
+
 
         return results
 
