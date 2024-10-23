@@ -80,6 +80,8 @@ class cloudtrail(object):
                                 results["affected"].append(trail_name)
                         except boto3.exceptions.botocore.exceptions.ClientError as e:
                             logging.error("Error getting trail status - %s" % e.response["Error"]["Code"])
+                            logging.error("Probably because it is in another account")
+                            results["affected"].append(trail_name)
 
         if results["affected"]:
             results["analysis"] = "The affected trails are multi region enabled."
@@ -88,7 +90,6 @@ class cloudtrail(object):
             results["affected"].append(self.account_id)
             results["analysis"] = "No multi region enabled trails were found."
             results["pass_fail"] = "FAIL"
-
         
         return results
 
