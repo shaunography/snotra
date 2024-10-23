@@ -48,20 +48,22 @@ class cloudfront(object):
         except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
             logging.error("Error getting distributions - EndpointConnectionError")
         else:
-            for i in current_distributions["Items"]:
-                distributions.append(i)
-            is_truncated = current_distributions["IsTruncated"]
-            while is_truncated == True:
-                try:
-                    current_distributions = self.client.list_distributions(Scope="AWS", Marker=current_distributions["Marker"])
-                except boto3.exceptions.botocore.exceptions.ClientError as e:
-                    logging.error("Error getting distributions - %s" % e.response["Error"]["Code"])
-                except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
-                    logging.error("Error getting distributions - EndpointConnectionError")
-                else:
-                    for i in current_distributions["Items"]:
-                        distributions.append(i)
-                    is_truncated = current_distributions["IsTruncated"]
+            if current_distributions["Quantity"] != 0:
+                for i in current_distributions["Items"]:
+                    distributions.append(i)
+                is_truncated = current_distributions["IsTruncated"]
+                while is_truncated == True:
+                    try:
+                        current_distributions = self.client.list_distributions(Scope="AWS", Marker=current_distributions["Marker"])
+                    except boto3.exceptions.botocore.exceptions.ClientError as e:
+                        logging.error("Error getting distributions - %s" % e.response["Error"]["Code"])
+                    except boto3.exceptions.botocore.exceptions.EndpointConnectionError:
+                        logging.error("Error getting distributions - EndpointConnectionError")
+                    else:
+                        if current_distributions["Quantity"] != 0:
+                            for i in current_distributions["Items"]:
+                                distributions.append(i)
+                            is_truncated = current_distributions["IsTruncated"]
 
             try:
                 for distribution in distributions:
