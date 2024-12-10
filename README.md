@@ -1,3 +1,7 @@
+# ARCHIVED
+Source code now hosted at [https://gitlab.com/snotra.cloud/aws](https://gitlab.com/snotra.cloud/aws).
+
+
 # Snotra
 Snotra (pronounced "snow-trah” ) is a pure Python Cloud (AWS) Auditing Tool it uses boto3 to audit your AWS account against a list of common issues and compliance standards including the CIS benchmark. Snotra produces a results.json file that can be easily incorporated into existing reporting workflows.
 
